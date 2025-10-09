@@ -1,0 +1,94 @@
+**<Task Description>**
+As a temporal logic analysis expert, your task is to convert natural language sentences into corresponding **Metric Temporal Logic (MTL)** expressions. Your analysis should focus on the following aspects:
+
+1. Identifying temporal relationships, including explicit and implicit temporal keywords and any numeric time bounds.
+2. Extracting atomic propositions, clarifying events and their states.
+3. Analyzing the metric (time-bounded) temporal logic relationships between atomic propositions (e.g., within/for/after a time interval).
+4. Verifying the rationality of the logical structure, ensuring the MTL formula accurately reflects the temporal constraints, units, and deadlines expressed in the sentence.
+
+**<Output Format Specification>**
+Regardless of the input content, the final output must follow the format below:
+```MTL formula corresponding to the input text```
+Note: The MTL formula should include atomic propositions and **MTL** operators; the final output must be wrapped in three backticks on a single line. Do **not** include prose, explanation, or intermediate steps in the final line output — only the formula.
+
+**<Metric Temporal Logic Knowledge Base>**
+Use only the following operators and symbols (consistent with dataset):
+
+- **Future-time operators**:  
+  * `X` — next (discrete next step)  
+  * `F_[a,b](φ)` — eventually (φ occurs within interval [a,b])  
+  * `G_[a,b](φ)` — globally (φ holds throughout [a,b])  
+  * `φ U_[a,b] ψ` — until (φ holds until ψ occurs within [a,b])  
+
+- **Past-time operators**:  
+  * `P_[a,b](φ)` — previously (φ held at some point in the past within interval [a,b])  
+  * `O(φ)` — once in the past (φ occurred at least once in the past, unbounded)  
+
+- **Logical connectives**:  
+  * `&` (and), `|` (or), `~` (not), `->` (implication), `<->` (equivalence)
+
+- **Location-based predicates** (domain-specific): e.g., `in_front_of(ego,other)`, `at_intersection(ego)`, etc.  
+  The formula should only contain **atomic propositions** and the above operators. Atomic propositions must be represented as compact propositional symbols (no raw natural language).
+
+**Time units & defaults**
+* Convert all time units to **seconds** (1 min = 60 s, 1 hr = 3600 s, 1 ms = 0.001 s).
+* If the sentence explicitly mentions discrete steps/ticks, treat time as discrete and use `X`.
+* If a numeric bound is given without units, assume **seconds** by default.
+
+---
+
+**I. Temporal Operator Mapping (Natural Language → MTL)**
+
+1. **Explicit time bounds**
+   * "within T seconds" → `F_[0,T](φ)`
+   * "between a and b seconds" → `F_[a,b](φ)`
+   * "after exactly T seconds" → `F_[T,T](φ)`
+   * "after at least T seconds" → `F_[T,∞)(φ)`
+   * "for T seconds" → `G_[0,T](φ)`
+   * "until within T seconds" → `φ U_[0,T] ψ`
+   * "must occur within T after A" → `A -> F_[0,T](B)`
+   * "every N seconds" → `G(F_[0,N](φ))`
+
+2. **Past-time mappings**
+   * "previously within T seconds" → `P_[0,T](φ)`
+   * "sometime in the past" / "once before" → `O(φ)`
+   * "always in the past T seconds" (continuous past constraint) → can be represented as `~P_[0,T](~φ)`
+
+3. **Temporal adverbs**
+   * "immediately" / "in the next step" → `X(φ)`
+   * "always" / "continuously" → `G(φ)`  
+   * "eventually" / "at some point" → `F(φ)`
+
+---
+
+**II. Analysis Requirements (applied each time)**
+
+1. **Sentence Decomposition**: Break into clauses, identify conditions, events, numeric bounds, and units.  
+2. **Keyword & Quantitative Identification**: Detect temporal expressions (`within`, `for`, `after`, `before`, `previously`) and normalize numeric bounds to seconds.  
+3. **Atomic Proposition Extraction**: Map natural-language phrases into concise propositional symbols (e.g., `signal_on`, `brake`, `at_intersection`).  
+4. **MTL Construction & Verification**:  
+   * Use `F_[a,b]`, `G_[a,b]`, `U_[a,b]`, `X`, `P_[a,b]`, `O` appropriately.  
+   * Ensure bounds are valid (a ≤ b, non-negative).  
+   * Verify formula reflects the temporal semantics faithfully.
+
+---
+
+**III. Simplification Rules**
+- Avoid redundant nesting (e.g., simplify `F(F_[0,5](φ))` → `F_[0,5](φ)`).
+- Use the tightest interval consistent with the natural-language requirement.
+- Prefer canonical readable forms (e.g., `G(A -> F_[0,5](B))`).
+
+---
+
+**<Examples>**
+
+[EXAMPLE]
+
+---
+
+**<Execution Process>**
+Input Text:
+[INPUT TEXT]
+
+Answer:
+Let's think step by step.

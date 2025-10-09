@@ -1,38 +1,38 @@
 {
     "framework_name": "DSV (Deconstruct, Synthesize, and Verify)",
     "version": "1.0.0",
-    "description": "白盒化、结构驱动的自然语言到MTL转换框架",
+    "description": "A white-box, structure-driven natural language to MTL conversion framework",
     
     "agents": {
         "analyst": {
             "name": "Analyst_Agent",
-            "role": "语义分析师",
-            "description": "负责将自然语言解构为结构化的语义组件",
+            "role": "Semantic Analyst",
+            "description": "Responsible for deconstructing natural language into structured semantic components",
             "model": "deepseek-v3.1",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
-            "specialization": "语义解构与组件提取"
+            "specialization": "Semantic Deconstruction and Component Extraction"
         },
         "synthesizer": {
             "name": "Synthesizer_Agent", 
-            "role": "公式合成师",
-            "description": "根据语义组件合成语法正确的MTL公式",
+            "role": "Formula Synthesizer",
+            "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
             "model": "deepseek-v3.1",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
-            "specialization": "约束下的语法合成"
+            "specialization": "Syntactic Synthesis under Constraints"
         },
         "verifier": {
             "name": "Verifier_Agent",
-            "role": "验证师",
-            "description": "通过逆向翻译验证MTL公式的语义正确性",
+            "role": "Verifier",
+            "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
             "model": "deepseek-v3.1",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
-            "specialization": "循环验证与修正"
+            "specialization": "Iterative Verification and Correction"
         }
     },
     
@@ -91,27 +91,27 @@
             "∨": "OR", 
             "¬": "NOT",
             "→": "IMPLIES",
-            "↔": "Equivalence"
+            "↔": "EQUIVALENCE"
         }
     },
     
     "semantic_components": {
         "atomic_propositions": {
-            "description": "描述系统状态或事件的基本单元",
+            "description": "The basic units that describe the status or events of a system",
             "required_fields": ["id", "description", "variable"]
         },
         "temporal_relations": {
-            "description": "描述原子命题之间的时序关系",
+            "description": "The temporal relations between atomic propositions",
             "types": ["after", "before", "during", "simultaneously", "within"],
             "required_fields": ["type", "antecedent", "consequent", "description"]
         },
         "metric_constraints": {
-            "description": "与时序关系相关的精确时间约束",
+            "description": "Precise time constraints related to temporal relationships",
             "types": ["window", "duration", "delay", "deadline"],
             "required_fields": ["applies_to", "type", "value", "description"]
         },
         "global_properties": {
-            "description": "整个规约的适用范围",
+            "description": "The scope of the entire specification",
             "types": ["Always", "Eventually", "Never", "Sometimes"]
         }
     },
@@ -119,28 +119,16 @@
     "ablation_studies": {
         "enabled": true,
         "experiments": {
-            "no_deconstruct": {
-                "description": "移除解构阶段，直接端到端生成",
-                "enabled": true
-            },
-            "no_verify": {
-                "description": "移除验证阶段，直接输出合成结果",
-                "enabled": true
-            },
-            "no_refinement": {
-                "description": "移除修正循环，验证失败后直接报告失败",
-                "enabled": true
-            },
             "no_dynamic_prompts": {
-                "description": "移除动态提示生成模块，使用原始DSV框架（无示例增强）",
+                "description": "Remove dynamic prompt generation module, using original DSV framework (no example enhancement)",
                 "enabled": true
             }
         }
     },
     
     "evaluation": {
-        "metrics": ["accuracy", "precision", "recall", "f1", "semantic_similarity"],
-        "comparison_baselines": ["end2end", "multi_agent_collaboration"],
+        "metrics": ["accuracy", "bleu score"],
+        "comparison_baselines": [],
         "test_datasets": ["traffic_rules", "system_specifications", "temporal_properties"]
     },
     

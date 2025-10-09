@@ -1,0 +1,126 @@
+{
+    "framework_name": "DSV (Deconstruct, Synthesize, and Verify)",
+    "version": "1.0.0",
+    "description": "白盒化、结构驱动的自然语言到MTL转换框架",
+    
+    "agents": {
+        "analyst": {
+            "name": "Analyst_Agent",
+            "role": "语义分析师",
+            "description": "负责将自然语言解构为结构化的语义组件",
+            "model": "deepseek-chat",
+            "temperature": 0.3,
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "base_url_env": "DEEPSEEK_API_URL",
+            "specialization": "语义解构与组件提取"
+        },
+        "synthesizer": {
+            "name": "Synthesizer_Agent", 
+            "role": "公式合成师",
+            "description": "根据语义组件合成语法正确的MTL公式",
+            "model": "deepseek-chat",
+            "temperature": 0.1,
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "base_url_env": "DEEPSEEK_API_URL",
+            "specialization": "约束下的语法合成"
+        },
+        "verifier": {
+            "name": "Verifier_Agent",
+            "role": "验证师",
+            "description": "通过逆向翻译验证MTL公式的语义正确性",
+            "model": "deepseek-chat",
+            "temperature": 0.2,
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "base_url_env": "DEEPSEEK_API_URL",
+            "specialization": "循环验证与修正"
+        }
+    },
+    
+    "processing_parameters": {
+        "similarity_threshold": 0.9,
+        "max_refinement_iterations": 3,
+        "enable_refinement_loop": true,
+        "similarity_model": "sentence-transformers/all-MiniLM-L6-v2"
+    },
+    
+    "mtl_syntax": {
+        "temporal_operators": {
+            "G": "Globally (Always)",
+            "F": "Finally (Eventually)", 
+            "X": "Next",
+            "U": "Until"
+        },
+        "metric_operators": {
+            "G_[a,b]": "Globally within time interval [a,b]",
+            "F_[a,b]": "Finally within time interval [a,b]",
+            "U_[a,b]": "Until within time interval [a,b]"
+        },
+        "logical_operators": {
+            "∧": "AND",
+            "∨": "OR", 
+            "¬": "NOT",
+            "→": "IMPLIES"
+        }
+    },
+    
+    "semantic_components": {
+        "atomic_propositions": {
+            "description": "描述系统状态或事件的基本单元",
+            "required_fields": ["id", "description", "variable"]
+        },
+        "temporal_relations": {
+            "description": "描述原子命题之间的时序关系",
+            "types": ["after", "before", "during", "simultaneously", "within"],
+            "required_fields": ["type", "antecedent", "consequent", "description"]
+        },
+        "metric_constraints": {
+            "description": "与时序关系相关的精确时间约束",
+            "types": ["window", "duration", "delay", "deadline"],
+            "required_fields": ["applies_to", "type", "value", "description"]
+        },
+        "global_properties": {
+            "description": "整个规约的适用范围",
+            "types": ["Always", "Eventually", "Never", "Sometimes"]
+        }
+    },
+    
+    "ablation_studies": {
+        "enabled": true,
+        "experiments": {
+            "no_deconstruct": {
+                "description": "移除解构阶段，直接端到端生成",
+                "enabled": true
+            },
+            "no_verify": {
+                "description": "移除验证阶段，直接输出合成结果",
+                "enabled": true
+            },
+            "no_refinement": {
+                "description": "移除修正循环，验证失败后直接报告失败",
+                "enabled": true
+            }
+        }
+    },
+    
+    "evaluation": {
+        "metrics": ["accuracy", "precision", "recall", "f1", "semantic_similarity"],
+        "comparison_baselines": ["end2end", "multi_agent_collaboration"],
+        "test_datasets": ["traffic_rules", "system_specifications", "temporal_properties"]
+    },
+    
+    "logging": {
+        "level": "INFO",
+        "save_detailed_logs": true,
+        "log_file": "logs/dsv_framework.log",
+        "save_stage_details": true,
+        "save_semantic_sketches": true
+    },
+    
+    "output": {
+        "save_intermediate_results": true,
+        "save_semantic_sketches": true,
+        "save_synthesis_reasoning": true,
+        "save_verification_details": true,
+        "output_format": "json"
+    }
+}

@@ -8,8 +8,8 @@
             "name": "Analyst_Agent",
             "role": "语义分析师",
             "description": "负责将自然语言解构为结构化的语义组件",
-            "model": "deepseek-chat",
-            "temperature": 0.3,
+            "model": "deepseek-v3.1",
+            "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
             "specialization": "语义解构与组件提取"
@@ -18,8 +18,8 @@
             "name": "Synthesizer_Agent", 
             "role": "公式合成师",
             "description": "根据语义组件合成语法正确的MTL公式",
-            "model": "deepseek-chat",
-            "temperature": 0.1,
+            "model": "deepseek-v3.1",
+            "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
             "specialization": "约束下的语法合成"
@@ -28,8 +28,8 @@
             "name": "Verifier_Agent",
             "role": "验证师",
             "description": "通过逆向翻译验证MTL公式的语义正确性",
-            "model": "deepseek-chat",
-            "temperature": 0.2,
+            "model": "deepseek-v3.1",
+            "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
             "specialization": "循环验证与修正"
@@ -37,10 +37,39 @@
     },
     
     "processing_parameters": {
-        "similarity_threshold": 0.9,
+        "similarity_threshold": 0.5,
         "max_refinement_iterations": 3,
         "enable_refinement_loop": true,
         "similarity_model": "sentence-transformers/all-MiniLM-L6-v2"
+    },
+    
+    "example_retrieval": {
+        "enabled": true,
+        "top_k": 3,
+        "similarity_threshold": 0.3,
+        "model": "sentence-transformers/all-MiniLM-L6-v2",
+        "sources": [
+            {
+                "path": "data/examples/deconstruct_examples.json",
+                "type": "json",
+                "stages": ["deconstruct"]
+            },
+            {
+                "path": "data/examples/synthesize_examples.json",
+                "type": "json",
+                "stages": ["synthesize"]
+            },
+            {
+                "path": "data/examples/verify_examples.json",
+                "type": "json",
+                "stages": ["verify"]
+            },
+            {
+                "path": "data/examples/all_examples.xlsx",
+                "type": "excel",
+                "stages": ["deconstruct", "synthesize", "verify"]
+            }
+        ]
     },
     
     "mtl_syntax": {
@@ -48,7 +77,9 @@
             "G": "Globally (Always)",
             "F": "Finally (Eventually)", 
             "X": "Next",
-            "U": "Until"
+            "U": "Until",
+            "P": "Past",
+            "O": "Once"
         },
         "metric_operators": {
             "G_[a,b]": "Globally within time interval [a,b]",
@@ -59,7 +90,8 @@
             "∧": "AND",
             "∨": "OR", 
             "¬": "NOT",
-            "→": "IMPLIES"
+            "→": "IMPLIES",
+            "↔": "Equivalence"
         }
     },
     
@@ -97,6 +129,10 @@
             },
             "no_refinement": {
                 "description": "移除修正循环，验证失败后直接报告失败",
+                "enabled": true
+            },
+            "no_dynamic_prompts": {
+                "description": "移除动态提示生成模块，使用原始DSV框架（无示例增强）",
                 "enabled": true
             }
         }

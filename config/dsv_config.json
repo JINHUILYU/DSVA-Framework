@@ -37,7 +37,7 @@
     },
     
     "processing_parameters": {
-        "similarity_threshold": 0.5,
+        "similarity_threshold": 0.85,
         "max_refinement_iterations": 3,
         "enable_refinement_loop": true,
         "similarity_model": "sentence-transformers/all-MiniLM-L6-v2"

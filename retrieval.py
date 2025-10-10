@@ -114,22 +114,42 @@ class ExampleRetriever:
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        examples = data.get("examples", [])
-        for example_data in examples:
-            example = Example(
-                id=example_data.get("id", ""),
-                input_text=example_data.get("input_text", ""),
-                stage=example_data.get("stage", "all"),
-                output=example_data.get("output", ""),
-                reasoning=example_data.get("reasoning"),
-                metadata=example_data.get("metadata")
-            )
-            
-            # 添加到对应阶段
-            for stage in stages:
-                if stage not in self.examples_db:
-                    self.examples_db[stage] = []
-                self.examples_db[stage].append(example)
+        # Handle both flat list format and categorized format
+        if "examples" in data and isinstance(data["examples"], dict):
+            # Categorized format: {examples: {stage: [examples]}}
+            for stage_name, stage_examples in data["examples"].items():
+                if stage_name in stages:
+                    for example_data in stage_examples:
+                        example = Example(
+                            id=example_data.get("id", ""),
+                            input_text=example_data.get("input_text", ""),
+                            stage=example_data.get("stage", stage_name),
+                            output=example_data.get("output", ""),
+                            reasoning=example_data.get("reasoning"),
+                            metadata=example_data.get("metadata")
+                        )
+                        
+                        if stage_name not in self.examples_db:
+                            self.examples_db[stage_name] = []
+                        self.examples_db[stage_name].append(example)
+        elif "examples" in data and isinstance(data["examples"], list):
+            # Flat list format: {examples: [examples]}
+            examples = data.get("examples", [])
+            for example_data in examples:
+                example = Example(
+                    id=example_data.get("id", ""),
+                    input_text=example_data.get("input_text", ""),
+                    stage=example_data.get("stage", "all"),
+                    output=example_data.get("output", ""),
+                    reasoning=example_data.get("reasoning"),
+                    metadata=example_data.get("metadata")
+                )
+                
+                # 添加到对应阶段
+                for stage in stages:
+                    if stage not in self.examples_db:
+                        self.examples_db[stage] = []
+                    self.examples_db[stage].append(example)
     
     def _load_excel_examples(self, file_path: str, stages: List[str]):
         """从Excel文件加载示例"""

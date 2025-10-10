@@ -8,7 +8,7 @@
             "name": "Analyst_Agent",
             "role": "Semantic Analyst",
             "description": "Responsible for deconstructing natural language into structured semantic components",
-            "model": "deepseek-v3.1",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -18,7 +18,7 @@
             "name": "Synthesizer_Agent", 
             "role": "Formula Synthesizer",
             "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
-            "model": "deepseek-v3.1",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -28,7 +28,7 @@
             "name": "Verifier_Agent",
             "role": "Verifier",
             "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
-            "model": "deepseek-v3.1",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -50,23 +50,8 @@
         "model": "sentence-transformers/all-MiniLM-L6-v2",
         "sources": [
             {
-                "path": "data/examples/deconstruct_examples.json",
+                "path": "data/examples/dsv_examples.json",
                 "type": "json",
-                "stages": ["deconstruct"]
-            },
-            {
-                "path": "data/examples/synthesize_examples.json",
-                "type": "json",
-                "stages": ["synthesize"]
-            },
-            {
-                "path": "data/examples/verify_examples.json",
-                "type": "json",
-                "stages": ["verify"]
-            },
-            {
-                "path": "data/examples/all_examples.xlsx",
-                "type": "excel",
                 "stages": ["deconstruct", "synthesize", "verify"]
             }
         ]

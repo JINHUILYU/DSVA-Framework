@@ -18,34 +18,96 @@ from enum import Enum
 from pathlib import Path
 import logging
 import os
+from sentence_transformers import SentenceTransformer, util
+from openai import OpenAI
+from dotenv import load_dotenv
 
-try:
-    from sentence_transformers import SentenceTransformer, util
-except ImportError:
-    SentenceTransformer = None
-    util = None
-
-try:
-    from openai import OpenAI
-except ImportError:
-    OpenAI = None
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    logging.warning("python-dotenv not installed, skipping .env loading")
+load_dotenv()
 
 # Import base DSV components
 from dsv_framework_ablation import (
     DSVStage, TokenUsage, SemanticSpecificationSketch,
-    SynthesisResult, VerificationResult, DSVStageResult, DSVProcessResult
+    SynthesisResult, VerificationResult, DSVStageResult, DSVProcessResult,
+    RefinementFeedback
 )
 
 # Import example retrieval system
 from retrieval import ExampleRetriever
 
 logger = logging.getLogger(__name__)
+# MTL Knowledge Base - Standardized syntax and operators
+MTL_KNOWLEDGE_BASE = """
+**<Metric Temporal Logic Knowledge Base>**
+
+Use only the following operators and symbols (consistent with dataset):
+
+**Future-time operators**:
+- `X` — next (discrete next step)
+- `F_[a,b](φ)` — eventually (φ occurs within interval [a,b])
+- `G_[a,b](φ)` — globally (φ holds throughout [a,b])
+- `φ U_[a,b] ψ` — until (φ holds until ψ occurs within [a,b])
+
+**Past-time operators**:
+- `P_[a,b](φ)` — previously (φ held at some point in the past within interval [a,b])
+- `O(φ)` — once in the past (φ occurred at least once in the past, unbounded)
+
+**Logical connectives**:
+- `&` (and), `|` (or), `~` (not), `->` (implication), `<->` (equivalence)
+
+**Location-based predicates** (domain-specific): e.g., `in_front_of(ego,other)`, `at_intersection(ego)`, etc.
+The formula should only contain **atomic propositions** and the above operators. Atomic propositions must be represented as compact propositional symbols (no raw natural language).
+
+**Time units & defaults**:
+* Convert all time units to **seconds** (1 min = 60 s, 1 hr = 3600 s, 1 ms = 0.001 s).
+* If the sentence explicitly mentions discrete steps/ticks, treat time as discrete and use `X`.
+* If a numeric bound is given without units, assume **seconds** by default.
+
+---
+
+**I. Temporal Operator Mapping (Natural Language → MTL)**
+
+1. **Explicit time bounds**:
+   * "within T seconds" → `F_[0,T](φ)`
+   * "between a and b seconds" → `F_[a,b](φ)`
+   * "after exactly T seconds" → `F_[T,T](φ)`
+   * "after at least T seconds" → `F_[T,∞)(φ)`
+   * "for T seconds" → `G_[0,T](φ)`
+   * "until within T seconds" → `φ U_[0,T] ψ`
+   * "must occur within T after A" → `A -> F_[0,T](B)`
+   * "every N seconds" → `G(F_[0,N](φ))`
+
+2. **Past-time mappings**:
+   * "previously within T seconds" → `P_[0,T](φ)`
+   * "sometime in the past" / "once before" → `O(φ)`
+   * "always in the past T seconds" (continuous past constraint) → can be represented as `~P_[0,T](~φ)`
+
+3. **Temporal adverbs**:
+   * "immediately" / "in the next step" → `X(φ)`
+   * "always" / "continuously" → `G(φ)`
+   * "eventually" / "at some point" → `F(φ)`
+
+---
+
+**II. Analysis Requirements (applied each time)**:
+
+1. **Sentence Decomposition**: Break into clauses, identify conditions, events, numeric bounds, and units.
+2. **Keyword & Quantitative Identification**: Detect temporal expressions (`within`, `for`, `after`, `before`, `previously`) and normalize numeric bounds to seconds.
+3. **Atomic Proposition Extraction**: Map natural-language phrases into concise propositional symbols (e.g., `signal_on`, `brake`, `at_intersection`).
+4. **MTL Construction & Verification**:
+   * Use `F_[a,b]`, `G_[a,b]`, `U_[a,b]`, `X`, `P_[a,b]`, `O` appropriately.
+   * Ensure bounds are valid (a ≤ b, non-negative).
+   * Verify formula reflects the temporal semantics faithfully.
+
+---
+
+**III. Simplification Rules**:
+- Avoid redundant nesting (e.g., simplify `F(F_[0,5](φ))` → `F_[0,5](φ)`).
+- Use the tightest interval consistent with the natural-language requirement.
+- Prefer canonical readable forms (e.g., `G(A -> F_[0,5](B))`).
+
+---
+"""
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -61,14 +123,11 @@ class EnhancedDSVFramework:
         self.clients = self._initialize_clients()
 
         # Initialize sentence transformer for similarity calculation
-        if SentenceTransformer is not None:
-            try:
-                self.sentence_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-                logger.info("Sentence transformer model initialized")
-            except Exception as e:
-                logger.warning(f"Failed to initialize sentence transformer: {e}")
-                self.sentence_model = None
-        else:
+        try:
+            self.sentence_model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+            logger.info("Sentence transformer model initialized")
+        except Exception as e:
+            logger.warning(f"Failed to initialize sentence transformer: {e}")
             self.sentence_model = None
 
         # Initialize example retrieval system
@@ -85,7 +144,7 @@ class EnhancedDSVFramework:
             self.example_retriever = None
 
         self.total_token_usage = TokenUsage()
-        self.similarity_threshold = self.config.get("similarity_threshold", 0.9)
+        self.similarity_threshold = self.config.get("similarity_threshold", 0.85)
         self.max_refinement_iterations = self.config.get("max_refinement_iterations", 3)
 
         logger.info("Enhanced DSV Framework initialized")
@@ -95,54 +154,8 @@ class EnhancedDSVFramework:
 
     def _load_config(self, config_path: str) -> Dict:
         """Load configuration from file"""
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except FileNotFoundError:
-            logger.warning(f"Config file {config_path} not found, using default config")
-            return self._get_default_config()
-
-    def _get_default_config(self) -> Dict:
-        """Get default configuration with example retrieval settings"""
-        return {
-            "agents": {
-                "analyst": {
-                    "name": "Analyst_Agent",
-                    "model": "deepseek-chat",
-                    "temperature": 0.3,
-                    "api_key_env": "DEEPSEEK_API_KEY",
-                    "base_url_env": "DEEPSEEK_API_URL"
-                },
-                "synthesizer": {
-                    "name": "Synthesizer_Agent",
-                    "model": "deepseek-chat",
-                    "temperature": 0.1,
-                    "api_key_env": "DEEPSEEK_API_KEY",
-                    "base_url_env": "DEEPSEEK_API_URL"
-                },
-                "verifier": {
-                    "name": "Verifier_Agent",
-                    "model": "deepseek-chat",
-                    "temperature": 0.2,
-                    "api_key_env": "DEEPSEEK_API_KEY",
-                    "base_url_env": "DEEPSEEK_API_URL"
-                }
-            },
-            "similarity_threshold": 0.9,
-            "max_refinement_iterations": 3,
-            "example_retrieval": {
-                "enabled": True,
-                "top_k": 3,
-                "similarity_threshold": 0.3,
-                "sources": [
-                    {
-                        "path": "data/examples/dsv_examples.json",
-                        "type": "json",
-                        "stages": ["deconstruct", "synthesize", "verify"]
-                    }
-                ]
-            }
-        }
+        with open(config_path, "r", encoding="utf-8") as f:
+            return json.load(f)
 
     def _initialize_clients(self) -> Dict[str, Any]:
         """Initialize API clients"""
@@ -196,6 +209,74 @@ class EnhancedDSVFramework:
             logger.error(f"LLM call failed for {agent_type}: {e}")
             return "", TokenUsage()
 
+    def _analyze_verification_failure(
+        self,
+        original_sentence: str,
+        mtl_formula: str,
+        back_translation: str,
+        similarity_score: float,
+        semantic_sketch_json: str
+    ) -> str:
+        """Analyze why verification failed and provide specific feedback"""
+        analysis_prompt = f"""
+You are an expert analyst tasked with identifying why an MTL formula verification failed.
+
+Original Sentence: "{original_sentence}"
+
+Generated MTL Formula: {mtl_formula}
+
+Back-translation: "{back_translation}"
+
+Semantic Similarity Score: {similarity_score:.3f} (Threshold: {self.similarity_threshold})
+
+Semantic Sketch Used:
+```json
+{semantic_sketch_json}
+```
+
+Please analyze the discrepancy between the original sentence and the back-translation. Identify:
+
+1. What semantic information was lost or misinterpreted?
+2. What temporal/metric constraints were incorrectly captured?
+3. Specific suggestions for correcting the semantic decomposition
+
+Provide a concise analysis focusing on actionable corrections.
+"""
+
+        messages = [
+            {"role": "system", "content": "You are an expert in temporal logic and semantic analysis. Provide precise, actionable feedback for improving MTL formula generation."},
+            {"role": "user", "content": analysis_prompt}
+        ]
+
+        try:
+            response, _ = self._call_llm("analyst", messages)
+            return response
+        except Exception as e:
+            logger.error(f"Failure analysis failed: {e}")
+            return f"Analysis failed: Low similarity score ({similarity_score:.3f}). The back-translation differs significantly from the original sentence."
+
+    def _format_refinement_history(self, refinement_history: List[RefinementFeedback]) -> str:
+        """Format refinement history for inclusion in prompts"""
+        if not refinement_history:
+            return ""
+        
+        history_text = "\n=== PREVIOUS REFINEMENT ATTEMPTS ===\n"
+        history_text += "The following attempts were made but failed verification. Learn from these mistakes:\n\n"
+        
+        for feedback in refinement_history:
+            history_text += f"Attempt {feedback.iteration}:\n"
+            history_text += f"- Semantic Sketch:\n```json\n{feedback.semantic_sketch_json}\n```\n"
+            history_text += f"- Generated MTL Formula: {feedback.mtl_formula}\n"
+            history_text += f"- Back-translation: \"{feedback.back_translation}\"\n"
+            history_text += f"- Similarity Score: {feedback.similarity_score:.3f}\n"
+            history_text += f"- Issue Analysis:\n{feedback.issue_analysis}\n"
+            history_text += "\n" + "-"*60 + "\n\n"
+        
+        history_text += "Based on these failures, please adjust your approach to avoid repeating the same mistakes.\n"
+        history_text += "=== END OF PREVIOUS ATTEMPTS ===\n\n"
+        
+        return history_text
+
     def _get_examples_for_stage(self, sentence: str, stage: str) -> str:
         """Get relevant examples for a specific stage"""
         if not self.examples_enabled or not self.example_retriever:
@@ -214,56 +295,63 @@ class EnhancedDSVFramework:
             logger.error(f"Example retrieval failed for stage {stage}: {e}")
             return ""
 
-    def _stage_1_deconstruct(self, sentence: str) -> DSVStageResult:
-        """Stage 1: Deconstruct with dynamic example enhancement"""
+    def _stage_1_deconstruct(self, sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+        """Stage 1: Deconstruct with dynamic example enhancement and refinement feedback"""
         start_time = time.time()
         logger.info("=== DSV Stage 1: Deconstruct (Enhanced) ===")
 
+        refinement_history = refinement_history or []
+        
         # Get relevant examples for deconstruction
         examples_text = self._get_examples_for_stage(sentence, "deconstruct")
+        
+        # Format refinement history if available
+        history_context = self._format_refinement_history(refinement_history)
 
-        # Enhanced analyst prompt with examples
+        # Enhanced analyst prompt with MTL knowledge base, examples and refinement feedback
         analyst_prompt = f"""
-你是一个专业的语义分析师Agent，负责将自然语言句子解构为构成MTL公式所需的核心语义组件。
+You are a professional semantic analysis agent tasked with decomposing natural language sentences into core semantic components required to construct MTL formulas.
+
+{MTL_KNOWLEDGE_BASE}
 
 {examples_text}
 
-请分析以下句子并提取结构化信息：
+{history_context}Analyze the following sentence and extract structured information:
 
-句子: "{sentence}"
+Sentence: "{sentence}"
 
-请提供一个JSON格式的语义规约草图，包含以下字段：
+Provide a JSON-formatted semantic specification sketch containing the following fields:
 
-1. atomic_propositions: 原子命题列表，每个包含id、description和variable
-2. temporal_relations: 时序关系列表，描述原子命题之间的时间关系
-3. metric_constraints: 度量约束列表，包含时间窗口、持续时间等约束
-4. global_property: 全局属性（如"Always"、"Eventually"等）
-5. lexicon: 词汇表，将变量名映射到自然语言描述
+1. atomic_propositions: List of atomic propositions, each containing id, description, and variable
+2. temporal_relations: List of temporal relations describing time relationships between atomic propositions
+3. metric_constraints: List of metric constraints, including time window, duration, etc.
+4. global_property: Global property (e.g., "Always", "Eventually")
+5. lexicon: A lexicon mapping variable names to natural language descriptions
 
-确保输出是有效的JSON格式。
+Ensure the output adheres to valid JSON format.
 
-输出格式示例：
+Example output format:
 ```json
 {{
     "atomic_propositions": [
-        {{"id": "ap_1", "description": "描述", "variable": "变量名"}}
+        {{"id": "ap_1", "description": "Description", 'variable': "VariableName"}}
     ],
     "temporal_relations": [
-        {{"type": "关系类型", "antecedent": "前件", "consequent": "后件", "description": "描述"}}
+        {{"type": "relation_type", "antecedent": "antecedent", "consequent": "consequent", 'description': "description"}}
     ],
     "metric_constraints": [
-        {{"applies_to": "适用对象", "type": "约束类型", "value": "约束值", "description": "描述"}}
+        {{"applies_to": "applies_to", "type": "constraint_type", "value": "constraint_value", 'description': "description"}}
     ],
     "global_property": "Always",
-    "lexicon": {{"变量名": "自然语言描述"}}
+    "lexicon": {{'variable_name': "natural language description"}}
 }}
 ```
 
-请参考上述示例的处理方式，但要根据当前句子的具体情况进行分析。
+Please refer to the processing approach in the above example, but analyze it based on the specific context of the current sentence.
 """
 
         messages = [
-            {"role": "system", "content": "你是一个专业的语义分析师，专门负责将自然语言解构为结构化的语义组件。严格按照要求输出JSON格式。参考提供的示例，但要根据具体输入进行独立分析。"},
+            {"role": "system", "content": "You are a professional semantic analyst specializing in deconstructing natural language into structured semantic components. Output strictly in JSON format as required. Refer to the provided examples, but perform independent analysis based on specific inputs."},
             {"role": "user", "content": analyst_prompt}
         ]
 
@@ -341,49 +429,56 @@ class EnhancedDSVFramework:
             logger.error(f"Failed to extract semantic sketch: {e}")
             return SemanticSpecificationSketch(extraction_success=False)
 
-    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, original_sentence: str) -> DSVStageResult:
-        """Stage 2: Synthesize with dynamic example enhancement"""
+    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, original_sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+        """Stage 2: Synthesize with dynamic example enhancement and refinement feedback"""
         start_time = time.time()
         logger.info("=== DSV Stage 2: Synthesize (Enhanced) ===")
 
+        refinement_history = refinement_history or []
+        
         # Get relevant examples for synthesis
         examples_text = self._get_examples_for_stage(original_sentence, "synthesize")
+        
+        # Format refinement history if available
+        history_context = self._format_refinement_history(refinement_history)
 
-        # Enhanced synthesizer prompt with examples
+        # Enhanced synthesizer prompt with MTL knowledge base, examples and refinement feedback
         synthesizer_prompt = f"""
-你是一个专业的MTL公式合成师Agent，负责根据结构化的语义规约草图合成语法正确的MTL公式。
+You are a professional MTL formula synthesizer agent tasked with generating syntactically correct MTL formulas based on structured semantic specification sketches.
+
+{MTL_KNOWLEDGE_BASE}
 
 {examples_text}
 
-你收到的语义规约草图如下：
+{history_context}The semantic specification sketch you received is as follows:
 
 ```json
 {sketch.raw_json}
 ```
 
-请根据此语义规约草图合成一个语法正确的MTL公式。
+Please synthesize a syntactically correct MTL formula based on this semantic specification sketch.
 
-MTL语法规则：
-- G: Globally (总是)
-- F: Finally (最终)
-- X: Next (下一个)  
-- U: Until (直到)
-- 时间区间: [a,b] 表示时间窗口
-- 逻辑运算: ∧ (and), ∨ (or), ¬ (not), → (implies)
+MTL Syntax Rules:
+- G: Globally (always)
+- F: Finally (ultimately)
+- X: Next (subsequent)  
+- U: Until (until)
+- Time Interval: [a,b] denotes a time window
+- Logical Operations: ∧ (and), ∨ (or), ¬ (not), → (implies)
 
-请提供两个标记的部分：
+Please provide the following two sections:
 
-推理过程:
-[详细的推理过程，解释如何从语义组件构建MTL公式]
+Reasoning Process:
+[Detailed reasoning process explaining how the MTL formula is constructed from semantic components]
 
-最终MTL公式:
-[合成的MTL公式]
+Final MTL Formula:
+[Synthetic MTL formula]
 
-请参考上述示例的处理方式，但要根据当前语义规约草图的具体内容进行合成。
+Please follow the processing approach demonstrated in the above example, but synthesize the formula based on the specific content of the current semantic specification sketch.
 """
 
         messages = [
-            {"role": "system", "content": "你是一个专业的MTL公式合成师。严格根据提供的语义组件构建MTL公式，不要添加额外的解释或推测。参考提供的示例，但要根据具体的语义规约草图进行独立合成。"},
+            {"role": "system", "content": "You are a professional MTL formula synthesizer. Strictly construct MTL formulas based on the provided semantic components without adding any additional explanations or speculations. Refer to the provided examples, but synthesize independently according to the specific semantic specification sketch."},
             {"role": "user", "content": synthesizer_prompt}
         ]
 
@@ -418,13 +513,13 @@ MTL语法规则：
         """Extract synthesis result from synthesizer response"""
         try:
             # Extract reasoning
-            reasoning_match = re.search(r'推理过程[:：]\s*(.*?)(?=最终MTL公式[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+            reasoning_match = re.search(r'Reasoning Process[:：]\s*(.*?)(?=Final MTL Formula[:：]|$)', response, re.DOTALL | re.IGNORECASE)
             if not reasoning_match:
-                reasoning_match = re.search(r'Reasoning[:：]\s*(.*?)(?=Final MTL formula[:：]|最终MTL公式[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+                reasoning_match = re.search(r'Reasoning[:：]\s*(.*?)(?=Final MTL formula[:：]|Final MTL Formula[:：]|$)', response, re.DOTALL | re.IGNORECASE)
             reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
 
             # Extract MTL formula
-            formula_match = re.search(r'最终MTL公式[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
+            formula_match = re.search(r'Final MTL Formula[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
             if not formula_match:
                 formula_match = re.search(r'Final MTL formula[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
             
@@ -472,45 +567,47 @@ MTL语法规则：
         # Format lexicon for prompt
         lexicon_text = ""
         if lexicon:
-            lexicon_text = "变量词汇表:\n"
+            lexicon_text = "Variable Vocabulary List:\n"
             for var, desc in lexicon.items():
                 lexicon_text += f"- {var}: {desc}\n"
             lexicon_text += "\n"
 
-        # Enhanced verifier prompt with examples
+        # Enhanced verifier prompt with MTL knowledge base and examples
         verifier_prompt = f"""
-你是一个专业的MTL公式验证师Agent，负责将MTL公式翻译回自然语言进行验证。
+You are a professional MTL formula verifier Agent, responsible for translating MTL formulas back into natural language for verification.
+
+{MTL_KNOWLEDGE_BASE}
 
 {examples_text}
 
-{lexicon_text}待验证的MTL公式: {mtl_formula}
+{lexicon_text}MTL formula to be verified: {mtl_formula}
 
-请将这个MTL公式翻译成清晰的自然语言描述。
+Please translate this MTL formula into a clear natural language description.
 
-MTL符号含义：
-- G: 总是/全局地
-- F: 最终/将来某时
-- X: 下一个时刻
-- U: 直到
-- [a,b]: 时间区间a到b
-- ∧: 且
-- ∨: 或  
-- ¬: 非
-- →: 蕴含
+MTL Symbol Meanings:
+- G: Always/Globally
+- F: Eventually/At some future time
+- X: Next time step
+- U: Until
+- [a,b]: Time interval from a to b
+- ∧: And
+- ∨: Or  
+- ¬: Not
+- →: Implication
 
-请提供两个标记的部分：
+Provide two marked sections:
 
-推理过程:
-[详细解释MTL公式的含义和翻译思路]
+Reasoning Process:
+[Detailed explanation of MTL formula meaning and translation approach]
 
-自然语言翻译:
-[将MTL公式翻译成自然语言的结果]
+Natural Language Translation:
+[Result of translating MTL formula into natural language]
 
-请参考上述示例的处理方式，但要根据当前MTL公式的具体内容进行翻译。
+Please follow the processing method from the above example, but adapt the translation based on the specific content of the current MTL formula.
 """
 
         messages = [
-            {"role": "system", "content": "你是一个专业的MTL公式验证师，擅长将形式化公式翻译成自然语言。请确保翻译准确且易于理解。参考提供的示例，但要根据具体的MTL公式进行独立翻译。"},
+            {"role": "system", "content": "You are a professional MTL formula translator, skilled at converting formal formulas into natural language. Ensure translations are accurate and easy to understand. Refer to the provided examples, but translate each MTL formula independently."},
             {"role": "user", "content": verifier_prompt}
         ]
 
@@ -545,13 +642,13 @@ MTL符号含义：
         """Extract verification result from verifier response"""
         try:
             # Extract reasoning
-            reasoning_match = re.search(r'推理过程[:：]\s*(.*?)(?=自然语言翻译[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+            reasoning_match = re.search(r'Reasoning Process[:：]\s*(.*?)(?=Natural Language Translation[:：]|$)', response, re.DOTALL | re.IGNORECASE)
             if not reasoning_match:
-                reasoning_match = re.search(r'Reasoning[:：]\s*(.*?)(?=Natural language translation[:：]|自然语言翻译[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+                reasoning_match = re.search(r'Reasoning[:：]\s*(.*?)(?=Natural language translation[:：]|Natural Language Translation[:：]|$)', response, re.DOTALL | re.IGNORECASE)
             reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
 
             # Extract back translation
-            translation_match = re.search(r'自然语言翻译[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
+            translation_match = re.search(r'Natural Language Translation[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
             if not translation_match:
                 translation_match = re.search(r'Natural language translation[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
 
@@ -562,7 +659,7 @@ MTL符号含义：
                 lines = response.split('\n')
                 back_translation = ""
                 for line in reversed(lines):
-                    if line.strip() and not line.strip().startswith(('推理', 'Reasoning', '自然语言', 'Natural')):
+                    if line.strip() and not line.strip().startswith(('Reasoning', 'Natural')):
                         back_translation = line.strip()
                         break
 
@@ -609,9 +706,9 @@ MTL符号含义：
             return 0.0
 
     def process(self, sentence: str, enable_refinement: bool = True) -> DSVProcessResult:
-        """Process a sentence through the complete enhanced DSV pipeline"""
+        """Process a sentence through the complete enhanced DSV pipeline with refinement feedback"""
         start_time = time.time()
-        logger.info(f"Starting Enhanced DSV processing: {sentence}")
+        logger.info(f"Starting Enhanced DSV processing with Refinement Feedback: {sentence}")
 
         # Reset token usage tracking
         self.total_token_usage = TokenUsage()
@@ -621,20 +718,30 @@ MTL符号含义：
         final_mtl_formula = None
         success = False
         termination_reason = "Unknown"
+        
+        # Track refinement history for feedback
+        refinement_history: List[RefinementFeedback] = []
 
         try:
             for iteration in range(self.max_refinement_iterations + 1):
                 logger.info(f"=== Enhanced DSV Processing Iteration {iteration + 1} ===")
                 
-                # Stage 1: Deconstruct (Enhanced)
-                deconstruct_result = self._stage_1_deconstruct(sentence)
+                if refinement_history:
+                    logger.info(f"Using feedback from {len(refinement_history)} previous attempt(s)")
+                
+                # Stage 1: Deconstruct (Enhanced with refinement history)
+                deconstruct_result = self._stage_1_deconstruct(sentence, refinement_history=refinement_history)
                 stage_results.append(deconstruct_result)
                 if not deconstruct_result.success:
                     termination_reason = "Deconstruct stage failed"
                     break
 
-                # Stage 2: Synthesize (Enhanced)
-                synth_result = self._stage_2_synthesize(deconstruct_result.stage_output, sentence)
+                # Stage 2: Synthesize (Enhanced with refinement history)
+                synth_result = self._stage_2_synthesize(
+                    deconstruct_result.stage_output,
+                    sentence,
+                    refinement_history=refinement_history
+                )
                 stage_results.append(synth_result)
                 if not synth_result.success:
                     termination_reason = "Synthesize stage failed"
@@ -653,6 +760,7 @@ MTL符号含义：
                     final_mtl_formula = synth_result.stage_output.mtl_formula
                     success = True
                     termination_reason = f"Verification passed (similarity: {verify_result.stage_output.similarity_score:.3f})"
+                    logger.info(f"✅ Success after {iteration + 1} iteration(s)")
                     break
                 else:
                     refinement_iterations += 1
@@ -664,7 +772,28 @@ MTL符号含义：
                         termination_reason = f"Reached max refinement iterations (similarity: {similarity:.3f})"
                         break
                     else:
-                        logger.info(f"Starting refinement iteration {refinement_iterations}")
+                        # Analyze failure and create feedback for next iteration
+                        logger.info(f"Analyzing failure to improve next iteration...")
+                        issue_analysis = self._analyze_verification_failure(
+                            original_sentence=sentence,
+                            mtl_formula=synth_result.stage_output.mtl_formula,
+                            back_translation=verify_result.stage_output.back_translation,
+                            similarity_score=similarity,
+                            semantic_sketch_json=deconstruct_result.stage_output.raw_json
+                        )
+                        
+                        # Store feedback for next iteration
+                        feedback = RefinementFeedback(
+                            iteration=iteration + 1,
+                            mtl_formula=synth_result.stage_output.mtl_formula,
+                            back_translation=verify_result.stage_output.back_translation,
+                            similarity_score=similarity,
+                            semantic_sketch_json=deconstruct_result.stage_output.raw_json,
+                            issue_analysis=issue_analysis
+                        )
+                        refinement_history.append(feedback)
+                        
+                        logger.info(f"Starting refinement iteration {refinement_iterations} with feedback")
                         continue
 
             total_processing_time = time.time() - start_time
@@ -772,9 +901,10 @@ def main() -> None:
     enhanced_dsv = EnhancedDSVFramework()
     
     test_sentences = [
-        "在传感器A检测到故障后的5到10秒内，警报B必须响起，并持续至少20秒。",
+        "Within 5 to 10 seconds after Sensor A detects a fault, Alarm B must sound and remain active for at least 20 seconds.",
         "After receiving the signal, the system must respond within 10 seconds.",
-        "The door should remain locked for at least 30 seconds after the alarm is triggered."
+        "The door should remain locked for at least 30 seconds after the alarm is triggered.",
+        "If ego vehicle wants to change lanes, turn, or overtake, they should use their turn signals beforehand for t seconds."
     ]
     
     for i, sentence in enumerate(test_sentences, 1):
@@ -816,7 +946,7 @@ def main() -> None:
     print("=== Ablation Study Demo ===")
     print("Comparing Enhanced vs Ablation versions on the same sentence...\n")
     
-    test_sentence = "在传感器A检测到故障后的5到10秒内，警报B必须响起，并持续至少20秒。"
+    test_sentence = "Within 5 to 10 seconds after Sensor A detects a fault, Alarm B must sound and remain active for at least 20 seconds."
     
     print(f"Test sentence: {test_sentence}\n")
     

@@ -1,22 +1,23 @@
+# DSVA Framework: Deconstruct-Synthesize-Verify-Analyze
 
-# DSV Framework: Deconstruct-Synthesize-Verify
-
-A sophisticated framework for translating natural language specifications into Metric Temporal Logic (MTL) formulas using a three-stage agent-based pipeline with intelligent refinement feedback.
+A sophisticated framework for translating natural language specifications into Metric Temporal Logic (MTL) formulas using a four-stage pipeline with intelligent refinement feedback and error analysis.
 
 ## 🌟 Overview
 
-The DSV Framework employs a **Deconstruct → Synthesize → Verify** approach to convert natural language requirements into formal MTL formulas:
+The DSVA Framework employs a **Deconstruct → Synthesize → Verify → Analyze** approach to convert natural language requirements into formal MTL formulas:
 
 1. **Deconstruct**: Semantic analysis agent breaks down natural language into structured components
-2. **Synthesize**: MTL formula synthesizer generates formal logic from semantic sketches
+2. **Synthesize**: MTL formula synthesizer generates formal logic from semantic sketches  
 3. **Verify**: Back-translation verifier validates formula correctness through semantic similarity
+4. **Analyze**: Error analyst function diagnoses verification failures and provides targeted feedback for refinement
 
 ### Key Features
 
 ✅ **Intelligent Refinement Loop**: Learns from verification failures with detailed feedback analysis  
+✅ **Error Analyst Function**: Advanced failure diagnosis that identifies semantic gaps and provides actionable correction suggestions  
 ✅ **MTL Knowledge Base Integration**: Standardized temporal logic operators and mappings  
 ✅ **Dynamic Example Retrieval** (Complete version): Semantic similarity-based few-shot learning  
-✅ **Multi-Agent Architecture**: Specialized agents for each DSV stage  
+✅ **Multi-Agent Architecture**: Specialized agents for each DSVA stage  
 ✅ **Comprehensive Tracking**: Token usage, processing time, and refinement history  
 
 ---
@@ -24,7 +25,7 @@ The DSV Framework employs a **Deconstruct → Synthesize → Verify** approach t
 ## 📁 Project Structure
 
 ```
-DSV-Framework/
+DSVA-Framework/
 ├── dsv_framework_complete.py    # Enhanced version with example retrieval
 ├── dsv_framework_ablation.py    # Baseline version for ablation studies
 ├── retrieval.py                  # Example retrieval system
@@ -134,7 +135,7 @@ python dsv_framework_ablation.py
 
 ### Core Components
 
-#### 1. **DSV Framework Ablation** ([`dsv_framework_ablation.py`](dsv_framework_ablation.py))
+#### 1. **DSVA Framework Ablation** ([`dsv_framework_ablation.py`](dsv_framework_ablation.py))
 
 The baseline version without dynamic example retrieval, designed for ablation studies.
 
@@ -149,10 +150,10 @@ The baseline version without dynamic example retrieval, designed for ablation st
 - [`_stage_1_deconstruct()`](dsv_framework_ablation.py:263): Natural language → Semantic sketch
 - [`_stage_2_synthesize()`](dsv_framework_ablation.py:388): Semantic sketch → MTL formula
 - [`_stage_3_verify()`](dsv_framework_ablation.py:504): MTL formula → Back-translation + similarity
-- [`_analyze_verification_failure()`](dsv_framework_ablation.py:195): Diagnose refinement failures
-- [`process()`](dsv_framework_ablation.py:646): Complete DSV pipeline with refinement
+- [`_analyze_verification_failure()`](dsv_framework_ablation.py:268): **Error Analyst Function** - Intelligent failure diagnosis and feedback generation
+- [`process()`](dsv_framework_ablation.py:646): Complete DSVA pipeline with refinement
 
-#### 2. **Enhanced DSV Framework** ([`dsv_framework_complete.py`](dsv_framework_complete.py))
+#### 2. **Enhanced DSVA Framework** ([`dsv_framework_complete.py`](dsv_framework_complete.py))
 
 Full-featured version with dynamic example retrieval for improved performance.
 
@@ -257,7 +258,33 @@ Both framework versions include a comprehensive MTL knowledge base that standard
 
 ---
 
-## 🔄 Intelligent Refinement Mechanism
+## � Error Analyst Function
+
+The `_analyze_verification_failure()` function serves as an intelligent error analyst that diagnoses why MTL formula verification failed and provides targeted feedback for improvement.
+
+### How It Works
+
+When verification fails (similarity score below threshold), the Error Analyst:
+
+1. **Compares** original sentence vs. back-translation
+2. **Identifies** semantic information gaps or misinterpretations  
+3. **Analyzes** temporal/metric constraint capture errors
+4. **Generates** specific, actionable correction suggestions
+5. **Guides** the next refinement iteration with targeted feedback
+
+### Example Analysis Output
+
+```text
+Analysis: The back-translation misses the temporal sequence relationship. 
+The original specifies "after detecting fault" (temporal precedence), 
+but the generated formula treats alarm activation as simultaneous. 
+Suggestion: Modify semantic sketch to include explicit temporal ordering 
+with precedence relation between fault detection and alarm activation.
+```
+
+---
+
+## �🔄 Intelligent Refinement Mechanism
 
 ### The Problem (Before)
 
@@ -273,25 +300,27 @@ Original implementation had a critical flaw:
 ```
 Iteration 1: 
   Input: "Within 5 seconds after A, B must occur"
-  → Sketch₁ → Formula₁ → Verify (similarity: 0.45) ❌
+  → Deconstruct → Synthesize → Verify (similarity: 0.45) ❌
   → Analyze: "Time constraint [5,5] should be [0,5]"
 
 Iteration 2:
   Input: Original + [Analysis from Iteration 1]
-  → Sketch₂ (corrected) → Formula₂ → Verify (similarity: 0.78) ❌
+  → Deconstruct → Synthesize → Verify (similarity: 0.78) ❌
   → Analyze: "Missing 'must' implication operator"
 
 Iteration 3:
   Input: Original + [Analysis from Iterations 1 & 2]
-  → Sketch₃ (fully corrected) → Formula₃ → Verify (similarity: 0.92) ✅
+  → Deconstruct → Synthesize → Verify (similarity: 0.92) ✅
 ```
 
 ### Key Improvements
 
-1. **Failure Analysis** ([`_analyze_verification_failure()`](dsv_framework_ablation.py:195))
-   - Uses Analyst Agent to diagnose discrepancies
-   - Identifies specific semantic/temporal errors
-   - Provides actionable correction suggestions
+1. **Error Analyst Function** ([`_analyze_verification_failure()`](dsv_framework_complete.py:212))
+   - **Intelligent Failure Diagnosis**: Analyzes discrepancies between original sentence and back-translation
+   - **Semantic Gap Identification**: Pinpoints lost or misinterpreted semantic information
+   - **Temporal Constraint Analysis**: Identifies incorrectly captured temporal/metric constraints
+   - **Actionable Feedback Generation**: Provides specific suggestions for correcting semantic decomposition
+   - **Refinement Guidance**: Directs the framework toward successful formula generation in subsequent iterations
 
 2. **Feedback Accumulation** ([`RefinementFeedback`](dsv_framework_ablation.py:73))
    - Stores each iteration's: formula, back-translation, similarity, analysis
@@ -658,7 +687,7 @@ If you use this framework in your research, please cite:
 
 ```bibtex
 @software{dsv_framework,
-  title={DSV Framework: Deconstruct-Synthesize-Verify for NL to MTL Translation},
+  title={DSVA Framework: Deconstruct-Synthesize-Verify-Analyze for NL to MTL Translation},
   author={Your Name},
   year={2025},
   url={https://github.com/your-repo/dsv-framework}

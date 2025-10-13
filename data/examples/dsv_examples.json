@@ -1,22 +1,22 @@
 {
   "framework": "DSV Example Database",
-  "description": "示例数据库，为DSV框架各阶段提供相似示例",
+  "description": "The sample database provides similar examples for each stage of the DSV framework.",
   "version": "1.0",
   "examples": {
     "deconstruct": [
       {
         "id": "dec_001",
-        "input_text": "在传感器A检测到故障后的5到10秒内，警报B必须响起，并持续至少20秒。",
+        "input_text": "Within 5 to 10 seconds after sensor A detects a fault, alarm B must sound and continue for at least 20 seconds.",
         "stage": "deconstruct",
-        "output": "{\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"description\": \"传感器A检测到故障\",\n      \"variable\": \"fault_A\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"description\": \"警报B响起\",\n      \"variable\": \"alarm_B_on\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"ap_2\",\n      \"description\": \"ap_2必须在ap_1之后发生\"\n    }\n  ],\n  \"metric_constraints\": [\n    {\n      \"applies_to\": \"relation_between_ap1_ap2\",\n      \"type\": \"window\",\n      \"value\": \"[5, 10]\",\n      \"description\": \"时间窗口为5到10秒\"\n    },\n    {\n      \"applies_to\": \"ap_2\",\n      \"type\": \"duration\",\n      \"value\": \">=20\",\n      \"description\": \"持续时间至少20秒\"\n    }\n  ],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"fault_A\": \"传感器A检测到故障\",\n    \"alarm_B_on\": \"警报B响起\"\n  }\n}",
-        "reasoning": "首先识别两个原子命题：传感器A检测到故障和警报B响起。然后确定时序关系：警报B必须在传感器A检测到故障之后响起。最后提取度量约束：5到10秒的时间窗口和至少20秒的持续时间。"
+        "output": "{\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"description\": \"Sensor A detects a fault\",\n      \"variable\": \"fault_A\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"description\": \"Alarm B sounds\",\n      \"variable\": \"alarm_B_on\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"ap_2\",\n      \"description\": \"ap_2 must occur after ap_1\"\n    }\n  ],\n  \"metric_constraints\": [\n    {\n      \"applies_to\": \"relation_between_ap1_ap2\",\n      \"type\": \"window\",\n      \"value\": \"[5, 10]\",\n      \"description\": \"Time window is 5 to 10 seconds\"\n    },\n    {\n      \"applies_to\": \"ap_2\",\n      \"type\": \"duration\",\n      \"value\": \">=20\",\n      \"description\": \"Duration of at least 20 seconds\"\n    }\n  ],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"fault_A\": \"Sensor A detects a fault\",\n    \"alarm_B_on\": \"Alarm B sounds\"\n  }\n}",
+        "reasoning": "First, identify two atomic propositions: Sensor A detects a fault and Alarm B sounds. Then determine the temporal relationship: Alarm B must sound after Sensor A detects a fault. Finally, extract metric constraints: a time window of 5 to 10 seconds and a duration of at least 20 seconds."
       },
       {
         "id": "dec_002",
-        "input_text": "系统启动后，状态灯必须在3秒内亮起。",
+        "input_text": "After the system starts, the status light must turn on within 3 seconds.",
         "stage": "deconstruct",
-        "output": "{\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"description\": \"系统启动\",\n      \"variable\": \"system_start\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"description\": \"状态灯亮起\",\n      \"variable\": \"status_light_on\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"ap_2\",\n      \"description\": \"ap_2必须在ap_1之后发生\"\n    }\n  ],\n  \"metric_constraints\": [\n    {\n      \"applies_to\": \"relation_between_ap1_ap2\",\n      \"type\": \"window\",\n      \"value\": \"[0, 3]\",\n      \"description\": \"时间窗口为0到3秒\"\n    }\n  ],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"system_start\": \"系统启动\",\n    \"status_light_on\": \"状态灯亮起\"\n  }\n}",
-        "reasoning": "识别两个原子命题：系统启动和状态灯亮起。确定时序关系：状态灯必须在系统启动之后亮起。提取度量约束：3秒内的时间窗口。"
+        "output": "{\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"description\": \"System starts\",\n      \"variable\": \"system_start\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"description\": \"Status light turns on\",\n      \"variable\": \"status_light_on\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"ap_2\",\n      \"description\": \"ap_2 must occur after ap_1\"\n    }\n  ],\n  \"metric_constraints\": [\n    {\n      \"applies_to\": \"relation_between_ap1_ap2\",\n      \"type\": \"window\",\n      \"value\": \"[0, 3]\",\n      \"description\": \"Time window is 0 to 3 seconds\"\n    }\n  ],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"system_start\": \"System starts\",\n    \"status_light_on\": \"Status light turns on\"\n  }\n}",
+        "reasoning": "Identify two atomic propositions: System starts and Status light turns on. Determine the temporal relationship: The status light must turn on after the system starts. Extract metric constraint: a time window of 0 to 3 seconds."
       },
       {
         "id": "dec_003",
@@ -29,21 +29,21 @@
     "synthesize": [
       {
         "id": "syn_001",
-        "input_text": "传感器故障后5-10秒内警报响起并持续20秒",
+        "input_text": "Alarm sounds within 5-10 seconds after sensor fault and lasts for 20 seconds",
         "stage": "synthesize",
         "output": "G (fault_A → F_[5,10] (alarm_B_on ∧ G_[0,20] alarm_B_on))",
-        "reasoning": "根据语义规约草图，构建MTL公式：G表示全局属性，fault_A→表示传感器故障作为前件，F_[5,10]表示在5到10秒时间窗口内最终发生，alarm_B_on表示警报响起，∧连接两个条件，G_[0,20] alarm_B_on表示警报持续20秒。"
+        "reasoning": "According to the semantic specification sketch, construct the MTL formula: G represents the global property, fault_A→ represents sensor fault as the antecedent, F_[5,10] represents eventually occurring within the time window of 5 to 10 seconds, alarm_B_on represents the alarm sounding, ∧ connects two conditions, and G_[0,20] alarm_B_on represents the alarm lasting for 20 seconds."
       },
       {
         "id": "syn_002",
-        "input_text": "系统启动后3秒内状态灯亮起",
+        "input_text": "Status light turns on within 3 seconds after system starts",
         "stage": "synthesize",
         "output": "G (system_start → F_[0,3] status_light_on)",
-        "reasoning": "全局属性G，系统启动作为前件，通过蕴含符号→连接，F_[0,3]表示在0到3秒时间窗口内最终发生状态灯亮起事件。"
+        "reasoning": "Global property G, system start as the antecedent, connected by the implication symbol →, F_[0,3] represents the status light turning on eventually within the time window of 0 to 3 seconds."
       },
       {
         "id": "syn_003",
-        "input_text": "警报触发后门锁至少保持30秒",
+        "input_text": "Door lock remains for at least 30 seconds after alarm is triggered",
         "stage": "synthesize",
         "output": "G (alarm_triggered → G_[0,30] door_locked)",
         "reasoning": "Global property G, alarm triggered as antecedent, implies door locked for at least 30 seconds using G_[0,30] to represent the duration constraint."
@@ -53,20 +53,20 @@
       {
         "id": "ver_001",
         "input_text": "G (fault_A → F_[5,10] (alarm_B_on ∧ G_[0,20] alarm_B_on))",
-        "stage": "verify",
-        "output": "总是，如果传感器A检测到故障，那么在5到10秒的时间窗口内，警报B将会响起并持续至少20秒。",
-        "reasoning": "G表示总是/全局地，fault_A→表示如果传感器A故障，F_[5,10]表示在5到10秒内最终发生，alarm_B_on表示警报B响起，∧表示并且，G_[0,20] alarm_B_on表示警报B持续20秒。"
+        "stage": "verify", 
+        "output": "Always, if sensor A detects a fault, then within a time window of 5 to 10 seconds, alarm B will sound and continue for at least 20 seconds.",
+        "reasoning": "G means always/globally, fault_A→ means if sensor A fails, F_[5,10] means eventually occurs within 5 to 10 seconds, alarm_B_on means alarm B sounds, ∧ means and, G_[0,20] alarm_B_on means alarm B continues for 20 seconds."
       },
       {
-        "id": "ver_002",
+        "id": "ver_002", 
         "input_text": "G (system_start → F_[0,3] status_light_on)",
         "stage": "verify",
-        "output": "总是，如果系统启动，那么状态灯将在3秒内亮起。",
-        "reasoning": "G表示总是，system_start→表示如果系统启动，F_[0,3]表示在0到3秒内最终发生，status_light_on表示状态灯亮起。"
+        "output": "Always, if the system starts, then the status light will turn on within 3 seconds.",
+        "reasoning": "G means always, system_start→ means if the system starts, F_[0,3] means eventually occurs within 0 to 3 seconds, status_light_on means the status light turns on."
       },
       {
         "id": "ver_003",
-        "input_text": "G (alarm_triggered → G_[0,30] door_locked)",
+        "input_text": "G (alarm_triggered → G_[0,30] door_locked)", 
         "stage": "verify",
         "output": "Always, if the alarm is triggered, then the door will remain locked for 30 seconds.",
         "reasoning": "G means globally/always, alarm_triggered→ means if alarm is triggered, G_[0,30] door_locked means the door remains locked for the duration of 30 seconds."

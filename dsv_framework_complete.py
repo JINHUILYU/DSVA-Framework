@@ -18,6 +18,7 @@ from enum import Enum
 from pathlib import Path
 import logging
 import os
+import openpyxl
 from sentence_transformers import SentenceTransformer, util
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -235,10 +236,9 @@ Semantic Sketch Used:
 ```
 
 Please analyze the discrepancy between the original sentence and the back-translation. Identify:
-
 1. What semantic information was lost or misinterpreted?
 2. What temporal/metric constraints were incorrectly captured?
-3. Specific suggestions for correcting the semantic decomposition
+3. Specific suggestions for correcting the semantic decomposition.
 
 Provide a concise analysis focusing on actionable corrections.
 """
@@ -314,6 +314,30 @@ You are a professional semantic analysis agent tasked with decomposing natural l
 
 {MTL_KNOWLEDGE_BASE}
 
+**Object and Predicate Extraction Guidelines**:
+
+1. **Object Naming Conventions**:
+   - Use lowercase, concise names: "ego", "other", "sign_306"
+   - For sensors/devices: Use CamelCase without spaces: "SensorA", "AlarmB", "StatusLight"
+   - Avoid full descriptions in names (use "ego" not "Ego vehicle")
+
+2. **Predicate Naming Conventions**:
+   - Use snake_case: "in_front_of", "sudden_braking", "at_intersection", "detects_fault"
+   - For relational predicates (2 objects): include preposition
+     Examples: in_front_of, in_right_of, yield
+   - For unary predicates (1 object): use verb/state
+     Examples: sudden_braking, at_intersection, detects_fault, sounds
+
+3. **Related Objects** (CRITICAL for relational predicates):
+   - MUST specify "related_object" field for predicates involving 2 entities
+   - Example: "in_front_of" requires subject (ego) and object (other)
+   - Example: "yield" requires who yields (ego) and to whom (other)
+
+4. **Complete Object List**:
+   - Extract ALL entities mentioned in the sentence
+   - Each object needs: id, name, type
+   - Types: "vehicle", "sensor", "actuator", "indicator", "traffic_sign", etc.
+
 {examples_text}
 
 {history_context}Analyze the following sentence and extract structured information:
@@ -322,28 +346,60 @@ Sentence: "{sentence}"
 
 Provide a JSON-formatted semantic specification sketch containing the following fields:
 
-1. atomic_propositions: List of atomic propositions, each containing id, description, and variable
-2. temporal_relations: List of temporal relations describing time relationships between atomic propositions
-3. metric_constraints: List of metric constraints, including time window, duration, etc.
-4. global_property: Global property (e.g., "Always", "Eventually")
-5. lexicon: A lexicon mapping variable names to natural language descriptions
+1. **objects**:
+   A list of ALL identified physical or logical entities, each with:
+   - id: unique identifier (e.g., "obj_ego", "obj_other", "obj_sensor_a")
+   - name: concise object name (e.g., "ego", "other", "SensorA")
+   - type: category (e.g., "vehicle", "sensor", "actuator", "indicator", "traffic_sign")
+
+2. **atomic_propositions**:
+   List of atomic propositions, each containing:
+   - id: unique identifier (e.g., "ap_1", "ap_2")
+   - object: reference to object ID from objects list
+   - related_object: (REQUIRED for relational predicates) reference to second object ID
+   - predicate: the action or property in snake_case (e.g., "in_front_of", "sudden_braking")
+   - variable: short variable name for reference
+   - description: human-readable description
+
+3. **temporal_relations**:
+   List of temporal relations describing time relationships between atomic propositions
+
+4. **metric_constraints**:
+   List of metric constraints, including time window, duration, etc.
+
+5. **global_property**:
+   Global property (e.g., "Always", "Eventually")
+
+6. **lexicon**:
+   A lexicon mapping variable names to natural language descriptions
 
 Ensure the output adheres to valid JSON format.
 
 Example output format:
 ```json
 {{
+    "objects": [
+        {{"id": "obj_ego", "name": "ego", "type": "vehicle"}},
+        {{"id": "obj_other", "name": "other", "type": "vehicle"}}
+    ],
     "atomic_propositions": [
-        {{"id": "ap_1", "description": "Description", 'variable': "VariableName"}}
+        {{
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "in_front_of",
+            "variable": "ego_in_front",
+            "description": "Ego vehicle is in front of other vehicle"
+        }}
     ],
     "temporal_relations": [
-        {{"type": "relation_type", "antecedent": "antecedent", "consequent": "consequent", 'description': "description"}}
+        {{"type": "relation_type", "antecedent": "antecedent", "consequent": "consequent", "description": "description"}}
     ],
     "metric_constraints": [
-        {{"applies_to": "applies_to", "type": "constraint_type", "value": "constraint_value", 'description': "description"}}
+        {{"applies_to": "applies_to", "type": "constraint_type", "value": "constraint_value", "description": "description"}}
     ],
     "global_property": "Always",
-    "lexicon": {{'variable_name': "natural language description"}}
+    "lexicon": {{"variable_name": "natural language description"}}
 }}
 ```
 
@@ -448,6 +504,46 @@ You are a professional MTL formula synthesizer agent tasked with generating synt
 
 {MTL_KNOWLEDGE_BASE}
 
+**CRITICAL RULES - MUST FOLLOW**:
+
+1. **MANDATORY**: Use predicate(object) format for ALL atomic propositions. NEVER use simple variables.
+   ❌ WRONG: ego_in_front, sudden_brake, alarm_active
+   ✅ CORRECT: in_front_of(ego,other), sudden_braking(ego), sounds(AlarmB)
+
+2. **For Relational Predicates** (involving 2 objects, with "related_object" field in sketch):
+   - Format: predicate(subject, object)
+   - Examples: 
+     * in_front_of(ego,other)
+     * yield(ego,other)
+     * in_right_of(other,ego)
+   - Order matters: predicate(主体, 客体)
+
+3. **For Unary Predicates** (single object, no "related_object" field):
+   - Format: predicate(object)
+   - Examples:
+     * sudden_braking(ego)
+     * at_intersection(ego)
+     * detects_fault(SensorA)
+     * sounds(AlarmB)
+
+4. **Object Name Extraction**:
+   - Extract object names from "objects" list in the semantic sketch
+   - Use the "name" field directly (e.g., "ego", "other", "SensorA", "AlarmB")
+   - For each atomic proposition:
+     a) Find the "object" field (object ID) → map to object "name"
+     b) If "related_object" exists → also map its ID to object "name"
+     c) Build: predicate(object_name) or predicate(object1_name, object2_name)
+
+5. **Step-by-Step Construction Process**:
+   Step 1: Parse the "objects" list to build ID→name mapping
+   Step 2: For each atomic proposition:
+           - Extract predicate name
+           - Map object ID to object name
+           - If related_object exists, map it to related object name
+           - Construct: predicate(name) or predicate(name1, name2)
+   Step 3: Combine predicates using temporal and logical operators
+   Step 4: Apply global property (G, F, etc.)
+
 {examples_text}
 
 {history_context}The semantic specification sketch you received is as follows:
@@ -456,23 +552,25 @@ You are a professional MTL formula synthesizer agent tasked with generating synt
 {sketch.raw_json}
 ```
 
-Please synthesize a syntactically correct MTL formula based on this semantic specification sketch.
+**Your Task**:
+Synthesize a syntactically correct MTL formula based on this semantic specification sketch.
+REMEMBER: Every atomic proposition MUST use predicate(object) format!
 
 MTL Syntax Rules:
 - G: Globally (always)
-- F: Finally (ultimately)
-- X: Next (subsequent)  
+- F: Finally (ultimately)  
+- X: Next (subsequent)
 - U: Until (until)
 - Time Interval: [a,b] denotes a time window
-- Logical Operations: ∧ (and), ∨ (or), ¬ (not), → (implies)
+- Logical Operations: & (and), | (or), ~ (not), -> (implication)
 
 Please provide the following two sections:
 
 Reasoning Process:
-[Detailed reasoning process explaining how the MTL formula is constructed from semantic components]
+[Explain step-by-step how you extract objects and construct predicate(object) forms]
 
 Final MTL Formula:
-[Synthetic MTL formula]
+[Synthetic MTL formula using ONLY predicate(object) format]
 
 Please follow the processing approach demonstrated in the above example, but synthesize the formula based on the specific content of the current semantic specification sketch.
 """
@@ -512,35 +610,69 @@ Please follow the processing approach demonstrated in the above example, but syn
     def _extract_synthesis_result(self, response: str) -> SynthesisResult:
         """Extract synthesis result from synthesizer response"""
         try:
-            # Extract reasoning
-            reasoning_match = re.search(r'Reasoning Process[:：]\s*(.*?)(?=Final MTL Formula[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+            # Extract reasoning - handle both plain and markdown formats
+            reasoning_match = re.search(
+                r'\*?\*?Reasoning Process\*?\*?[:：]\s*(.*?)(?=\*?\*?Final MTL Formula\*?\*?[:：]|$)', 
+                response, re.DOTALL | re.IGNORECASE
+            )
             if not reasoning_match:
-                reasoning_match = re.search(r'Reasoning[:：]\s*(.*?)(?=Final MTL formula[:：]|Final MTL Formula[:：]|$)', response, re.DOTALL | re.IGNORECASE)
+                reasoning_match = re.search(
+                    r'\*?\*?Reasoning\*?\*?[:：]\s*(.*?)(?=\*?\*?Final MTL [Ff]ormula\*?\*?[:：]|$)', 
+                    response, re.DOTALL | re.IGNORECASE
+                )
             reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
 
-            # Extract MTL formula
-            formula_match = re.search(r'Final MTL Formula[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
+            # Extract MTL formula - handle markdown bold markers and various formats
+            formula_match = re.search(
+                r'\*?\*?Final MTL Formula\*?\*?[:：]\s*\n?\s*(.+?)(?=\n\n|\Z)', 
+                response, re.DOTALL | re.IGNORECASE
+            )
             if not formula_match:
-                formula_match = re.search(r'Final MTL formula[:：]\s*(.*)', response, re.DOTALL | re.IGNORECASE)
+                formula_match = re.search(
+                    r'\*?\*?Final MTL formula\*?\*?[:：]\s*\n?\s*(.+?)(?=\n\n|\Z)', 
+                    response, re.DOTALL | re.IGNORECASE
+                )
             
             if not formula_match:
                 # Try to find formula in code blocks
                 code_block = re.search(r'```\s*(.*?)\s*```', response, re.DOTALL)
-                formula = code_block.group(1).strip() if code_block else ""
+                if code_block:
+                    formula = code_block.group(1).strip()
+                else:
+                    # Last resort: try to find a line starting with G, F, P, or X (common MTL operators)
+                    lines = response.split('\n')
+                    formula = ""
+                    for line in reversed(lines):
+                        line = line.strip()
+                        if line and re.match(r'^[GFPXgfpx][\(\[]', line):
+                            formula = line
+                            break
             else:
                 formula = formula_match.group(1).strip()
 
-            # Clean up the formula
-            formula = re.sub(r'[`\n\r]', '', formula).strip()
+            # Clean up the formula - remove markdown markers, newlines, and extra spaces
+            formula = re.sub(r'\*\*', '', formula)  # Remove bold markers
+            formula = re.sub(r'[`\n\r]', '', formula)  # Remove backticks and newlines
+            formula = formula.strip()
+            
+            # Further cleanup: extract only the formula part if there's extra text
+            # Look for patterns like "G(...)" or "F[...](...)"
+            if formula:
+                # Try to extract a pure MTL formula (starts with G, F, P, X, ~, or parenthesis)
+                mtl_pattern = re.search(r'([GFPXgfpx~\(][\s\S]+?)(?:\s*$|\s+[A-Z][a-z]+)', formula)
+                if mtl_pattern:
+                    formula = mtl_pattern.group(1).strip()
 
             if not formula:
                 logger.error("No MTL formula found in synthesizer response")
+                logger.debug(f"Response content: {response[:500]}...")
                 return SynthesisResult(
                     mtl_formula="",
                     synthesis_reasoning=reasoning,
                     synthesis_success=False
                 )
 
+            logger.info(f"Successfully extracted MTL formula: {formula}")
             return SynthesisResult(
                 mtl_formula=formula,
                 synthesis_reasoning=reasoning,
@@ -548,13 +680,14 @@ Please follow the processing approach demonstrated in the above example, but syn
             )
         except Exception as e:
             logger.error(f"Failed to extract synthesis result: {e}")
+            logger.debug(f"Response content: {response[:500]}...")
             return SynthesisResult(
                 mtl_formula="",
                 synthesis_reasoning="",
                 synthesis_success=False
             )
 
-    def _stage_3_verify(self, original_sentence: str, mtl_formula: str, lexicon: Optional[Dict[str, str]] = None) -> DSVStageResult:
+    def _stage_3_verify(self, original_sentence: str, mtl_formula: str, lexicon: Optional[Dict[str, Any]] = None) -> DSVStageResult:
         """Stage 3: Verify with dynamic example enhancement"""
         start_time = time.time()
         logger.info("=== DSV Stage 3: Verify (Enhanced) ===")
@@ -578,6 +711,25 @@ You are a professional MTL formula verifier Agent, responsible for translating M
 
 {MTL_KNOWLEDGE_BASE}
 
+**Predicate(Object) Interpretation Rules**:
+
+1. **Relational Predicates** (two parameters):
+   - Format: predicate(subject, object)
+   - in_front_of(ego,other) → "ego is in front of other" or "the ego vehicle is in front of the other vehicle"
+   - yield(ego,other) → "ego yields to other" or "ego vehicle yields to other vehicle"
+   - in_right_of(other,ego) → "other is on the right side of ego"
+
+2. **Unary Predicates** (one parameter):
+   - Format: predicate(object)
+   - sudden_braking(ego) → "ego brakes suddenly" or "ego vehicle brakes suddenly"
+   - at_intersection(ego) → "ego is at an intersection" or "ego vehicle is at an intersection"
+   - detects_fault(SensorA) → "SensorA detects a fault" or "sensor A detects a fault"
+   - sounds(AlarmB) → "AlarmB sounds" or "alarm B sounds"
+
+3. **Preserve Object Information**:
+   - Always mention the specific objects involved
+   - Use natural language equivalents: "ego vehicle", "other vehicle", "sensor A", "alarm B"
+
 {examples_text}
 
 {lexicon_text}MTL formula to be verified: {mtl_formula}
@@ -590,18 +742,18 @@ MTL Symbol Meanings:
 - X: Next time step
 - U: Until
 - [a,b]: Time interval from a to b
-- ∧: And
-- ∨: Or  
-- ¬: Not
-- →: Implication
+- &: And
+- |: Or  
+- ~: Not
+- ->: Implication
 
 Provide two marked sections:
 
 Reasoning Process:
-[Detailed explanation of MTL formula meaning and translation approach]
+[Explain how you interpret each predicate(object) and translate to natural language]
 
 Natural Language Translation:
-[Result of translating MTL formula into natural language]
+[Result of translating MTL formula into natural language, preserving object information]
 
 Please follow the processing method from the above example, but adapt the translation based on the specific content of the current MTL formula.
 """
@@ -899,19 +1051,27 @@ def main() -> None:
     
     # Create enhanced DSV framework
     enhanced_dsv = EnhancedDSVFramework()
-    
-    test_sentences = [
-        "Within 5 to 10 seconds after Sensor A detects a fault, Alarm B must sound and remain active for at least 20 seconds.",
-        "After receiving the signal, the system must respond within 10 seconds.",
-        "The door should remain locked for at least 30 seconds after the alarm is triggered.",
-        "If ego vehicle wants to change lanes, turn, or overtake, they should use their turn signals beforehand for t seconds."
-    ]
-    
-    for i, sentence in enumerate(test_sentences, 1):
+    # Read dataset
+    dataset = []
+    with open("data/input/dataset.xlsx", "rb") as f:
+        # 读取Excel文件
+        workbook = openpyxl.load_workbook(f)
+        # 选择第一个工作表
+        sheet = workbook.active
+        if sheet is None:
+            raise ValueError("Could not load active sheet from workbook")
+        # 读取 Natural Language 列的数据
+        for row in sheet.iter_rows(min_row=2, values_only=True):
+            if row and row[0]:
+                dataset.append(row[0])
+
+    # Process each sentence in the dataset
+    for i, sentence in enumerate(dataset, 1):
         print(f"=== Test Sentence {i} ===")
         print(f"Input: {sentence}")
         print("-" * 60)
-        
+        if i != 3 and i <= 6:
+            continue
         try:
             result = enhanced_dsv.process(sentence, enable_refinement=True)
             
@@ -932,7 +1092,7 @@ def main() -> None:
             
             # Save results
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            output_dir = Path("data/output/dsv_enhanced")
+            output_dir = Path("data/output/dsv_enhanced/deepseek-r1")
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"result_{i}_{timestamp}.json"
             enhanced_dsv.save_result(result, str(output_file))
@@ -942,29 +1102,29 @@ def main() -> None:
             
         print("\n" + "="*80 + "\n")
 
-    # Demo: Ablation comparison
-    print("=== Ablation Study Demo ===")
-    print("Comparing Enhanced vs Ablation versions on the same sentence...\n")
+    # # Demo: Ablation comparison
+    # print("=== Ablation Study Demo ===")
+    # print("Comparing Enhanced vs Ablation versions on the same sentence...\n")
     
-    test_sentence = "Within 5 to 10 seconds after Sensor A detects a fault, Alarm B must sound and remain active for at least 20 seconds."
+    # test_sentence = "Within 5 to 10 seconds after Sensor A detects a fault, Alarm B must sound and remain active for at least 20 seconds."
     
-    print(f"Test sentence: {test_sentence}\n")
+    # print(f"Test sentence: {test_sentence}\n")
     
-    # Test with examples enabled
-    print("🚀 Enhanced Version (with examples):")
-    enhanced_dsv.toggle_examples(True)
-    result_enhanced = enhanced_dsv.process(test_sentence, enable_refinement=False)
-    print(f"  Success: {result_enhanced.success}")
-    print(f"  Processing time: {result_enhanced.total_processing_time:.2f}s")
-    print(f"  Tokens used: {result_enhanced.total_token_usage.total_tokens}")
+    # # Test with examples enabled
+    # print("🚀 Enhanced Version (with examples):")
+    # enhanced_dsv.toggle_examples(True)
+    # result_enhanced = enhanced_dsv.process(test_sentence, enable_refinement=False)
+    # print(f"  Success: {result_enhanced.success}")
+    # print(f"  Processing time: {result_enhanced.total_processing_time:.2f}s")
+    # print(f"  Tokens used: {result_enhanced.total_token_usage.total_tokens}")
     
-    # Test with examples disabled (ablation)
-    print("\n🚫 Ablation Version (without examples):")
-    enhanced_dsv.toggle_examples(False)
-    result_ablation = enhanced_dsv.process(test_sentence, enable_refinement=False)
-    print(f"  Success: {result_ablation.success}")
-    print(f"  Processing time: {result_ablation.total_processing_time:.2f}s")
-    print(f"  Tokens used: {result_ablation.total_token_usage.total_tokens}")
+    # # Test with examples disabled (ablation)
+    # print("\n🚫 Ablation Version (without examples):")
+    # enhanced_dsv.toggle_examples(False)
+    # result_ablation = enhanced_dsv.process(test_sentence, enable_refinement=False)
+    # print(f"  Success: {result_ablation.success}")
+    # print(f"  Processing time: {result_ablation.total_processing_time:.2f}s")
+    # print(f"  Tokens used: {result_ablation.total_token_usage.total_tokens}")
 
 
 if __name__ == "__main__":

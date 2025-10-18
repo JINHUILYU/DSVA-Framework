@@ -1,0 +1,617 @@
+{
+  "framework": "Enhanced DSV (Deconstruct, Synthesize, and Verify) with Dynamic Examples",
+  "input_sentence": "At intersections and junctions, ego must yield to vehicles coming from right side of ego, provided there is no traffic sign number 306 in front of ego.",
+  "final_mtl_formula": "G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego)) → (coming_from_right_of(Vehicles, Ego) → F_[0,∞] yields_to(Ego, Vehicles)))",
+  "success": false,
+  "termination_reason": "Reached max refinement iterations (similarity: 0.174)",
+  "total_processing_time": 228.2430899143219,
+  "total_token_usage": {
+    "prompt_tokens": 46887,
+    "completion_tokens": 5788,
+    "total_tokens": 52675
+  },
+  "refinement_iterations": 4,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 29.89273715019226,
+      "token_usage": {
+        "prompt_tokens": 2675,
+        "completion_tokens": 829,
+        "total_tokens": 3504
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Vehicles from right\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_3\",\n            \"name\": \"Traffic sign 306\",\n            \"type\": \"traffic_sign\"\n        },\n        {\n            \"id\": \"obj_4\",\n            \"name\": \"Intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_5\",\n            \"name\": \"Junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_4\",\n            \"predicate\": \"is_at\",\n            \"variable\": \"at_intersection\",\n            \"description\": \"Ego is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_5\",\n            \"predicate\": \"is_at\",\n            \"variable\": \"at_junction\",\n            \"description\": \"Ego is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_2\",\n            \"predicate\": \"coming_from_right\",\n            \"variable\": \"vehicles_right\",\n            \"description\": \"Vehicles are coming from right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"yields_to\",\n            \"variable\": \"ego_yields\",\n            \"description\": \"Ego yields to vehicles\"\n        },\n        {\n            \"id\": \"ap_5\",\n            \"object\": \"obj_3\",\n            \"predicate\": \"is_present_in_front\",\n            \"variable\": \"sign_306_present\",\n            \"description\": \"Traffic sign number 306 is present in front of ego\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional\",\n            \"antecedent\": \"ap_3\",\n            \"consequent\": \"ap_4\",\n            \"description\": \"Ego must yield when vehicles are coming from right\"\n        },\n        {\n            \"type\": \"negation_condition\",\n            \"antecedent\": \"ap_5\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Yield requirement applies only when traffic sign 306 is NOT present\"\n        },\n        {\n            \"type\": \"location_condition\",\n            \"antecedent\": \"ap_1 | ap_2\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Rule applies at intersections or junctions\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_ap3_ap4\",\n            \"type\": \"immediate\",\n            \"value\": \"0\",\n            \"description\": \"Yield must occur immediately when condition is met\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"at_intersection\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at intersection\"\n        },\n        \"at_junction\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at junction\"\n        },\n        \"vehicles_right\": {\n            \"entity\": \"Vehicles from right\",\n            \"action\": \"are coming from right side\"\n        },\n        \"ego_yields\": {\n            \"entity\": \"Ego\",\n            \"action\": \"yields to vehicles\"\n        },\n        \"sign_306_present\": {\n            \"entity\": \"Traffic sign 306\",\n            \"action\": \"is present in front of ego\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_4",
+            "predicate": "is_at",
+            "variable": "at_intersection",
+            "description": "Ego is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_5",
+            "predicate": "is_at",
+            "variable": "at_junction",
+            "description": "Ego is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_2",
+            "predicate": "coming_from_right",
+            "variable": "vehicles_right",
+            "description": "Vehicles are coming from right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_1",
+            "predicate": "yields_to",
+            "variable": "ego_yields",
+            "description": "Ego yields to vehicles"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_3",
+            "predicate": "is_present_in_front",
+            "variable": "sign_306_present",
+            "description": "Traffic sign number 306 is present in front of ego"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional",
+            "antecedent": "ap_3",
+            "consequent": "ap_4",
+            "description": "Ego must yield when vehicles are coming from right"
+          },
+          {
+            "type": "negation_condition",
+            "antecedent": "ap_5",
+            "consequent": "relation_ap3_ap4",
+            "description": "Yield requirement applies only when traffic sign 306 is NOT present"
+          },
+          {
+            "type": "location_condition",
+            "antecedent": "ap_1 | ap_2",
+            "consequent": "relation_ap3_ap4",
+            "description": "Rule applies at intersections or junctions"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_ap3_ap4",
+            "type": "immediate",
+            "value": "0",
+            "description": "Yield must occur immediately when condition is met"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "at_intersection": {
+            "entity": "Ego",
+            "action": "is at intersection"
+          },
+          "at_junction": {
+            "entity": "Ego",
+            "action": "is at junction"
+          },
+          "vehicles_right": {
+            "entity": "Vehicles from right",
+            "action": "are coming from right side"
+          },
+          "ego_yields": {
+            "entity": "Ego",
+            "action": "yields to vehicles"
+          },
+          "sign_306_present": {
+            "entity": "Traffic sign 306",
+            "action": "is present in front of ego"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 12.012898921966553,
+      "token_usage": {
+        "prompt_tokens": 2716,
+        "completion_tokens": 302,
+        "total_tokens": 3018
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to is_at(Ego, Intersection)\",\n    \"Map ap_2 to is_at(Ego, Junction)\",\n    \"Map ap_3 to coming_from_right(Vehicles_from_right)\",\n    \"Map ap_4 to yields_to(Ego, Vehicles)\",\n    \"Map ap_5 to is_present_in_front(Traffic_sign_306)\",\n    \"Create base conditional: coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles)\",\n    \"Apply negation condition: ¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles))\",\n    \"Apply location condition: (is_at(Ego, Intersection) ∨ is_at(Ego, Junction)) → (¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles)))\",\n    \"Apply immediate timing constraint with X operator for 'immediately'\",\n    \"Wrap with global operator G for 'Always'\"\n  ],\n  \"mtl_formula\": \"G ((is_at(Ego, Intersection) ∨ is_at(Ego, Junction)) → (¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → X yields_to(Ego, Vehicles))))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G ((is_at(Ego, Intersection) ∨ is_at(Ego, Junction)) → (¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → X yields_to(Ego, Vehicles))))",
+        "synthesis_reasoning": "Map ap_1 to is_at(Ego, Intersection); Map ap_2 to is_at(Ego, Junction); Map ap_3 to coming_from_right(Vehicles_from_right); Map ap_4 to yields_to(Ego, Vehicles); Map ap_5 to is_present_in_front(Traffic_sign_306); Create base conditional: coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles); Apply negation condition: ¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles)); Apply location condition: (is_at(Ego, Intersection) ∨ is_at(Ego, Junction)) → (¬is_present_in_front(Traffic_sign_306) → (coming_from_right(Vehicles_from_right) → yields_to(Ego, Vehicles))); Apply immediate timing constraint with X operator for 'immediately'; Wrap with global operator G for 'Always'",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 5.598979949951172,
+      "token_usage": {
+        "prompt_tokens": 1656,
+        "completion_tokens": 112,
+        "total_tokens": 1768
+      },
+      "agent_response": "```json\n{\n  \"reasoning\": \"G represents 'always' global operator. The formula states that whenever ego is at intersection OR junction, if traffic sign 306 is NOT present AND vehicles are coming from right, then in the NEXT step ego must yield to vehicles.\",\n  \"translation\": \"Always, if the ego vehicle is at an intersection or junction, and traffic sign 306 is not present in front, and vehicles are coming from the right side, then in the next time step the ego vehicle must yield to those vehicles.\"\n}\n```",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "```",
+        "similarity_score": 0.17448368668556213,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 30.40701699256897,
+      "token_usage": {
+        "prompt_tokens": 3907,
+        "completion_tokens": 838,
+        "total_tokens": 4745
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Vehicles\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_3\",\n            \"name\": \"Traffic sign 306\",\n            \"type\": \"traffic_sign\"\n        },\n        {\n            \"id\": \"obj_4\",\n            \"name\": \"Intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_5\",\n            \"name\": \"Junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_intersection\",\n            \"description\": \"Ego is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_junction\",\n            \"description\": \"Ego is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_2\",\n            \"predicate\": \"coming_from_right_of\",\n            \"variable\": \"vehicles_from_right\",\n            \"description\": \"Vehicles are coming from right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"yields_to\",\n            \"variable\": \"ego_yields\",\n            \"description\": \"Ego yields to vehicles\"\n        },\n        {\n            \"id\": \"ap_5\",\n            \"object\": \"obj_3\",\n            \"predicate\": \"present_in_front_of\",\n            \"variable\": \"sign_306_present\",\n            \"description\": \"Traffic sign number 306 is present in front of ego\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional_implication\",\n            \"antecedent\": \"ap_3\",\n            \"consequent\": \"ap_4\",\n            \"description\": \"When vehicles are coming from right, ego must yield\"\n        },\n        {\n            \"type\": \"negation_condition\",\n            \"antecedent\": \"ap_5\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Yield requirement applies only when traffic sign 306 is NOT present\"\n        },\n        {\n            \"type\": \"location_condition\",\n            \"antecedent\": \"ap_1 | ap_2\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Rule applies at intersections or junctions\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_ap3_ap4\",\n            \"type\": \"immediate_response\",\n            \"value\": \"F_[0,0]\",\n            \"description\": \"Yield must occur immediately when conditions are met\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"at_intersection\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at intersection\"\n        },\n        \"at_junction\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at junction\"\n        },\n        \"vehicles_from_right\": {\n            \"entity\": \"Vehicles\",\n            \"action\": \"are coming from right side of ego\"\n        },\n        \"ego_yields\": {\n            \"entity\": \"Ego\",\n            \"action\": \"yields to vehicles\"\n        },\n        \"sign_306_present\": {\n            \"entity\": \"Traffic sign 306\",\n            \"action\": \"is present in front of ego\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_intersection",
+            "description": "Ego is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_junction",
+            "description": "Ego is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_2",
+            "predicate": "coming_from_right_of",
+            "variable": "vehicles_from_right",
+            "description": "Vehicles are coming from right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_1",
+            "predicate": "yields_to",
+            "variable": "ego_yields",
+            "description": "Ego yields to vehicles"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_3",
+            "predicate": "present_in_front_of",
+            "variable": "sign_306_present",
+            "description": "Traffic sign number 306 is present in front of ego"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional_implication",
+            "antecedent": "ap_3",
+            "consequent": "ap_4",
+            "description": "When vehicles are coming from right, ego must yield"
+          },
+          {
+            "type": "negation_condition",
+            "antecedent": "ap_5",
+            "consequent": "relation_ap3_ap4",
+            "description": "Yield requirement applies only when traffic sign 306 is NOT present"
+          },
+          {
+            "type": "location_condition",
+            "antecedent": "ap_1 | ap_2",
+            "consequent": "relation_ap3_ap4",
+            "description": "Rule applies at intersections or junctions"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_ap3_ap4",
+            "type": "immediate_response",
+            "value": "F_[0,0]",
+            "description": "Yield must occur immediately when conditions are met"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "at_intersection": {
+            "entity": "Ego",
+            "action": "is at intersection"
+          },
+          "at_junction": {
+            "entity": "Ego",
+            "action": "is at junction"
+          },
+          "vehicles_from_right": {
+            "entity": "Vehicles",
+            "action": "are coming from right side of ego"
+          },
+          "ego_yields": {
+            "entity": "Ego",
+            "action": "yields to vehicles"
+          },
+          "sign_306_present": {
+            "entity": "Traffic sign 306",
+            "action": "is present in front of ego"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 10.226359128952026,
+      "token_usage": {
+        "prompt_tokens": 3957,
+        "completion_tokens": 246,
+        "total_tokens": 4203
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to at_location(Ego, Intersection)\",\n    \"Map ap_2 to at_location(Ego, Junction)\",\n    \"Map ap_3 to coming_from_right_of(Vehicles, Ego)\",\n    \"Map ap_4 to yields_to(Ego, Vehicles)\",\n    \"Map ap_5 to present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Construct location condition: at_location(Ego, Intersection) ∨ at_location(Ego, Junction)\",\n    \"Construct negation condition: ¬present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Apply immediate temporal constraint F_[0,0] to yield action\",\n    \"Combine conditions with implication structure\",\n    \"Wrap with global operator G for 'Always' property\"\n  ],\n  \"mtl_formula\": \"G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego) ∧ coming_from_right_of(Vehicles, Ego)) → F_[0,0] yields_to(Ego, Vehicles))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego) ∧ coming_from_right_of(Vehicles, Ego)) → F_[0,0] yields_to(Ego, Vehicles))",
+        "synthesis_reasoning": "Map ap_1 to at_location(Ego, Intersection); Map ap_2 to at_location(Ego, Junction); Map ap_3 to coming_from_right_of(Vehicles, Ego); Map ap_4 to yields_to(Ego, Vehicles); Map ap_5 to present_in_front_of(Traffic_sign_306, Ego); Construct location condition: at_location(Ego, Intersection) ∨ at_location(Ego, Junction); Construct negation condition: ¬present_in_front_of(Traffic_sign_306, Ego); Apply immediate temporal constraint F_[0,0] to yield action; Combine conditions with implication structure; Wrap with global operator G for 'Always' property",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 6.283034801483154,
+      "token_usage": {
+        "prompt_tokens": 1663,
+        "completion_tokens": 123,
+        "total_tokens": 1786
+      },
+      "agent_response": "```json\n{\n  \"reasoning\": \"G represents 'always', the antecedent combines three conditions using AND, and the consequent uses F_[0,0] which means 'immediately' or 'in the next step'. The formula is a global implication stating that whenever all three conditions are true, the action must occur immediately.\",\n  \"translation\": \"Always, if the ego vehicle is at an intersection or junction, traffic sign 306 is not present in front of the ego, and vehicles are coming from the right side of the ego, then the ego must immediately yield to the vehicles.\"\n}\n```",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "```",
+        "similarity_score": 0.17448368668556213,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 30.411941051483154,
+      "token_usage": {
+        "prompt_tokens": 5163,
+        "completion_tokens": 843,
+        "total_tokens": 6006
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Vehicles\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_3\",\n            \"name\": \"Traffic sign 306\",\n            \"type\": \"traffic_sign\"\n        },\n        {\n            \"id\": \"obj_4\",\n            \"name\": \"Intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_5\",\n            \"name\": \"Junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_intersection\",\n            \"description\": \"Ego is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_junction\",\n            \"description\": \"Ego is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_2\",\n            \"predicate\": \"coming_from_right_of\",\n            \"variable\": \"vehicles_from_right\",\n            \"description\": \"Vehicles are coming from right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"yields_to\",\n            \"variable\": \"ego_yields\",\n            \"description\": \"Ego yields to vehicles\"\n        },\n        {\n            \"id\": \"ap_5\",\n            \"object\": \"obj_3\",\n            \"predicate\": \"present_in_front_of\",\n            \"variable\": \"sign_306_present\",\n            \"description\": \"Traffic sign number 306 is present in front of ego\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional_implication\",\n            \"antecedent\": \"ap_1 | ap_2\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Rule applies at intersections or junctions\"\n        },\n        {\n            \"type\": \"negation_condition\",\n            \"antecedent\": \"~ap_5\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"Yield requirement applies only when traffic sign 306 is NOT present\"\n        },\n        {\n            \"type\": \"trigger_condition\",\n            \"antecedent\": \"ap_3\",\n            \"consequent\": \"ap_4\",\n            \"description\": \"When vehicles are coming from right, ego must yield\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_ap3_ap4\",\n            \"type\": \"response_time\",\n            \"value\": \"F_[0,∞]\",\n            \"description\": \"Yield must occur after conditions are met (immediate or eventual response)\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"at_intersection\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at intersection\"\n        },\n        \"at_junction\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at junction\"\n        },\n        \"vehicles_from_right\": {\n            \"entity\": \"Vehicles\",\n            \"action\": \"are coming from right side of ego\"\n        },\n        \"ego_yields\": {\n            \"entity\": \"Ego\",\n            \"action\": \"yields to vehicles\"\n        },\n        \"sign_306_present\": {\n            \"entity\": \"Traffic sign 306\",\n            \"action\": \"is present in front of ego\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_intersection",
+            "description": "Ego is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_junction",
+            "description": "Ego is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_2",
+            "predicate": "coming_from_right_of",
+            "variable": "vehicles_from_right",
+            "description": "Vehicles are coming from right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_1",
+            "predicate": "yields_to",
+            "variable": "ego_yields",
+            "description": "Ego yields to vehicles"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_3",
+            "predicate": "present_in_front_of",
+            "variable": "sign_306_present",
+            "description": "Traffic sign number 306 is present in front of ego"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional_implication",
+            "antecedent": "ap_1 | ap_2",
+            "consequent": "relation_ap3_ap4",
+            "description": "Rule applies at intersections or junctions"
+          },
+          {
+            "type": "negation_condition",
+            "antecedent": "~ap_5",
+            "consequent": "relation_ap3_ap4",
+            "description": "Yield requirement applies only when traffic sign 306 is NOT present"
+          },
+          {
+            "type": "trigger_condition",
+            "antecedent": "ap_3",
+            "consequent": "ap_4",
+            "description": "When vehicles are coming from right, ego must yield"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_ap3_ap4",
+            "type": "response_time",
+            "value": "F_[0,∞]",
+            "description": "Yield must occur after conditions are met (immediate or eventual response)"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "at_intersection": {
+            "entity": "Ego",
+            "action": "is at intersection"
+          },
+          "at_junction": {
+            "entity": "Ego",
+            "action": "is at junction"
+          },
+          "vehicles_from_right": {
+            "entity": "Vehicles",
+            "action": "are coming from right side of ego"
+          },
+          "ego_yields": {
+            "entity": "Ego",
+            "action": "yields to vehicles"
+          },
+          "sign_306_present": {
+            "entity": "Traffic sign 306",
+            "action": "is present in front of ego"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 11.195977926254272,
+      "token_usage": {
+        "prompt_tokens": 5218,
+        "completion_tokens": 258,
+        "total_tokens": 5476
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to at_location(Ego, Intersection)\",\n    \"Map ap_2 to at_location(Ego, Junction)\",\n    \"Map ap_3 to coming_from_right_of(Vehicles, Ego)\",\n    \"Map ap_4 to yields_to(Ego, Vehicles)\",\n    \"Map ap_5 to present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Combine location condition: (at_location(Ego, Intersection) ∨ at_location(Ego, Junction))\",\n    \"Add sign absence condition: ¬present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Add vehicle detection condition: coming_from_right_of(Vehicles, Ego)\",\n    \"Apply temporal constraint F_[0,∞] to yield action\",\n    \"Wrap with global operator G for 'Always' property\"\n  ],\n  \"mtl_formula\": \"G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego) ∧ coming_from_right_of(Vehicles, Ego)) → F_[0,∞] yields_to(Ego, Vehicles))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego) ∧ coming_from_right_of(Vehicles, Ego)) → F_[0,∞] yields_to(Ego, Vehicles))",
+        "synthesis_reasoning": "Map ap_1 to at_location(Ego, Intersection); Map ap_2 to at_location(Ego, Junction); Map ap_3 to coming_from_right_of(Vehicles, Ego); Map ap_4 to yields_to(Ego, Vehicles); Map ap_5 to present_in_front_of(Traffic_sign_306, Ego); Combine location condition: (at_location(Ego, Intersection) ∨ at_location(Ego, Junction)); Add sign absence condition: ¬present_in_front_of(Traffic_sign_306, Ego); Add vehicle detection condition: coming_from_right_of(Vehicles, Ego); Apply temporal constraint F_[0,∞] to yield action; Wrap with global operator G for 'Always' property",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 5.7070300579071045,
+      "token_usage": {
+        "prompt_tokens": 1663,
+        "completion_tokens": 113,
+        "total_tokens": 1776
+      },
+      "agent_response": "```json\n{\n  \"reasoning\": \"G operator means 'Always', the formula is an implication where the premise combines three conditions (at intersection/junction, no traffic sign 306 present, vehicles coming from right) and the conclusion requires eventual yielding with no upper time bound\",\n  \"translation\": \"Always, if the ego vehicle is at an intersection or junction, traffic sign 306 is not present in front of the ego, and vehicles are coming from the right side of the ego, then eventually the ego will yield to the vehicles.\"\n}\n```",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "```",
+        "similarity_score": 0.17448368668556213,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 29.28400421142578,
+      "token_usage": {
+        "prompt_tokens": 6501,
+        "completion_tokens": 798,
+        "total_tokens": 7299
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Vehicles\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_3\",\n            \"name\": \"Traffic sign 306\",\n            \"type\": \"traffic_sign\"\n        },\n        {\n            \"id\": \"obj_4\",\n            \"name\": \"Intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_5\",\n            \"name\": \"Junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_intersection\",\n            \"description\": \"Ego is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"at_junction\",\n            \"description\": \"Ego is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_2\",\n            \"predicate\": \"coming_from_right_of\",\n            \"variable\": \"vehicles_from_right\",\n            \"description\": \"Vehicles are coming from right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"yields_to\",\n            \"variable\": \"ego_yields\",\n            \"description\": \"Ego yields to vehicles\"\n        },\n        {\n            \"id\": \"ap_5\",\n            \"object\": \"obj_3\",\n            \"predicate\": \"present_in_front_of\",\n            \"variable\": \"sign_306_present\",\n            \"description\": \"Traffic sign number 306 is present in front of ego\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional_implication\",\n            \"antecedent\": \"(ap_1 | ap_2) & ~ap_5\",\n            \"consequent\": \"relation_ap3_ap4\",\n            \"description\": \"At intersections or junctions without traffic sign 306, the yield rule applies\"\n        },\n        {\n            \"type\": \"trigger_response\",\n            \"antecedent\": \"ap_3\",\n            \"consequent\": \"ap_4\",\n            \"description\": \"When vehicles come from right, ego must yield\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_ap3_ap4\",\n            \"type\": \"response_time\",\n            \"value\": \"F_[0,∞]\",\n            \"description\": \"Yield must occur after conditions are met (immediate or eventual response)\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"at_intersection\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at intersection\"\n        },\n        \"at_junction\": {\n            \"entity\": \"Ego\",\n            \"action\": \"is at junction\"\n        },\n        \"vehicles_from_right\": {\n            \"entity\": \"Vehicles\",\n            \"action\": \"are coming from right side of ego\"\n        },\n        \"ego_yields\": {\n            \"entity\": \"Ego\",\n            \"action\": \"yields to vehicles\"\n        },\n        \"sign_306_present\": {\n            \"entity\": \"Traffic sign 306\",\n            \"action\": \"is present in front of ego\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_intersection",
+            "description": "Ego is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "at_location",
+            "variable": "at_junction",
+            "description": "Ego is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_2",
+            "predicate": "coming_from_right_of",
+            "variable": "vehicles_from_right",
+            "description": "Vehicles are coming from right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_1",
+            "predicate": "yields_to",
+            "variable": "ego_yields",
+            "description": "Ego yields to vehicles"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_3",
+            "predicate": "present_in_front_of",
+            "variable": "sign_306_present",
+            "description": "Traffic sign number 306 is present in front of ego"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional_implication",
+            "antecedent": "(ap_1 | ap_2) & ~ap_5",
+            "consequent": "relation_ap3_ap4",
+            "description": "At intersections or junctions without traffic sign 306, the yield rule applies"
+          },
+          {
+            "type": "trigger_response",
+            "antecedent": "ap_3",
+            "consequent": "ap_4",
+            "description": "When vehicles come from right, ego must yield"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_ap3_ap4",
+            "type": "response_time",
+            "value": "F_[0,∞]",
+            "description": "Yield must occur after conditions are met (immediate or eventual response)"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "at_intersection": {
+            "entity": "Ego",
+            "action": "is at intersection"
+          },
+          "at_junction": {
+            "entity": "Ego",
+            "action": "is at junction"
+          },
+          "vehicles_from_right": {
+            "entity": "Vehicles",
+            "action": "are coming from right side of ego"
+          },
+          "ego_yields": {
+            "entity": "Ego",
+            "action": "yields to vehicles"
+          },
+          "sign_306_present": {
+            "entity": "Traffic sign 306",
+            "action": "is present in front of ego"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 10.322801113128662,
+      "token_usage": {
+        "prompt_tokens": 6511,
+        "completion_tokens": 236,
+        "total_tokens": 6747
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to at_location(Ego, Intersection)\",\n    \"Map ap_2 to at_location(Ego, Junction)\",\n    \"Map ap_3 to coming_from_right_of(Vehicles, Ego)\",\n    \"Map ap_4 to yields_to(Ego, Vehicles)\",\n    \"Map ap_5 to present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Construct location and sign condition: (at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego)\",\n    \"Apply response time constraint F_[0,∞] to yield action\",\n    \"Combine into global implication structure with trigger-response pattern\"\n  ],\n  \"mtl_formula\": \"G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego)) → (coming_from_right_of(Vehicles, Ego) → F_[0,∞] yields_to(Ego, Vehicles)))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (((at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego)) → (coming_from_right_of(Vehicles, Ego) → F_[0,∞] yields_to(Ego, Vehicles)))",
+        "synthesis_reasoning": "Map ap_1 to at_location(Ego, Intersection); Map ap_2 to at_location(Ego, Junction); Map ap_3 to coming_from_right_of(Vehicles, Ego); Map ap_4 to yields_to(Ego, Vehicles); Map ap_5 to present_in_front_of(Traffic_sign_306, Ego); Construct location and sign condition: (at_location(Ego, Intersection) ∨ at_location(Ego, Junction)) ∧ ¬present_in_front_of(Traffic_sign_306, Ego); Apply response time constraint F_[0,∞] to yield action; Combine into global implication structure with trigger-response pattern",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 5.93557596206665,
+      "token_usage": {
+        "prompt_tokens": 1664,
+        "completion_tokens": 117,
+        "total_tokens": 1781
+      },
+      "agent_response": "```json\n{\n  \"reasoning\": \"G represents 'always', the formula describes a conditional requirement where if ego is at intersection/junction without sign 306, then vehicles coming from right implies ego must eventually yield. F_[0,∞] means 'eventually' with no upper time bound.\",\n  \"translation\": \"Always, if the ego is at an intersection or junction and traffic sign 306 is not present in front of the ego, then if vehicles are coming from the right side of the ego, the ego will eventually yield to the vehicles.\"\n}\n```",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "```",
+        "similarity_score": 0.17448368668556213,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": true,
+    "example_retrieval": {
+      "enabled": true,
+      "top_k": 3,
+      "similarity_threshold": 0.3,
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "sources": [
+        {
+          "path": "data/examples/dsv_examples.json",
+          "type": "json",
+          "stages": [
+            "deconstruct",
+            "synthesize",
+            "verify"
+          ]
+        }
+      ]
+    }
+  },
+  "timestamp": "2025-10-18 17:42:45"
+}

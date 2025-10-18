@@ -1,0 +1,493 @@
+{
+  "framework": "Enhanced DSV (Deconstruct, Synthesize, and Verify) with Dynamic Examples",
+  "input_sentence": "if Ego vehicle in front of other vehicle then it must not brake suddenly without a compelling reason.",
+  "final_mtl_formula": "G (in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))",
+  "success": false,
+  "termination_reason": "Reached max refinement iterations (similarity: 0.093)",
+  "total_processing_time": 158.31424283981323,
+  "total_token_usage": {
+    "prompt_tokens": 39367,
+    "completion_tokens": 3840,
+    "total_tokens": 43207
+  },
+  "refinement_iterations": 4,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 17.697172164916992,
+      "token_usage": {
+        "prompt_tokens": 2664,
+        "completion_tokens": 473,
+        "total_tokens": 3137
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego vehicle\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Other vehicle\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"in_front_of\",\n            \"variable\": \"ego_front\",\n            \"description\": \"Ego vehicle is in front of other vehicle\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"brakes_suddenly\",\n            \"variable\": \"sudden_brake\",\n            \"description\": \"Ego vehicle brakes suddenly\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"has_compelling_reason\",\n            \"variable\": \"compelling_reason\",\n            \"description\": \"Ego vehicle has a compelling reason\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional\",\n            \"antecedent\": \"ap_1\",\n            \"consequent\": \"ap_2\",\n            \"description\": \"If ego vehicle is in front of other vehicle, then it must not brake suddenly without compelling reason\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"ap_2\",\n            \"type\": \"prohibition\",\n            \"value\": \"without ap_3\",\n            \"description\": \"Sudden braking is prohibited without compelling reason\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_front\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"is in front of other vehicle\"\n        },\n        \"sudden_brake\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"brakes suddenly\"\n        },\n        \"compelling_reason\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"has compelling reason\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "in_front_of",
+            "variable": "ego_front",
+            "description": "Ego vehicle is in front of other vehicle"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "brakes_suddenly",
+            "variable": "sudden_brake",
+            "description": "Ego vehicle brakes suddenly"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_1",
+            "predicate": "has_compelling_reason",
+            "variable": "compelling_reason",
+            "description": "Ego vehicle has a compelling reason"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional",
+            "antecedent": "ap_1",
+            "consequent": "ap_2",
+            "description": "If ego vehicle is in front of other vehicle, then it must not brake suddenly without compelling reason"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "ap_2",
+            "type": "prohibition",
+            "value": "without ap_3",
+            "description": "Sudden braking is prohibited without compelling reason"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_front": {
+            "entity": "Ego vehicle",
+            "action": "is in front of other vehicle"
+          },
+          "sudden_brake": {
+            "entity": "Ego vehicle",
+            "action": "brakes suddenly"
+          },
+          "compelling_reason": {
+            "entity": "Ego vehicle",
+            "action": "has compelling reason"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 7.214740991592407,
+      "token_usage": {
+        "prompt_tokens": 2360,
+        "completion_tokens": 155,
+        "total_tokens": 2515
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to in_front_of(ego,other)\",\n    \"Map ap_2 to brakes_suddenly(ego)\",\n    \"Map ap_3 to has_compelling_reason(ego)\",\n    \"Apply global property 'Always' → G\",\n    \"Construct conditional relation: in_front_of(ego,other) → ¬brakes_suddenly(ego) ∨ has_compelling_reason(ego)\",\n    \"Combine into final formula with global operator\"\n  ],\n  \"mtl_formula\": \"G (in_front_of(ego,other) → (¬brakes_suddenly(ego) ∨ has_compelling_reason(ego)))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (in_front_of(ego,other) → (¬brakes_suddenly(ego) ∨ has_compelling_reason(ego)))",
+        "synthesis_reasoning": "Map ap_1 to in_front_of(ego,other); Map ap_2 to brakes_suddenly(ego); Map ap_3 to has_compelling_reason(ego); Apply global property 'Always' → G; Construct conditional relation: in_front_of(ego,other) → ¬brakes_suddenly(ego) ∨ has_compelling_reason(ego); Combine into final formula with global operator",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 5.986056089401245,
+      "token_usage": {
+        "prompt_tokens": 1606,
+        "completion_tokens": 82,
+        "total_tokens": 1688
+      },
+      "agent_response": "{\n  \"reasoning\": \"The formula uses G for 'always', → for implication, and logical connectives ¬ for negation and ∨ for disjunction. Predicates are directly mapped to their natural language meanings.\",\n  \"translation\": \"Always, if the ego vehicle is in front of the other vehicle, then either the ego vehicle does not brake suddenly or the ego vehicle has a compelling reason.\"\n}",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "}",
+        "similarity_score": 0.10929134488105774,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 17.615821838378906,
+      "token_usage": {
+        "prompt_tokens": 3545,
+        "completion_tokens": 483,
+        "total_tokens": 4028
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego vehicle\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Other vehicle\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"in_front_of\",\n            \"variable\": \"ego_front\",\n            \"description\": \"Ego vehicle is in front of other vehicle\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"brakes_suddenly\",\n            \"variable\": \"sudden_brake\",\n            \"description\": \"Ego vehicle brakes suddenly\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"has_compelling_reason\",\n            \"variable\": \"compelling_reason\",\n            \"description\": \"Ego vehicle has a compelling reason\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional\",\n            \"antecedent\": \"ap_1\",\n            \"consequent\": \"ap_2\",\n            \"description\": \"If ego vehicle is in front of other vehicle, then sudden braking behavior is constrained\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_between_ap1_ap2_ap3\",\n            \"type\": \"prohibition\",\n            \"value\": \"without compelling reason\",\n            \"description\": \"Sudden braking is prohibited without compelling reason when ego is in front\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_front\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"is in front of other vehicle\"\n        },\n        \"sudden_brake\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"brakes suddenly\"\n        },\n        \"compelling_reason\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"has compelling reason\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "in_front_of",
+            "variable": "ego_front",
+            "description": "Ego vehicle is in front of other vehicle"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "brakes_suddenly",
+            "variable": "sudden_brake",
+            "description": "Ego vehicle brakes suddenly"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_1",
+            "predicate": "has_compelling_reason",
+            "variable": "compelling_reason",
+            "description": "Ego vehicle has a compelling reason"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional",
+            "antecedent": "ap_1",
+            "consequent": "ap_2",
+            "description": "If ego vehicle is in front of other vehicle, then sudden braking behavior is constrained"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_between_ap1_ap2_ap3",
+            "type": "prohibition",
+            "value": "without compelling reason",
+            "description": "Sudden braking is prohibited without compelling reason when ego is in front"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_front": {
+            "entity": "Ego vehicle",
+            "action": "is in front of other vehicle"
+          },
+          "sudden_brake": {
+            "entity": "Ego vehicle",
+            "action": "brakes suddenly"
+          },
+          "compelling_reason": {
+            "entity": "Ego vehicle",
+            "action": "has compelling reason"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 8.978346109390259,
+      "token_usage": {
+        "prompt_tokens": 3251,
+        "completion_tokens": 206,
+        "total_tokens": 3457
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to in_front_of(ego,other)\",\n    \"Map ap_2 to brakes_suddenly(ego)\",\n    \"Map ap_3 to has_compelling_reason(ego)\",\n    \"Apply global property 'Always' → G\",\n    \"Construct conditional relation: in_front_of(ego,other) → constraint on sudden braking\",\n    \"Apply prohibition constraint: must not brake suddenly without compelling reason → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego))\",\n    \"Combine into final formula: G(in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))\"\n  ],\n  \"mtl_formula\": \"G(in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G(in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))",
+        "synthesis_reasoning": "Map ap_1 to in_front_of(ego,other); Map ap_2 to brakes_suddenly(ego); Map ap_3 to has_compelling_reason(ego); Apply global property 'Always' → G; Construct conditional relation: in_front_of(ego,other) → constraint on sudden braking; Apply prohibition constraint: must not brake suddenly without compelling reason → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)); Combine into final formula: G(in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 4.181055068969727,
+      "token_usage": {
+        "prompt_tokens": 1606,
+        "completion_tokens": 86,
+        "total_tokens": 1692
+      },
+      "agent_response": "{\n  \"reasoning\": \"G operator means 'always', the implication → means 'if...then', and the logical structure inside translates to 'it is not the case that both brakes suddenly and lacks compelling reason'.\",\n  \"translation\": \"Always, if the ego vehicle is in front of the other vehicle, then it is not the case that the ego vehicle brakes suddenly and does not have a compelling reason.\"\n}",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "}",
+        "similarity_score": 0.10929134488105774,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 19.05550479888916,
+      "token_usage": {
+        "prompt_tokens": 4346,
+        "completion_tokens": 531,
+        "total_tokens": 4877
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego vehicle\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Other vehicle\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"in_front_of\",\n            \"variable\": \"ego_front\",\n            \"description\": \"Ego vehicle is in front of other vehicle\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"brakes_suddenly\",\n            \"variable\": \"sudden_brake\",\n            \"description\": \"Ego vehicle brakes suddenly\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"has_compelling_reason\",\n            \"variable\": \"compelling_reason\",\n            \"description\": \"Ego vehicle has a compelling reason\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional\",\n            \"antecedent\": \"ap_1\",\n            \"consequent\": \"ap_2\",\n            \"description\": \"If ego vehicle is in front of other vehicle, then sudden braking behavior is constrained\"\n        },\n        {\n            \"type\": \"prohibition_constraint\",\n            \"antecedent\": \"ap_2\",\n            \"consequent\": \"ap_3\",\n            \"description\": \"Sudden braking is prohibited without compelling reason\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_between_ap1_ap2_ap3\",\n            \"type\": \"prohibition\",\n            \"value\": \"without compelling reason\",\n            \"description\": \"Sudden braking is prohibited without compelling reason when ego is in front\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_front\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"is in front of other vehicle\"\n        },\n        \"sudden_brake\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"brakes suddenly\"\n        },\n        \"compelling_reason\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"has compelling reason\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "in_front_of",
+            "variable": "ego_front",
+            "description": "Ego vehicle is in front of other vehicle"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "brakes_suddenly",
+            "variable": "sudden_brake",
+            "description": "Ego vehicle brakes suddenly"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_1",
+            "predicate": "has_compelling_reason",
+            "variable": "compelling_reason",
+            "description": "Ego vehicle has a compelling reason"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional",
+            "antecedent": "ap_1",
+            "consequent": "ap_2",
+            "description": "If ego vehicle is in front of other vehicle, then sudden braking behavior is constrained"
+          },
+          {
+            "type": "prohibition_constraint",
+            "antecedent": "ap_2",
+            "consequent": "ap_3",
+            "description": "Sudden braking is prohibited without compelling reason"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_between_ap1_ap2_ap3",
+            "type": "prohibition",
+            "value": "without compelling reason",
+            "description": "Sudden braking is prohibited without compelling reason when ego is in front"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_front": {
+            "entity": "Ego vehicle",
+            "action": "is in front of other vehicle"
+          },
+          "sudden_brake": {
+            "entity": "Ego vehicle",
+            "action": "brakes suddenly"
+          },
+          "compelling_reason": {
+            "entity": "Ego vehicle",
+            "action": "has compelling reason"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 6.485556125640869,
+      "token_usage": {
+        "prompt_tokens": 4100,
+        "completion_tokens": 155,
+        "total_tokens": 4255
+      },
+      "agent_response": "```json\n{\n    \"construction_steps\": [\n        \"Map ap_1 to in_front_of(ego,other)\",\n        \"Map ap_2 to brakes_suddenly(ego)\",\n        \"Map ap_3 to has_compelling_reason(ego)\",\n        \"Apply global property 'Always' → G\",\n        \"Construct conditional: in_front_of(ego,other) → (brakes_suddenly(ego) → has_compelling_reason(ego))\",\n        \"Combine with global operator to capture prohibition constraint\"\n    ],\n    \"mtl_formula\": \"G (in_front_of(ego,other) → (brakes_suddenly(ego) → has_compelling_reason(ego)))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (in_front_of(ego,other) → (brakes_suddenly(ego) → has_compelling_reason(ego)))",
+        "synthesis_reasoning": "Map ap_1 to in_front_of(ego,other); Map ap_2 to brakes_suddenly(ego); Map ap_3 to has_compelling_reason(ego); Apply global property 'Always' → G; Construct conditional: in_front_of(ego,other) → (brakes_suddenly(ego) → has_compelling_reason(ego)); Combine with global operator to capture prohibition constraint",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 4.644626140594482,
+      "token_usage": {
+        "prompt_tokens": 1605,
+        "completion_tokens": 90,
+        "total_tokens": 1695
+      },
+      "agent_response": "{\n  \"reasoning\": \"The formula uses G for 'always', → for implication, and predicates in_front_of, brakes_suddenly, and has_compelling_reason with ego as the subject, indicating conditions about the ego vehicle's position and actions.\",\n  \"translation\": \"Always, if the ego vehicle is in front of the other vehicle, then if the ego vehicle brakes suddenly, it must have a compelling reason.\"\n}",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "}",
+        "similarity_score": 0.10929134488105774,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 19.06154227256775,
+      "token_usage": {
+        "prompt_tokens": 5256,
+        "completion_tokens": 487,
+        "total_tokens": 5743
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_1\",\n            \"name\": \"Ego vehicle\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_2\",\n            \"name\": \"Other vehicle\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"in_front_of\",\n            \"variable\": \"ego_front\",\n            \"description\": \"Ego vehicle is in front of other vehicle\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"brakes_suddenly\",\n            \"variable\": \"sudden_brake\",\n            \"description\": \"Ego vehicle brakes suddenly\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_1\",\n            \"predicate\": \"has_compelling_reason\",\n            \"variable\": \"compelling_reason\",\n            \"description\": \"Ego vehicle has a compelling reason\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"conditional_prohibition\",\n            \"antecedent\": \"ap_1\",\n            \"consequent\": \"ap_2\",\n            \"description\": \"If ego vehicle is in front of other vehicle, then sudden braking is prohibited without compelling reason\"\n        }\n    ],\n    \"metric_constraints\": [\n        {\n            \"applies_to\": \"relation_between_ap1_ap2_ap3\",\n            \"type\": \"negation_constraint\",\n            \"value\": \"without compelling reason\",\n            \"description\": \"Sudden braking is prohibited when there is no compelling reason\"\n        }\n    ],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_front\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"is in front of other vehicle\"\n        },\n        \"sudden_brake\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"brakes suddenly\"\n        },\n        \"compelling_reason\": {\n            \"entity\": \"Ego vehicle\",\n            \"action\": \"has compelling reason\"\n        }\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_1",
+            "predicate": "in_front_of",
+            "variable": "ego_front",
+            "description": "Ego vehicle is in front of other vehicle"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_1",
+            "predicate": "brakes_suddenly",
+            "variable": "sudden_brake",
+            "description": "Ego vehicle brakes suddenly"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_1",
+            "predicate": "has_compelling_reason",
+            "variable": "compelling_reason",
+            "description": "Ego vehicle has a compelling reason"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional_prohibition",
+            "antecedent": "ap_1",
+            "consequent": "ap_2",
+            "description": "If ego vehicle is in front of other vehicle, then sudden braking is prohibited without compelling reason"
+          }
+        ],
+        "metric_constraints": [
+          {
+            "applies_to": "relation_between_ap1_ap2_ap3",
+            "type": "negation_constraint",
+            "value": "without compelling reason",
+            "description": "Sudden braking is prohibited when there is no compelling reason"
+          }
+        ],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_front": {
+            "entity": "Ego vehicle",
+            "action": "is in front of other vehicle"
+          },
+          "sudden_brake": {
+            "entity": "Ego vehicle",
+            "action": "brakes suddenly"
+          },
+          "compelling_reason": {
+            "entity": "Ego vehicle",
+            "action": "has compelling reason"
+          }
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 6.907958984375,
+      "token_usage": {
+        "prompt_tokens": 4966,
+        "completion_tokens": 159,
+        "total_tokens": 5125
+      },
+      "agent_response": "```json\n{\n  \"construction_steps\": [\n    \"Map ap_1 to in_front_of(ego,other)\",\n    \"Map ap_2 to brakes_suddenly(ego)\",\n    \"Map ap_3 to has_compelling_reason(ego)\",\n    \"Apply global property 'Always' → G\",\n    \"Construct conditional prohibition: in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego))\",\n    \"Combine into final formula with global scope\"\n  ],\n  \"mtl_formula\": \"G (in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))\"\n}\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G (in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)))",
+        "synthesis_reasoning": "Map ap_1 to in_front_of(ego,other); Map ap_2 to brakes_suddenly(ego); Map ap_3 to has_compelling_reason(ego); Apply global property 'Always' → G; Construct conditional prohibition: in_front_of(ego,other) → ¬(brakes_suddenly(ego) ∧ ¬has_compelling_reason(ego)); Combine into final formula with global scope",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 4.268388032913208,
+      "token_usage": {
+        "prompt_tokens": 1607,
+        "completion_tokens": 87,
+        "total_tokens": 1694
+      },
+      "agent_response": "```json\n{\n  \"reasoning\": \"G operator means 'always', → represents implication, ¬ is negation. The formula states that whenever ego is in front of other vehicle, it cannot brake suddenly without a compelling reason.\",\n  \"translation\": \"Always, if the ego vehicle is in front of another vehicle, then it is not the case that the ego vehicle brakes suddenly and does not have a compelling reason.\"\n}\n```",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "```",
+        "similarity_score": 0.09325869381427765,
+        "verification_passed": false,
+        "verification_reasoning": ""
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": true,
+    "example_retrieval": {
+      "enabled": true,
+      "top_k": 3,
+      "similarity_threshold": 0.3,
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "sources": [
+        {
+          "path": "data/examples/dsv_examples.json",
+          "type": "json",
+          "stages": [
+            "deconstruct",
+            "synthesize",
+            "verify"
+          ]
+        }
+      ]
+    }
+  },
+  "timestamp": "2025-10-18 17:38:57"
+}

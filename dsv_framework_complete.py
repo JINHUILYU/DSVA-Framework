@@ -610,26 +610,35 @@ Please follow the processing approach demonstrated in the above example, but syn
     def _extract_synthesis_result(self, response: str) -> SynthesisResult:
         """Extract synthesis result from synthesizer response"""
         try:
-            # Extract reasoning - handle both plain and markdown formats
+            # Extract reasoning - handle both plain and markdown formats (** for bold)
             reasoning_match = re.search(
-                r'\*?\*?Reasoning Process\*?\*?[:：]\s*(.*?)(?=\*?\*?Final MTL Formula\*?\*?[:：]|$)', 
+                r'\*{0,2}Reasoning Process\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final MTL Formula\*{0,2}[:：]|$)', 
                 response, re.DOTALL | re.IGNORECASE
             )
             if not reasoning_match:
                 reasoning_match = re.search(
-                    r'\*?\*?Reasoning\*?\*?[:：]\s*(.*?)(?=\*?\*?Final MTL [Ff]ormula\*?\*?[:：]|$)', 
+                    r'\*{0,2}Reasoning\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：]|$)', 
                     response, re.DOTALL | re.IGNORECASE
                 )
             reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
 
-            # Extract MTL formula - handle markdown bold markers and various formats
+            # Extract MTL formula - handle markdown bold markers (**) and various formats
+            # Try multiple patterns to handle different formats:
+            # Pattern 1: Formula on same line (no newline after colon, only spaces)
+            # Pattern 2: Formula on next line (with optional blank lines)
+            
+            # Pattern 1: Same line format - Final MTL Formula: G(...) or Final MTL Formula: **G(...)**
+            # Use [ \t] (space or tab, NOT newline) after colon to ensure same-line matching
             formula_match = re.search(
-                r'\*?\*?Final MTL Formula\*?\*?[:：]\s*\n?\s*(.+?)(?=\n\n|\Z)', 
-                response, re.DOTALL | re.IGNORECASE
+                r'\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：][ \t]*\*{0,2}[ \t]*([GFPXgfpx~\(][^\n]+?)(?:\*{0,2})?(?:\n|$)', 
+                response, re.IGNORECASE
             )
+            
+            # Pattern 2: Next line format with optional blank lines - Final MTL Formula:\n\nG(...)
+            # Use DOTALL to match across multiple lines
             if not formula_match:
                 formula_match = re.search(
-                    r'\*?\*?Final MTL formula\*?\*?[:：]\s*\n?\s*(.+?)(?=\n\n|\Z)', 
+                    r'\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：]\*{0,2}\s*\n+\s*(.+?)(?=\n\n\n|\n\*{2}[A-Z]|\Z)', 
                     response, re.DOTALL | re.IGNORECASE
                 )
             
@@ -644,24 +653,28 @@ Please follow the processing approach demonstrated in the above example, but syn
                     formula = ""
                     for line in reversed(lines):
                         line = line.strip()
-                        if line and re.match(r'^[GFPXgfpx][\(\[]', line):
+                        if line and re.match(r'^[GFPXgfpx~][\(\[]', line):
                             formula = line
                             break
             else:
                 formula = formula_match.group(1).strip()
 
             # Clean up the formula - remove markdown markers, newlines, and extra spaces
-            formula = re.sub(r'\*\*', '', formula)  # Remove bold markers
-            formula = re.sub(r'[`\n\r]', '', formula)  # Remove backticks and newlines
+            formula = re.sub(r'\*+', '', formula)  # Remove all asterisks (bold markers)
+            formula = re.sub(r'[`\n\r]', ' ', formula)  # Replace backticks and newlines with space
+            formula = re.sub(r'\s+', ' ', formula)  # Normalize multiple spaces to single space
             formula = formula.strip()
             
             # Further cleanup: extract only the formula part if there's extra text
             # Look for patterns like "G(...)" or "F[...](...)"
             if formula:
                 # Try to extract a pure MTL formula (starts with G, F, P, X, ~, or parenthesis)
-                mtl_pattern = re.search(r'([GFPXgfpx~\(][\s\S]+?)(?:\s*$|\s+[A-Z][a-z]+)', formula)
+                # Match until end of string or until we hit text that looks like explanation
+                mtl_pattern = re.search(r'([GFPXgfpx~\(].+?)(?:\s*$)', formula)
                 if mtl_pattern:
                     formula = mtl_pattern.group(1).strip()
+                # Remove any trailing punctuation that's not part of the formula
+                formula = re.sub(r'\s*\)\s*$', ')', formula)
 
             if not formula:
                 logger.error("No MTL formula found in synthesizer response")
@@ -1064,13 +1077,27 @@ def main() -> None:
         for row in sheet.iter_rows(min_row=2, values_only=True):
             if row and row[0]:
                 dataset.append(row[0])
-
+    # dataset = [
+    #     # "The ego vehicle has to stop with respect to a stop sign (sign 206) before it enters the intersection at least for a duration of tslw in front of the associated stop line.",
+    #     # "Do not overtake a vehicle on its right side, except in congested traffic, where overtaking on the right is also allowed.",
+    #     # "Making U-turns and reversing is prohibited by ego vehicle.",
+    #     # "If ego vehicle wants to change lanes, turn, or overtake, they should use their turn signals beforehand for t seconds."
+    #     # "At ‘T’ intersections without ‘STOP’ or ‘YIELD’ signs, yield to traffic and pedestrians on the through road."
+    #     # "before overtaking vehicle in front ego shall make sure that other vehicle in behind did not already started to overtake the ego."
+    #     "At intersections and junctions ego must yield to the other vehicles coming from right side of ego.",
+    #     "At intersections without stop or yield signs, yield to other traffic participants already in the intersection or just entering the intersection.",
+    #     "Ego must stop behind the line at a junction with a Stop sign and a solid white line across the road. Wait for a safe gap in the traffic before you move off.",
+    #     "During overtaking, a sufficient lateral distance must be kept from other road users, particularly pedestrians and pedal cyclists.",
+    #     "at the intersection where the stop sign is placed, ego shall stop before entering the  intersection and give way to vehicles on the road they are approaching.",
+    #     "If traffic is moving slowly, vehicles must not enter an intersection or junction, even if they have the right of way or the traffic lights are green, if by doing so they would be forced to wait there."
+    # ]
     # Process each sentence in the dataset
+    # dataset = ["If the ego vehicle is not part of congestion or if the directly leading vehicle is not standing, then stopping on the main carriage way, shoulder lane, or ramps is forbidden."]
     for i, sentence in enumerate(dataset, 1):
         print(f"=== Test Sentence {i} ===")
         print(f"Input: {sentence}")
         print("-" * 60)
-        if i != 3 and i <= 6:
+        if i < 26:
             continue
         try:
             result = enhanced_dsv.process(sentence, enable_refinement=True)
@@ -1092,7 +1119,7 @@ def main() -> None:
             
             # Save results
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            output_dir = Path("data/output/dsv_enhanced/deepseek-r1")
+            output_dir = Path("data/output/dsv/deepseek-r1")
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"result_{i}_{timestamp}.json"
             enhanced_dsv.save_result(result, str(output_file))

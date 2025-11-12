@@ -1,0 +1,154 @@
+{
+  "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+  "input_sentence": "It is always the case that if the other vehicle is to the left of the ego vehicle and the ego vehicle drives faster than the other vehicle, then the ego vehicle is to the right of a broad lane marking and the other vehicle is to the left of a solid lane marking.",
+  "final_mtl_formula": "G((is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking)))",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.983)",
+  "total_processing_time": 36.30382800102234,
+  "total_token_usage": {
+    "prompt_tokens": 6150,
+    "completion_tokens": 4456,
+    "total_tokens": 10606
+  },
+  "refinement_iterations": 0,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 12.958696842193604,
+      "token_usage": {
+        "prompt_tokens": 2043,
+        "completion_tokens": 1644,
+        "total_tokens": 3687
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_other\",\n            \"name\": \"other\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_broad_lane_marking\",\n            \"name\": \"broad_lane_marking\",\n            \"type\": \"lane_marking\"\n        },\n        {\n            \"id\": \"obj_solid_lane_marking\",\n            \"name\": \"solid_lane_marking\",\n            \"type\": \"lane_marking\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"is_to_left_of\",\n            \"variable\": \"other_left_of_ego\",\n            \"description\": \"Other vehicle is to the left of the ego vehicle\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_other\",\n            \"predicate\": \"drives_faster_than\",\n            \"variable\": \"ego_faster_than_other\",\n            \"description\": \"Ego vehicle drives faster than the other vehicle\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_broad_lane_marking\",\n            \"predicate\": \"is_to_right_of\",\n            \"variable\": \"ego_right_of_broad_marking\",\n            \"description\": \"Ego vehicle is to the right of a broad lane marking\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_solid_lane_marking\",\n            \"predicate\": \"is_to_left_of\",\n            \"variable\": \"other_left_of_solid_marking\",\n            \"description\": \"Other vehicle is to the left of a solid lane marking\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"implication\",\n            \"antecedent\": \"(other_left_of_ego & ego_faster_than_other)\",\n            \"consequent\": \"(ego_right_of_broad_marking & other_left_of_solid_marking)\",\n            \"description\": \"If other vehicle is to the left of ego AND ego drives faster than other, THEN ego is to the right of broad lane marking AND other is to the left of solid lane marking\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"other_left_of_ego\": \"Other vehicle is to the left of the ego vehicle\",\n        \"ego_faster_than_other\": \"Ego vehicle drives faster than the other vehicle\",\n        \"ego_right_of_broad_marking\": \"Ego vehicle is to the right of a broad lane marking\",\n        \"other_left_of_solid_marking\": \"Other vehicle is to the left of a solid lane marking\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "is_to_left_of",
+            "variable": "other_left_of_ego",
+            "description": "Other vehicle is to the left of the ego vehicle"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "drives_faster_than",
+            "variable": "ego_faster_than_other",
+            "description": "Ego vehicle drives faster than the other vehicle"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_ego",
+            "related_object": "obj_broad_lane_marking",
+            "predicate": "is_to_right_of",
+            "variable": "ego_right_of_broad_marking",
+            "description": "Ego vehicle is to the right of a broad lane marking"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_other",
+            "related_object": "obj_solid_lane_marking",
+            "predicate": "is_to_left_of",
+            "variable": "other_left_of_solid_marking",
+            "description": "Other vehicle is to the left of a solid lane marking"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "implication",
+            "antecedent": "(other_left_of_ego & ego_faster_than_other)",
+            "consequent": "(ego_right_of_broad_marking & other_left_of_solid_marking)",
+            "description": "If other vehicle is to the left of ego AND ego drives faster than other, THEN ego is to the right of broad lane marking AND other is to the left of solid lane marking"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "other_left_of_ego": "Other vehicle is to the left of the ego vehicle",
+          "ego_faster_than_other": "Ego vehicle drives faster than the other vehicle",
+          "ego_right_of_broad_marking": "Ego vehicle is to the right of a broad lane marking",
+          "other_left_of_solid_marking": "Other vehicle is to the left of a solid lane marking"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 12.808264970779419,
+      "token_usage": {
+        "prompt_tokens": 2492,
+        "completion_tokens": 1615,
+        "total_tokens": 4107
+      },
+      "agent_response": "Reasoning Process:\n1.  **Object Mapping**:\n    *   `obj_ego` maps to `ego`\n    *   `obj_other` maps to `other`\n    *   `obj_broad_lane_marking` maps to `broad_lane_marking`\n    *   `obj_solid_lane_marking` maps to `solid_lane_marking`\n\n2.  **Atomic Proposition Construction**:\n    *   `ap_1`: predicate `is_to_left_of`, subject `other` (`obj_other`), object `ego` (`obj_ego`) → `is_to_left_of(other, ego)`\n    *   `ap_2`: predicate `drives_faster_than`, subject `ego` (`obj_ego`), object `other` (`obj_other`) → `drives_faster_than(ego, other)`\n    *   `ap_3`: predicate `is_to_right_of`, subject `ego` (`obj_ego`), object `broad_lane_marking` (`obj_broad_lane_marking`) → `is_to_right_of(ego, broad_lane_marking)`\n    *   `ap_4`: predicate `is_to_left_of`, subject `other` (`obj_other`), object `solid_lane_marking` (`obj_solid_lane_marking`) → `is_to_left_of(other, solid_lane_marking)`\n\n3.  **Temporal Relation Integration**:\n    *   The `temporal_relations` specifies an `implication`.\n    *   The `antecedent` is `(other_left_of_ego & ego_faster_than_other)`. Substituting the constructed atomic propositions: `(is_to_left_of(other, ego) & drives_faster_than(ego, other))`\n    *   The `consequent` is `(ego_right_of_broad_marking & other_left_of_solid_marking)`. Substituting: `(is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n    *   Combining these with implication: `(is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n\n4.  **Global Property Application**:\n    *   The `global_property` is \"Always\", which translates to the `G` (Globally) operator.\n    *   Applying `G` to the entire implication: `G((is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking)))`\n\nFinal MTL Formula:\n`G((is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking)))`",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G((is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking)))",
+        "synthesis_reasoning": "1.  **Object Mapping**:\n    *   `obj_ego` maps to `ego`\n    *   `obj_other` maps to `other`\n    *   `obj_broad_lane_marking` maps to `broad_lane_marking`\n    *   `obj_solid_lane_marking` maps to `solid_lane_marking`\n\n2.  **Atomic Proposition Construction**:\n    *   `ap_1`: predicate `is_to_left_of`, subject `other` (`obj_other`), object `ego` (`obj_ego`) → `is_to_left_of(other, ego)`\n    *   `ap_2`: predicate `drives_faster_than`, subject `ego` (`obj_ego`), object `other` (`obj_other`) → `drives_faster_than(ego, other)`\n    *   `ap_3`: predicate `is_to_right_of`, subject `ego` (`obj_ego`), object `broad_lane_marking` (`obj_broad_lane_marking`) → `is_to_right_of(ego, broad_lane_marking)`\n    *   `ap_4`: predicate `is_to_left_of`, subject `other` (`obj_other`), object `solid_lane_marking` (`obj_solid_lane_marking`) → `is_to_left_of(other, solid_lane_marking)`\n\n3.  **Temporal Relation Integration**:\n    *   The `temporal_relations` specifies an `implication`.\n    *   The `antecedent` is `(other_left_of_ego & ego_faster_than_other)`. Substituting the constructed atomic propositions: `(is_to_left_of(other, ego) & drives_faster_than(ego, other))`\n    *   The `consequent` is `(ego_right_of_broad_marking & other_left_of_solid_marking)`. Substituting: `(is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n    *   Combining these with implication: `(is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n\n4.  **Global Property Application**:\n    *   The `global_property` is \"Always\", which translates to the `G` (Globally) operator.\n    *   Applying `G` to the entire implication: `G((is_to_left_of(other, ego) & drives_faster_than(ego, other)) -> (is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking)))`",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 10.536716938018799,
+      "token_usage": {
+        "prompt_tokens": 1615,
+        "completion_tokens": 1197,
+        "total_tokens": 2812
+      },
+      "agent_response": "Reasoning Process:\n1.  **Outer Operator**: The formula starts with `G`, which translates to \"Always\" or \"Globally\".\n2.  **Implication**: The main structure inside `G` is an implication `(...) -> (...)`, which translates to \"if ... then ...\".\n3.  **Antecedent (Left side of Implication)**: `(is_to_left_of(other, ego) & drives_faster_than(ego, other))`\n    *   `is_to_left_of(other, ego)`: This is a relational predicate. Based on the rules, it means \"the other vehicle is to the left of the ego vehicle\".\n    *   `drives_faster_than(ego, other)`: This is a relational predicate. Based on the rules, it means \"the ego vehicle drives faster than the other vehicle\".\n    *   `&`: This is a logical AND, meaning both conditions must be true.\n    *   Combining these, the antecedent translates to: \"the other vehicle is to the left of the ego vehicle and the ego vehicle drives faster than the other vehicle\".\n4.  **Consequent (Right side of Implication)**: `(is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n    *   `is_to_right_of(ego, broad_lane_marking)`: This is a relational predicate. Based on the rules, it means \"the ego vehicle is to the right of the broad lane marking\".\n    *   `is_to_left_of(other, solid_lane_marking)`: This is a relational predicate. Based on the rules, it means \"the other vehicle is to the left of the solid lane marking\".\n    *   `&`: This is a logical AND, meaning both conditions must be true.\n    *   Combining these, the consequent translates to: \"the ego vehicle is to the right of the broad lane marking and the other vehicle is to the left of the solid lane marking\".\n5.  **Final Combination**: Put all translated parts together according to the formula's structure.\n\nNatural Language Translation:\nAlways, if the other vehicle is to the left of the ego vehicle and the ego vehicle drives faster than the other vehicle, then the ego vehicle is to the right of the broad lane marking and the other vehicle is to the left of the solid lane marking.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "Always, if the other vehicle is to the left of the ego vehicle and the ego vehicle drives faster than the other vehicle, then the ego vehicle is to the right of the broad lane marking and the other vehicle is to the left of the solid lane marking.",
+        "similarity_score": 0.9834427833557129,
+        "verification_passed": true,
+        "verification_reasoning": "1.  **Outer Operator**: The formula starts with `G`, which translates to \"Always\" or \"Globally\".\n2.  **Implication**: The main structure inside `G` is an implication `(...) -> (...)`, which translates to \"if ... then ...\".\n3.  **Antecedent (Left side of Implication)**: `(is_to_left_of(other, ego) & drives_faster_than(ego, other))`\n    *   `is_to_left_of(other, ego)`: This is a relational predicate. Based on the rules, it means \"the other vehicle is to the left of the ego vehicle\".\n    *   `drives_faster_than(ego, other)`: This is a relational predicate. Based on the rules, it means \"the ego vehicle drives faster than the other vehicle\".\n    *   `&`: This is a logical AND, meaning both conditions must be true.\n    *   Combining these, the antecedent translates to: \"the other vehicle is to the left of the ego vehicle and the ego vehicle drives faster than the other vehicle\".\n4.  **Consequent (Right side of Implication)**: `(is_to_right_of(ego, broad_lane_marking) & is_to_left_of(other, solid_lane_marking))`\n    *   `is_to_right_of(ego, broad_lane_marking)`: This is a relational predicate. Based on the rules, it means \"the ego vehicle is to the right of the broad lane marking\".\n    *   `is_to_left_of(other, solid_lane_marking)`: This is a relational predicate. Based on the rules, it means \"the other vehicle is to the left of the solid lane marking\".\n    *   `&`: This is a logical AND, meaning both conditions must be true.\n    *   Combining these, the consequent translates to: \"the ego vehicle is to the right of the broad lane marking and the other vehicle is to the left of the solid lane marking\".\n5.  **Final Combination**: Put all translated parts together according to the formula's structure."
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "gemini-2.5-flash",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "gemini-2.5-flash",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "gemini-2.5-flash",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": false
+  },
+  "timestamp": "2025-10-27 23:41:42"
+}

@@ -1,0 +1,76 @@
+{
+  "framework": "DSV Example Database - Improved Version",
+  "description": "Enhanced examples with explicit object-predicate notation for MTL generation",
+  "version": "2.0",
+  "examples": {
+    "deconstruct": [
+      {
+        "id": "dec_001",
+        "input_text": "Within 5 to 10 seconds after sensor A detects a fault, alarm B must sound and continue for at least 20 seconds.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [\n    {\"id\": \"obj_sensor_a\", \"name\": \"SensorA\", \"type\": \"sensor\"},\n    {\"id\": \"obj_alarm_b\", \"name\": \"AlarmB\", \"type\": \"alarm\"}\n  ],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"object\": \"obj_sensor_a\",\n      \"predicate\": \"detects_fault\",\n      \"variable\": \"fault_detected\",\n      \"description\": \"SensorA detects a fault\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"object\": \"obj_alarm_b\",\n      \"predicate\": \"sounds\",\n      \"variable\": \"alarm_active\",\n      \"description\": \"AlarmB sounds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"ap_2\",\n      \"description\": \"AlarmB must sound after SensorA detects fault\"\n    }\n  ],\n  \"metric_constraints\": [\n    {\n      \"applies_to\": \"relation_between_ap1_ap2\",\n      \"type\": \"window\",\n      \"value\": \"[5,10]\",\n      \"description\": \"Time window is 5 to 10 seconds\"\n    },\n    {\n      \"applies_to\": \"ap_2\",\n      \"type\": \"duration\",\n      \"value\": \">=20\",\n      \"description\": \"AlarmB must continue for at least 20 seconds\"\n    }\n  ],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"fault_detected\": {\"entity\": \"SensorA\", \"action\": \"detects fault\"},\n    \"alarm_active\": {\"entity\": \"AlarmB\", \"action\": \"sounds\"}\n  }\n}",
+        "reasoning": "Identify objects: SensorA (sensor), AlarmB (alarm). Extract atomic propositions with object-predicate structure. Map temporal and metric constraints."
+      },
+      {
+        "id": "dec_002",
+        "input_text": "if Ego vehicle in front of other vehicle then it must not brake suddenly without a compelling reason.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [\n    {\"id\": \"obj_ego\", \"name\": \"ego\", \"type\": \"vehicle\"},\n    {\"id\": \"obj_other\", \"name\": \"other\", \"type\": \"vehicle\"}\n  ],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"object\": \"obj_ego\",\n      \"related_object\": \"obj_other\",\n      \"predicate\": \"in_front_of\",\n      \"variable\": \"ego_in_front\",\n      \"description\": \"Ego vehicle is in front of other vehicle\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"object\": \"obj_ego\",\n      \"predicate\": \"sudden_braking\",\n      \"variable\": \"ego_brakes\",\n      \"description\": \"Ego vehicle brakes suddenly\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"conditional\",\n      \"antecedent\": \"ap_1\",\n      \"consequent\": \"~ap_2\",\n      \"description\": \"If ego in front of other, then ego must not brake suddenly\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"ego_in_front\": {\"entity\": \"ego\", \"action\": \"in front of other\", \"related_entity\": \"other\"},\n    \"ego_brakes\": {\"entity\": \"ego\", \"action\": \"brakes suddenly\"}\n  }\n}",
+        "reasoning": "Identify two vehicle objects: ego and other. The predicate in_front_of is a relational predicate between two objects. The conditional logic requires negation of sudden braking."
+      },
+      {
+        "id": "dec_003",
+        "input_text": "At intersections and junctions, ego must yield to vehicles coming from right side of ego, provided there is no traffic sign number 306 in front of ego.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [\n    {\"id\": \"obj_ego\", \"name\": \"ego\", \"type\": \"vehicle\"},\n    {\"id\": \"obj_other\", \"name\": \"other\", \"type\": \"vehicle\"},\n    {\"id\": \"obj_sign\", \"name\": \"sign_306\", \"type\": \"traffic_sign\"}\n  ],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"object\": \"obj_ego\",\n      \"predicate\": \"at_intersection\",\n      \"variable\": \"ego_at_intersection\",\n      \"description\": \"Ego is at intersection\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"object\": \"obj_ego\",\n      \"predicate\": \"at_junction\",\n      \"variable\": \"ego_at_junction\",\n      \"description\": \"Ego is at junction\"\n    },\n    {\n      \"id\": \"ap_3\",\n      \"object\": \"obj_other\",\n      \"related_object\": \"obj_ego\",\n      \"predicate\": \"in_right_of\",\n      \"variable\": \"other_on_right\",\n      \"description\": \"Other vehicle is on right side of ego\"\n    },\n    {\n      \"id\": \"ap_4\",\n      \"object\": \"obj_ego\",\n      \"related_object\": \"obj_other\",\n      \"predicate\": \"yield\",\n      \"variable\": \"ego_yields\",\n      \"description\": \"Ego yields to other vehicle\"\n    },\n    {\n      \"id\": \"ap_5\",\n      \"object\": \"obj_sign\",\n      \"related_object\": \"obj_ego\",\n      \"predicate\": \"in_front_of\",\n      \"variable\": \"sign_in_front\",\n      \"description\": \"Sign 306 is in front of ego\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"conditional\",\n      \"antecedent\": \"(ap_1 | ap_2) & ap_3 & ~ap_5\",\n      \"consequent\": \"ap_4\",\n      \"description\": \"At intersection/junction with vehicle on right and no sign 306, ego must yield\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"ego_at_intersection\": {\"entity\": \"ego\", \"action\": \"at intersection\"},\n    \"ego_at_junction\": {\"entity\": \"ego\", \"action\": \"at junction\"},\n    \"other_on_right\": {\"entity\": \"other\", \"action\": \"on right side of\", \"related_entity\": \"ego\"},\n    \"ego_yields\": {\"entity\": \"ego\", \"action\": \"yields to\", \"related_entity\": \"other\"},\n    \"sign_in_front\": {\"entity\": \"sign_306\", \"action\": \"in front of\", \"related_entity\": \"ego\"}\n  }\n}",
+        "reasoning": "Identify three object types: ego vehicle, other vehicle, and traffic sign. Extract location-based predicates (at_intersection, at_junction) and relational predicates (in_right_of, in_front_of, yield). Complex conditional logic with multiple antecedents."
+      }
+    ],
+    "synthesize": [
+      {
+        "id": "syn_001",
+        "input_text": "Alarm sounds within 5-10 seconds after sensor fault and lasts for 20 seconds",
+        "stage": "synthesize",
+        "output": "G (detects_fault(SensorA) -> F_[5,10] (sounds(AlarmB) & G_[0,20] sounds(AlarmB)))",
+        "reasoning": "Map atomic propositions to predicate(object) form: detects_fault(SensorA), sounds(AlarmB). Apply temporal operators: G for global, F_[5,10] for eventual within window, G_[0,20] for duration constraint."
+      },
+      {
+        "id": "syn_002",
+        "input_text": "If ego in front of other, then ego must not brake suddenly",
+        "stage": "synthesize",
+        "output": "G (in_front_of(ego,other) -> ~sudden_braking(ego))",
+        "reasoning": "Use relational predicate in_front_of(ego,other) to capture the spatial relationship between two objects. Apply global operator G and negation ~ for prohibition."
+      },
+      {
+        "id": "syn_003",
+        "input_text": "At intersection with vehicle on right and no sign 306, ego must yield",
+        "stage": "synthesize",
+        "output": "G ((at_intersection(ego) | at_junction(ego)) & in_right_of(other,ego) -> (yield(ego,other) & ~in_front_of(ego,sign_306)))",
+        "reasoning": "Combine multiple predicates with logical operators. Use disjunction (|) for intersection or junction, conjunction (&) for multiple conditions. All predicates use object parameters for clarity and traceability."
+      }
+    ],
+    "verify": [
+      {
+        "id": "ver_001",
+        "input_text": "G (detects_fault(SensorA) -> F_[5,10] (sounds(AlarmB) & G_[0,20] sounds(AlarmB)))",
+        "stage": "verify",
+        "output": "Always, if SensorA detects a fault, then within 5 to 10 seconds AlarmB will sound and continue for at least 20 seconds.",
+        "reasoning": "Interpret predicate(object) notation: detects_fault(SensorA) means SensorA performs the action of detecting fault. Temporal operators map to natural language time expressions."
+      },
+      {
+        "id": "ver_002",
+        "input_text": "G (in_front_of(ego,other) -> ~sudden_braking(ego))",
+        "stage": "verify",
+        "output": "Always, if the ego vehicle is in front of another vehicle, then the ego vehicle must not brake suddenly.",
+        "reasoning": "Relational predicate in_front_of(ego,other) translates to spatial relationship. Negation ~ translates to prohibition 'must not'."
+      },
+      {
+        "id": "ver_003",
+        "input_text": "G ((at_intersection(ego) | at_junction(ego)) & in_right_of(other,ego) -> (yield(ego,other) & ~in_front_of(ego,sign_306)))",
+        "stage": "verify",
+        "output": "Always, if ego is at an intersection or junction and another vehicle is on the right side of ego, then ego must yield to the other vehicle and there must not be sign 306 in front of ego.",
+        "reasoning": "Complex formula with multiple predicates. Logical operators (|, &, ~) map to natural language connectives (or, and, not). Each predicate explicitly references its objects."
+      }
+    ]
+  }
+}

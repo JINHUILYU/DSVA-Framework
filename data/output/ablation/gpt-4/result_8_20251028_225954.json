@@ -1,0 +1,163 @@
+{
+  "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+  "input_sentence": "If the ego vehicle is not part of congestion or if the directly leading vehicle is not standing, then stopping on the main carriage way, shoulder lane, or ramps is forbidden.",
+  "final_mtl_formula": "G( (~part_of(ego,congestion) | ~standing(leader)) -> ~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps)) )",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.950)",
+  "total_processing_time": 17.505903959274292,
+  "total_token_usage": {
+    "prompt_tokens": 5733,
+    "completion_tokens": 1782,
+    "total_tokens": 7515
+  },
+  "refinement_iterations": 0,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 6.358770132064819,
+      "token_usage": {
+        "prompt_tokens": 1886,
+        "completion_tokens": 721,
+        "total_tokens": 2607
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_leader\",\n            \"name\": \"leader\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_main_carriageway\",\n            \"name\": \"main_carriageway\",\n            \"type\": \"road_segment\"\n        },\n        {\n            \"id\": \"obj_shoulder_lane\",\n            \"name\": \"shoulder_lane\",\n            \"type\": \"road_segment\"\n        },\n        {\n            \"id\": \"obj_ramps\",\n            \"name\": \"ramps\",\n            \"type\": \"road_segment\"\n        },\n        {\n            \"id\": \"obj_congestion\",\n            \"name\": \"congestion\",\n            \"type\": \"traffic_condition\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_congestion\",\n            \"predicate\": \"part_of\",\n            \"variable\": \"ego_in_congestion\",\n            \"description\": \"Ego vehicle is part of congestion\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_leader\",\n            \"related_object\": null,\n            \"predicate\": \"standing\",\n            \"variable\": \"leader_standing\",\n            \"description\": \"Directly leading vehicle is standing\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_main_carriageway\",\n            \"predicate\": \"stopping_on\",\n            \"variable\": \"ego_stop_main\",\n            \"description\": \"Ego vehicle is stopping on the main carriageway\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_shoulder_lane\",\n            \"predicate\": \"stopping_on\",\n            \"variable\": \"ego_stop_shoulder\",\n            \"description\": \"Ego vehicle is stopping on the shoulder lane\"\n        },\n        {\n            \"id\": \"ap_5\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_ramps\",\n            \"predicate\": \"stopping_on\",\n            \"variable\": \"ego_stop_ramps\",\n            \"description\": \"Ego vehicle is stopping on the ramps\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"implication\",\n            \"antecedent\": \"~ego_in_congestion | ~leader_standing\",\n            \"consequent\": \"~(ego_stop_main | ego_stop_shoulder | ego_stop_ramps)\",\n            \"description\": \"If the ego is not part of congestion or the leader is not standing, then stopping on the main carriageway, shoulder lane, or ramps is forbidden.\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_in_congestion\": \"Ego vehicle is part of congestion\",\n        \"leader_standing\": \"Directly leading vehicle is standing\",\n        \"ego_stop_main\": \"Ego vehicle is stopping on the main carriageway\",\n        \"ego_stop_shoulder\": \"Ego vehicle is stopping on the shoulder lane\",\n        \"ego_stop_ramps\": \"Ego vehicle is stopping on the ramps\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": "obj_congestion",
+            "predicate": "part_of",
+            "variable": "ego_in_congestion",
+            "description": "Ego vehicle is part of congestion"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_leader",
+            "related_object": null,
+            "predicate": "standing",
+            "variable": "leader_standing",
+            "description": "Directly leading vehicle is standing"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_ego",
+            "related_object": "obj_main_carriageway",
+            "predicate": "stopping_on",
+            "variable": "ego_stop_main",
+            "description": "Ego vehicle is stopping on the main carriageway"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_ego",
+            "related_object": "obj_shoulder_lane",
+            "predicate": "stopping_on",
+            "variable": "ego_stop_shoulder",
+            "description": "Ego vehicle is stopping on the shoulder lane"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_ego",
+            "related_object": "obj_ramps",
+            "predicate": "stopping_on",
+            "variable": "ego_stop_ramps",
+            "description": "Ego vehicle is stopping on the ramps"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "implication",
+            "antecedent": "~ego_in_congestion | ~leader_standing",
+            "consequent": "~(ego_stop_main | ego_stop_shoulder | ego_stop_ramps)",
+            "description": "If the ego is not part of congestion or the leader is not standing, then stopping on the main carriageway, shoulder lane, or ramps is forbidden."
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_in_congestion": "Ego vehicle is part of congestion",
+          "leader_standing": "Directly leading vehicle is standing",
+          "ego_stop_main": "Ego vehicle is stopping on the main carriageway",
+          "ego_stop_shoulder": "Ego vehicle is stopping on the shoulder lane",
+          "ego_stop_ramps": "Ego vehicle is stopping on the ramps"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 4.698408126831055,
+      "token_usage": {
+        "prompt_tokens": 2336,
+        "completion_tokens": 589,
+        "total_tokens": 2925
+      },
+      "agent_response": "Reasoning Process:\n1. **Object Extraction and ID→Name Mapping**:  \n   - `\"obj_ego\"` → `\"ego\"`  \n   - `\"obj_leader\"` → `\"leader\"`  \n   - `\"obj_main_carriageway\"` → `\"main_carriageway\"`  \n   - `\"obj_shoulder_lane\"` → `\"shoulder_lane\"`  \n   - `\"obj_ramps\"` → `\"ramps\"`  \n   - `\"obj_congestion\"` → `\"congestion\"`\n\n2. **Atomic Proposition Mapping (Predicate Construction)**:  \n   - **ap_1**: predicate: `part_of`; object: `\"ego\"`; related_object: `\"congestion\"`  \n     → `part_of(ego,congestion)`  \n   - **ap_2**: predicate: `standing`; object: `\"leader\"`; no related_object  \n     → `standing(leader)`  \n   - **ap_3**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"main_carriageway\"`  \n     → `stopping_on(ego,main_carriageway)`  \n   - **ap_4**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"shoulder_lane\"`  \n     → `stopping_on(ego,shoulder_lane)`  \n   - **ap_5**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"ramps\"`  \n     → `stopping_on(ego,ramps)`\n\n3. **Temporal Relation Parsing**:  \n   - The relation is:  \n     If the ego is **not** part of congestion **OR** the leader is **not** standing, then stopping on main carriageway, shoulder lane, or ramps is **forbidden**.  \n   - Antecedent: `~ego_in_congestion | ~leader_standing`  \n     → `~part_of(ego,congestion) | ~standing(leader)`  \n   - Consequent: `~(ego_stop_main | ego_stop_shoulder | ego_stop_ramps)`  \n     → `~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps))`\n\n4. **Global Property Enforcement**:  \n   - The global property is `\"Always\"` → use `G(...)` operator.\n\n5. **Final Formula Construction**:  \n   - Structure: `G( (Antecedent) -> (Consequent) )`  \n   - Substitute predicates in canonical form.\n\nFinal MTL Formula:\n```\nG( (~part_of(ego,congestion) | ~standing(leader)) -> ~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps)) )\n```",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G( (~part_of(ego,congestion) | ~standing(leader)) -> ~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps)) )",
+        "synthesis_reasoning": "1. **Object Extraction and ID→Name Mapping**:  \n   - `\"obj_ego\"` → `\"ego\"`  \n   - `\"obj_leader\"` → `\"leader\"`  \n   - `\"obj_main_carriageway\"` → `\"main_carriageway\"`  \n   - `\"obj_shoulder_lane\"` → `\"shoulder_lane\"`  \n   - `\"obj_ramps\"` → `\"ramps\"`  \n   - `\"obj_congestion\"` → `\"congestion\"`\n\n2. **Atomic Proposition Mapping (Predicate Construction)**:  \n   - **ap_1**: predicate: `part_of`; object: `\"ego\"`; related_object: `\"congestion\"`  \n     → `part_of(ego,congestion)`  \n   - **ap_2**: predicate: `standing`; object: `\"leader\"`; no related_object  \n     → `standing(leader)`  \n   - **ap_3**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"main_carriageway\"`  \n     → `stopping_on(ego,main_carriageway)`  \n   - **ap_4**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"shoulder_lane\"`  \n     → `stopping_on(ego,shoulder_lane)`  \n   - **ap_5**: predicate: `stopping_on`; object: `\"ego\"`; related_object: `\"ramps\"`  \n     → `stopping_on(ego,ramps)`\n\n3. **Temporal Relation Parsing**:  \n   - The relation is:  \n     If the ego is **not** part of congestion **OR** the leader is **not** standing, then stopping on main carriageway, shoulder lane, or ramps is **forbidden**.  \n   - Antecedent: `~ego_in_congestion | ~leader_standing`  \n     → `~part_of(ego,congestion) | ~standing(leader)`  \n   - Consequent: `~(ego_stop_main | ego_stop_shoulder | ego_stop_ramps)`  \n     → `~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps))`\n\n4. **Global Property Enforcement**:  \n   - The global property is `\"Always\"` → use `G(...)` operator.\n\n5. **Final Formula Construction**:  \n   - Structure: `G( (Antecedent) -> (Consequent) )`  \n   - Substitute predicates in canonical form.",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 6.44858717918396,
+      "token_usage": {
+        "prompt_tokens": 1511,
+        "completion_tokens": 472,
+        "total_tokens": 1983
+      },
+      "agent_response": "Reasoning Process:\n- The formula is:  \n  `G( (~part_of(ego,congestion) | ~standing(leader)) -> ~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps)) )`\n- The outermost operator is `G`, meaning \"always\" or \"at all times\".\n- Inside, we have an implication:  \n  `(~part_of(ego,congestion) | ~standing(leader)) -> ...`\n  - `~part_of(ego,congestion)`: \"ego vehicle is not part of congestion\"\n  - `~standing(leader)`: \"the leading vehicle is not standing\"\n  - `|` means \"or\", so this is: \"ego vehicle is not part of congestion OR the leading vehicle is not standing\"\n- The implication's consequent is:  \n  `~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps))`\n  - `stopping_on(ego,main_carriageway)`: \"ego vehicle is stopping on the main carriageway\"\n  - `stopping_on(ego,shoulder_lane)`: \"ego vehicle is stopping on the shoulder lane\"\n  - `stopping_on(ego,ramps)`: \"ego vehicle is stopping on the ramps\"\n  - The `|` means \"or\", so this is: \"ego vehicle is stopping on the main carriageway OR on the shoulder lane OR on the ramps\"\n  - The outer `~` negates this, meaning: \"ego vehicle is not stopping on the main carriageway, the shoulder lane, or the ramps\"\n- Thus, the implication says:  \n  \"If the ego vehicle is not part of congestion, or the leading vehicle is not standing, then the ego vehicle is not stopping on the main carriageway, the shoulder lane, or the ramps.\"\n- Since this is wrapped in `G`, this condition must always hold.\n\nNatural Language Translation:\nAt all times, if the ego vehicle is not part of congestion or the leading vehicle is not standing, then the ego vehicle must not stop on the main carriageway, the shoulder lane, or the ramps.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "At all times, if the ego vehicle is not part of congestion or the leading vehicle is not standing, then the ego vehicle must not stop on the main carriageway, the shoulder lane, or the ramps.",
+        "similarity_score": 0.9503027200698853,
+        "verification_passed": true,
+        "verification_reasoning": "- The formula is:  \n  `G( (~part_of(ego,congestion) | ~standing(leader)) -> ~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps)) )`\n- The outermost operator is `G`, meaning \"always\" or \"at all times\".\n- Inside, we have an implication:  \n  `(~part_of(ego,congestion) | ~standing(leader)) -> ...`\n  - `~part_of(ego,congestion)`: \"ego vehicle is not part of congestion\"\n  - `~standing(leader)`: \"the leading vehicle is not standing\"\n  - `|` means \"or\", so this is: \"ego vehicle is not part of congestion OR the leading vehicle is not standing\"\n- The implication's consequent is:  \n  `~(stopping_on(ego,main_carriageway) | stopping_on(ego,shoulder_lane) | stopping_on(ego,ramps))`\n  - `stopping_on(ego,main_carriageway)`: \"ego vehicle is stopping on the main carriageway\"\n  - `stopping_on(ego,shoulder_lane)`: \"ego vehicle is stopping on the shoulder lane\"\n  - `stopping_on(ego,ramps)`: \"ego vehicle is stopping on the ramps\"\n  - The `|` means \"or\", so this is: \"ego vehicle is stopping on the main carriageway OR on the shoulder lane OR on the ramps\"\n  - The outer `~` negates this, meaning: \"ego vehicle is not stopping on the main carriageway, the shoulder lane, or the ramps\"\n- Thus, the implication says:  \n  \"If the ego vehicle is not part of congestion, or the leading vehicle is not standing, then the ego vehicle is not stopping on the main carriageway, the shoulder lane, or the ramps.\"\n- Since this is wrapped in `G`, this condition must always hold."
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": false
+  },
+  "timestamp": "2025-10-28 22:59:54"
+}

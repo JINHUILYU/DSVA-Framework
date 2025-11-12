@@ -1,0 +1,436 @@
+{
+  "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+  "input_sentence": "At intersections and junctions ego must yield to the other vehicles coming from right side of ego.",
+  "final_mtl_formula": "G((at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.851)",
+  "total_processing_time": 160.1305468082428,
+  "total_token_usage": {
+    "prompt_tokens": 42487,
+    "completion_tokens": 7977,
+    "total_tokens": 50464
+  },
+  "refinement_iterations": 3,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.595126152038574,
+      "token_usage": {
+        "prompt_tokens": 1870,
+        "completion_tokens": 489,
+        "total_tokens": 2359
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_other\",\n            \"name\": \"other\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_intersection\",\n            \"name\": \"intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_junction\",\n            \"name\": \"junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"at_intersection_or_junction\",\n            \"variable\": \"ego_at_intersection_or_junction\",\n            \"description\": \"Ego vehicle is at an intersection or junction\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"coming_from_right_of\",\n            \"variable\": \"other_from_right\",\n            \"description\": \"Other vehicle is coming from the right side of ego\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_other\",\n            \"predicate\": \"yield\",\n            \"variable\": \"ego_yields_to_other\",\n            \"description\": \"Ego vehicle yields to other vehicle\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"implication\",\n            \"antecedent\": \"(ego_at_intersection_or_junction & other_from_right)\",\n            \"consequent\": \"ego_yields_to_other\",\n            \"description\": \"If ego is at an intersection or junction and another vehicle is coming from the right, ego must yield to the other vehicle\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_at_intersection_or_junction\": \"Ego vehicle is at an intersection or junction\",\n        \"other_from_right\": \"Other vehicle is coming from the right side of ego\",\n        \"ego_yields_to_other\": \"Ego vehicle yields to other vehicle\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "at_intersection_or_junction",
+            "variable": "ego_at_intersection_or_junction",
+            "description": "Ego vehicle is at an intersection or junction"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "coming_from_right_of",
+            "variable": "other_from_right",
+            "description": "Other vehicle is coming from the right side of ego"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "yield",
+            "variable": "ego_yields_to_other",
+            "description": "Ego vehicle yields to other vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "implication",
+            "antecedent": "(ego_at_intersection_or_junction & other_from_right)",
+            "consequent": "ego_yields_to_other",
+            "description": "If ego is at an intersection or junction and another vehicle is coming from the right, ego must yield to the other vehicle"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_at_intersection_or_junction": "Ego vehicle is at an intersection or junction",
+          "other_from_right": "Other vehicle is coming from the right side of ego",
+          "ego_yields_to_other": "Ego vehicle yields to other vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 3.467385768890381,
+      "token_usage": {
+        "prompt_tokens": 2104,
+        "completion_tokens": 386,
+        "total_tokens": 2490
+      },
+      "agent_response": "Reasoning Process:\n\nStep 1: Parse the \"objects\" list to build ID→name mapping  \n- obj_ego → \"ego\"  \n- obj_other → \"other\"  \n- obj_intersection → \"intersection\"  \n- obj_junction → \"junction\"  \n\nStep 2: For each atomic proposition:  \n- ap_1:  \n    * predicate: \"at_intersection_or_junction\"  \n    * object: obj_ego → \"ego\"  \n    * related_object: null  \n    * Construct: at_intersection_or_junction(ego)  \n- ap_2:  \n    * predicate: \"coming_from_right_of\"  \n    * object: obj_other → \"other\"  \n    * related_object: obj_ego → \"ego\"  \n    * Construct: coming_from_right_of(other, ego)  \n- ap_3:  \n    * predicate: \"yield\"  \n    * object: obj_ego → \"ego\"  \n    * related_object: obj_other → \"other\"  \n    * Construct: yield(ego, other)  \n\nStep 3: Combine predicates using temporal and logical operators  \n- Temporal relation:  \n    * Implication: (ego_at_intersection_or_junction & other_from_right) -> ego_yields_to_other  \n    * Substitute predicate(object) forms:  \n        (at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other)  \n\nStep 4: Apply global property (\"Always\")  \n- Use G (globally) operator around the implication:  \n    G((at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other))  \n\n\nFinal MTL Formula:\nG((at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G((at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other))",
+        "synthesis_reasoning": "Step 1: Parse the \"objects\" list to build ID→name mapping  \n- obj_ego → \"ego\"  \n- obj_other → \"other\"  \n- obj_intersection → \"intersection\"  \n- obj_junction → \"junction\"  \n\nStep 2: For each atomic proposition:  \n- ap_1:  \n    * predicate: \"at_intersection_or_junction\"  \n    * object: obj_ego → \"ego\"  \n    * related_object: null  \n    * Construct: at_intersection_or_junction(ego)  \n- ap_2:  \n    * predicate: \"coming_from_right_of\"  \n    * object: obj_other → \"other\"  \n    * related_object: obj_ego → \"ego\"  \n    * Construct: coming_from_right_of(other, ego)  \n- ap_3:  \n    * predicate: \"yield\"  \n    * object: obj_ego → \"ego\"  \n    * related_object: obj_other → \"other\"  \n    * Construct: yield(ego, other)  \n\nStep 3: Combine predicates using temporal and logical operators  \n- Temporal relation:  \n    * Implication: (ego_at_intersection_or_junction & other_from_right) -> ego_yields_to_other  \n    * Substitute predicate(object) forms:  \n        (at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other)  \n\nStep 4: Apply global property (\"Always\")  \n- Use G (globally) operator around the implication:  \n    G((at_intersection_or_junction(ego) & coming_from_right_of(other, ego)) -> yield(ego, other))",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 64.72657585144043,
+      "token_usage": {
+        "prompt_tokens": 1467,
+        "completion_tokens": 324,
+        "total_tokens": 1791
+      },
+      "agent_response": "**Reasoning Process:**\n\n1. **Operator Analysis:**  \n   - The outermost operator is `G`, meaning \"always\" or \"globally\"—the formula must hold at all times.\n   - The inner part is an implication (`->`):  \n     - **Antecedent**: `(at_intersection_or_junction(ego) & coming_from_right_of(other, ego))`  \n       - This means: both \"ego vehicle is at an intersection or junction\" AND \"other vehicle is coming from the right side of ego\".\n     - **Consequent**: `yield(ego, other)`  \n       - This means: \"ego vehicle yields to other vehicle\".\n\n2. **Predicate/Object Mapping:**  \n   - `at_intersection_or_junction(ego)`: Ego vehicle is at an intersection or junction.\n   - `coming_from_right_of(other, ego)`: Other vehicle is coming from the right side of the ego vehicle.\n   - `yield(ego, other)`: Ego vehicle yields to the other vehicle.\n\n3. **Overall Structure:**  \n   - The formula requires that **whenever** the ego vehicle is at an intersection or junction **and** the other vehicle is coming from the right side, **then** the ego vehicle must yield to the other vehicle.\n   - This requirement is enforced **at all times** (globally).\n\n---\n\n**Natural Language Translation:**\n\nAt all times, if the ego vehicle is at an intersection or junction and the other vehicle is coming from the right side, then the ego vehicle must yield to the other vehicle.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "**\n\nAt all times, if the ego vehicle is at an intersection or junction and the other vehicle is coming from the right side, then the ego vehicle must yield to the other vehicle.",
+        "similarity_score": 0.8472930192947388,
+        "verification_passed": false,
+        "verification_reasoning": "**\n\n1. **Operator Analysis:**  \n   - The outermost operator is `G`, meaning \"always\" or \"globally\"—the formula must hold at all times.\n   - The inner part is an implication (`->`):  \n     - **Antecedent**: `(at_intersection_or_junction(ego) & coming_from_right_of(other, ego))`  \n       - This means: both \"ego vehicle is at an intersection or junction\" AND \"other vehicle is coming from the right side of ego\".\n     - **Consequent**: `yield(ego, other)`  \n       - This means: \"ego vehicle yields to other vehicle\".\n\n2. **Predicate/Object Mapping:**  \n   - `at_intersection_or_junction(ego)`: Ego vehicle is at an intersection or junction.\n   - `coming_from_right_of(other, ego)`: Other vehicle is coming from the right side of the ego vehicle.\n   - `yield(ego, other)`: Ego vehicle yields to the other vehicle.\n\n3. **Overall Structure:**  \n   - The formula requires that **whenever** the ego vehicle is at an intersection or junction **and** the other vehicle is coming from the right side, **then** the ego vehicle must yield to the other vehicle.\n   - This requirement is enforced **at all times** (globally).\n\n---\n\n**"
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.7088940143585205,
+      "token_usage": {
+        "prompt_tokens": 3320,
+        "completion_tokens": 530,
+        "total_tokens": 3850
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_other\",\n            \"name\": \"other\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_intersection\",\n            \"name\": \"intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_junction\",\n            \"name\": \"junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"at_intersection_or_junction\",\n            \"variable\": \"ego_at_intersection_or_junction\",\n            \"description\": \"Ego vehicle is at an intersection or junction\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"approaching_from_right_of\",\n            \"variable\": \"other_approaching_right_of_ego\",\n            \"description\": \"Other vehicle is approaching from the right side of ego\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_other\",\n            \"predicate\": \"yield\",\n            \"variable\": \"ego_yields_to_other\",\n            \"description\": \"Ego vehicle yields to other vehicle\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"contextual_implication\",\n            \"antecedent\": \"ego_at_intersection_or_junction\",\n            \"consequent\": \"(other_approaching_right_of_ego -> (yield(ego, other) U_[0,∞) proceed(ego)))\",\n            \"description\": \"Whenever ego is at an intersection or junction, if another vehicle is approaching from the right, ego must yield to the other vehicle before proceeding\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Contextual (Whenever at intersection or junction)\",\n    \"lexicon\": {\n        \"ego_at_intersection_or_junction\": \"Ego vehicle is at an intersection or junction\",\n        \"other_approaching_right_of_ego\": \"Other vehicle is approaching from the right side of ego\",\n        \"ego_yields_to_other\": \"Ego vehicle yields to other vehicle\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "at_intersection_or_junction",
+            "variable": "ego_at_intersection_or_junction",
+            "description": "Ego vehicle is at an intersection or junction"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "approaching_from_right_of",
+            "variable": "other_approaching_right_of_ego",
+            "description": "Other vehicle is approaching from the right side of ego"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "yield",
+            "variable": "ego_yields_to_other",
+            "description": "Ego vehicle yields to other vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "contextual_implication",
+            "antecedent": "ego_at_intersection_or_junction",
+            "consequent": "(other_approaching_right_of_ego -> (yield(ego, other) U_[0,∞) proceed(ego)))",
+            "description": "Whenever ego is at an intersection or junction, if another vehicle is approaching from the right, ego must yield to the other vehicle before proceeding"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Contextual (Whenever at intersection or junction)",
+        "lexicon": {
+          "ego_at_intersection_or_junction": "Ego vehicle is at an intersection or junction",
+          "other_approaching_right_of_ego": "Other vehicle is approaching from the right side of ego",
+          "ego_yields_to_other": "Ego vehicle yields to other vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 4.41858696937561,
+      "token_usage": {
+        "prompt_tokens": 3595,
+        "completion_tokens": 479,
+        "total_tokens": 4074
+      },
+      "agent_response": "Reasoning Process:\n\n1. **Parse the \"objects\" list to build ID→name mapping**  \n   - obj_ego → ego  \n   - obj_other → other  \n   - obj_intersection → intersection  \n   - obj_junction → junction  \n\n2. **Extract each atomic proposition and construct predicate(object) forms:**  \n   - ap_1:  \n     * predicate: at_intersection_or_junction  \n     * object: obj_ego → ego  \n     * related_object: null  \n     * → at_intersection_or_junction(ego)  \n   - ap_2:  \n     * predicate: approaching_from_right_of  \n     * object: obj_other → other  \n     * related_object: obj_ego → ego  \n     * → approaching_from_right_of(other, ego)  \n   - ap_3:  \n     * predicate: yield  \n     * object: obj_ego → ego  \n     * related_object: obj_other → other  \n     * → yield(ego, other)  \n\n   *There is a reference to \"proceed(ego)\" in the temporal relation, but it is not present in the atomic_propositions list. Since the contextual implication formula requires \"yield(ego, other) U_[0,∞) proceed(ego)\", we will use \"proceed(ego)\" as an atomic predicate as per the semantic sketch intent.*\n\n3. **Temporal relation (contextual implication):**  \n   * Whenever at_intersection_or_junction(ego) holds,  \n   * If approaching_from_right_of(other, ego) holds,  \n   * Then yield(ego, other) must hold UNTIL proceed(ego) occurs (unbounded time window [0,∞)).  \n   * → Contextual property, so use \"G (at_intersection_or_junction(ego) -> ...)\"\n\n4. **Final formula assembly:**  \n   - Use the canonical readable form:  \n     G( at_intersection_or_junction(ego) -> (approaching_from_right_of(other, ego) -> (yield(ego, other) U_[0,∞) proceed(ego))) )\n\nFinal MTL Formula:\n\nG( at_intersection_or_junction(ego) -> (approaching_from_right_of(other, ego) -> (yield(ego, other) U_[0,∞) proceed(ego))) )",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G( at_intersection_or_junction(ego) -> (approaching_from_right_of(other, ego) -> (yield(ego, other) U_[0,∞) proceed(ego))) )",
+        "synthesis_reasoning": "1. **Parse the \"objects\" list to build ID→name mapping**  \n   - obj_ego → ego  \n   - obj_other → other  \n   - obj_intersection → intersection  \n   - obj_junction → junction  \n\n2. **Extract each atomic proposition and construct predicate(object) forms:**  \n   - ap_1:  \n     * predicate: at_intersection_or_junction  \n     * object: obj_ego → ego  \n     * related_object: null  \n     * → at_intersection_or_junction(ego)  \n   - ap_2:  \n     * predicate: approaching_from_right_of  \n     * object: obj_other → other  \n     * related_object: obj_ego → ego  \n     * → approaching_from_right_of(other, ego)  \n   - ap_3:  \n     * predicate: yield  \n     * object: obj_ego → ego  \n     * related_object: obj_other → other  \n     * → yield(ego, other)  \n\n   *There is a reference to \"proceed(ego)\" in the temporal relation, but it is not present in the atomic_propositions list. Since the contextual implication formula requires \"yield(ego, other) U_[0,∞) proceed(ego)\", we will use \"proceed(ego)\" as an atomic predicate as per the semantic sketch intent.*\n\n3. **Temporal relation (contextual implication):**  \n   * Whenever at_intersection_or_junction(ego) holds,  \n   * If approaching_from_right_of(other, ego) holds,  \n   * Then yield(ego, other) must hold UNTIL proceed(ego) occurs (unbounded time window [0,∞)).  \n   * → Contextual property, so use \"G (at_intersection_or_junction(ego) -> ...)\"\n\n4. **Final formula assembly:**  \n   - Use the canonical readable form:  \n     G( at_intersection_or_junction(ego) -> (approaching_from_right_of(other, ego) -> (yield(ego, other) U_[0,∞) proceed(ego))) )",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 7.531503915786743,
+      "token_usage": {
+        "prompt_tokens": 1486,
+        "completion_tokens": 308,
+        "total_tokens": 1794
+      },
+      "agent_response": "Reasoning Process:\n- The overall formula is wrapped in a `G`, meaning \"globally\" or \"at all times.\"\n- Inside the global operator, we have an implication:  \n  `at_intersection_or_junction(ego) -> (...)`  \n  This means: \"If the ego vehicle is at an intersection or junction, then ...\"\n- The consequent is another implication:  \n  `approaching_from_right_of(other, ego) -> (...)`  \n  So, \"If the other vehicle is approaching from the right side of the ego vehicle, then ...\"\n- The innermost part is:  \n  `(yield(ego, other) U_[0,∞) proceed(ego))`  \n  \"The ego vehicle must yield to the other vehicle until, at some future point (within an unbounded interval), the ego vehicle proceeds.\"\n- Each predicate, per the rules:\n  - `at_intersection_or_junction(ego)`: Ego vehicle is at an intersection or junction.\n  - `approaching_from_right_of(other, ego)`: Other vehicle is approaching from the right side of ego vehicle.\n  - `yield(ego, other)`: Ego vehicle yields to other vehicle.\n  - `proceed(ego)`: Ego vehicle proceeds.\n\nNatural Language Translation:\nAt all times, if the ego vehicle is at an intersection or junction and another vehicle is approaching from the right side of the ego vehicle, then the ego vehicle must yield to the other vehicle continuously until the ego vehicle proceeds.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "At all times, if the ego vehicle is at an intersection or junction and another vehicle is approaching from the right side of the ego vehicle, then the ego vehicle must yield to the other vehicle continuously until the ego vehicle proceeds.",
+        "similarity_score": 0.8192132711410522,
+        "verification_passed": false,
+        "verification_reasoning": "- The overall formula is wrapped in a `G`, meaning \"globally\" or \"at all times.\"\n- Inside the global operator, we have an implication:  \n  `at_intersection_or_junction(ego) -> (...)`  \n  This means: \"If the ego vehicle is at an intersection or junction, then ...\"\n- The consequent is another implication:  \n  `approaching_from_right_of(other, ego) -> (...)`  \n  So, \"If the other vehicle is approaching from the right side of the ego vehicle, then ...\"\n- The innermost part is:  \n  `(yield(ego, other) U_[0,∞) proceed(ego))`  \n  \"The ego vehicle must yield to the other vehicle until, at some future point (within an unbounded interval), the ego vehicle proceeds.\"\n- Each predicate, per the rules:\n  - `at_intersection_or_junction(ego)`: Ego vehicle is at an intersection or junction.\n  - `approaching_from_right_of(other, ego)`: Other vehicle is approaching from the right side of ego vehicle.\n  - `yield(ego, other)`: Ego vehicle yields to other vehicle.\n  - `proceed(ego)`: Ego vehicle proceeds."
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.179275989532471,
+      "token_usage": {
+        "prompt_tokens": 4862,
+        "completion_tokens": 585,
+        "total_tokens": 5447
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_other\",\n            \"name\": \"other\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_intersection\",\n            \"name\": \"intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_junction\",\n            \"name\": \"junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"at_intersection\",\n            \"variable\": \"ego_at_intersection\",\n            \"description\": \"Ego vehicle is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"at_junction\",\n            \"variable\": \"ego_at_junction\",\n            \"description\": \"Ego vehicle is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"approaching_from_right_of\",\n            \"variable\": \"other_approaching_right_of_ego\",\n            \"description\": \"Other vehicle is approaching from right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_other\",\n            \"predicate\": \"yield\",\n            \"variable\": \"ego_yields_to_other\",\n            \"description\": \"Ego vehicle yields to other vehicle\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"contextual_implication\",\n            \"antecedent\": \"(ego_at_intersection | ego_at_junction)\",\n            \"consequent\": \"(approaching_from_right_of(other, ego) -> yield(ego, other))\",\n            \"description\": \"Whenever the ego vehicle is at an intersection or junction, if another vehicle is approaching from the right side of ego, ego must yield to that vehicle.\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Contextual (Whenever at intersection or junction)\",\n    \"lexicon\": {\n        \"ego_at_intersection\": \"Ego vehicle is at an intersection\",\n        \"ego_at_junction\": \"Ego vehicle is at a junction\",\n        \"other_approaching_right_of_ego\": \"Other vehicle is approaching from right side of ego\",\n        \"ego_yields_to_other\": \"Ego vehicle yields to other vehicle\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "at_intersection",
+            "variable": "ego_at_intersection",
+            "description": "Ego vehicle is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "at_junction",
+            "variable": "ego_at_junction",
+            "description": "Ego vehicle is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "approaching_from_right_of",
+            "variable": "other_approaching_right_of_ego",
+            "description": "Other vehicle is approaching from right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "yield",
+            "variable": "ego_yields_to_other",
+            "description": "Ego vehicle yields to other vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "contextual_implication",
+            "antecedent": "(ego_at_intersection | ego_at_junction)",
+            "consequent": "(approaching_from_right_of(other, ego) -> yield(ego, other))",
+            "description": "Whenever the ego vehicle is at an intersection or junction, if another vehicle is approaching from the right side of ego, ego must yield to that vehicle."
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Contextual (Whenever at intersection or junction)",
+        "lexicon": {
+          "ego_at_intersection": "Ego vehicle is at an intersection",
+          "ego_at_junction": "Ego vehicle is at a junction",
+          "other_approaching_right_of_ego": "Other vehicle is approaching from right side of ego",
+          "ego_yields_to_other": "Ego vehicle yields to other vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 4.178952217102051,
+      "token_usage": {
+        "prompt_tokens": 5193,
+        "completion_tokens": 386,
+        "total_tokens": 5579
+      },
+      "agent_response": "Reasoning Process:\n\nStep 1: Parse the \"objects\" list to build ID→name mapping:\n- obj_ego → \"ego\"\n- obj_other → \"other\"\n- obj_intersection → \"intersection\"\n- obj_junction → \"junction\"\n\nStep 2: Extract atomic propositions and construct predicate(object) forms:\n- ap_1: predicate = \"at_intersection\", object = \"obj_ego\" → at_intersection(ego)\n- ap_2: predicate = \"at_junction\", object = \"obj_ego\" → at_junction(ego)\n- ap_3: predicate = \"approaching_from_right_of\", object = \"obj_other\", related_object = \"obj_ego\" → approaching_from_right_of(other, ego)\n- ap_4: predicate = \"yield\", object = \"obj_ego\", related_object = \"obj_other\" → yield(ego, other)\n\nStep 3: Analyze temporal relation:\n- Type: contextual_implication\n- Antecedent: (ego_at_intersection | ego_at_junction) → (at_intersection(ego) | at_junction(ego))\n- Consequent: (approaching_from_right_of(other, ego) -> yield(ego, other))\n- The implication applies \"whenever\" ego is at intersection OR junction.\n\nStep 4: Construct MTL formula:\n- Use the global operator to encode \"whenever at intersection or junction\".\n- The inner implication: if a vehicle is approaching from the right, ego must yield.\n- Compose as: G((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))\n\nFinal MTL Formula:\nG((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+        "synthesis_reasoning": "Step 1: Parse the \"objects\" list to build ID→name mapping:\n- obj_ego → \"ego\"\n- obj_other → \"other\"\n- obj_intersection → \"intersection\"\n- obj_junction → \"junction\"\n\nStep 2: Extract atomic propositions and construct predicate(object) forms:\n- ap_1: predicate = \"at_intersection\", object = \"obj_ego\" → at_intersection(ego)\n- ap_2: predicate = \"at_junction\", object = \"obj_ego\" → at_junction(ego)\n- ap_3: predicate = \"approaching_from_right_of\", object = \"obj_other\", related_object = \"obj_ego\" → approaching_from_right_of(other, ego)\n- ap_4: predicate = \"yield\", object = \"obj_ego\", related_object = \"obj_other\" → yield(ego, other)\n\nStep 3: Analyze temporal relation:\n- Type: contextual_implication\n- Antecedent: (ego_at_intersection | ego_at_junction) → (at_intersection(ego) | at_junction(ego))\n- Consequent: (approaching_from_right_of(other, ego) -> yield(ego, other))\n- The implication applies \"whenever\" ego is at intersection OR junction.\n\nStep 4: Construct MTL formula:\n- Use the global operator to encode \"whenever at intersection or junction\".\n- The inner implication: if a vehicle is approaching from the right, ego must yield.\n- Compose as: G((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 6.867508172988892,
+      "token_usage": {
+        "prompt_tokens": 1485,
+        "completion_tokens": 366,
+        "total_tokens": 1851
+      },
+      "agent_response": "**Reasoning Process:**\n\n1. **Formula Structure:**  \n   The formula is:  \n   `G((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))`  \n   This is a nested implication under a global operator.\n\n2. **Global Operator (`G`):**  \n   The `G` operator means \"always\" or \"at all times\".\n\n3. **Disjunction (`|`) in Antecedent:**\n   - `at_intersection(ego)`: The ego vehicle is at an intersection.\n   - `at_junction(ego)`: The ego vehicle is at a junction.\n   - Combined as: \"the ego vehicle is at an intersection or at a junction\".\n\n4. **Nested Implication:**  \n   - `approaching_from_right_of(other, ego)`: The other vehicle is approaching from the right side of the ego vehicle.\n   - `yield(ego, other)`: The ego vehicle yields to the other vehicle.\n   - `approaching_from_right_of(other, ego) -> yield(ego, other)`: If the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle.\n\n5. **Overall Structure:**  \n   - Whenever the ego vehicle is at an intersection or at a junction, if another vehicle is approaching from the right, the ego must yield to that vehicle.\n   - This condition must hold at all times (\"always\"/\"globally\").\n\n---\n\n**Natural Language Translation:**\n\nAt all times, whenever the ego vehicle is at an intersection or at a junction, if another vehicle is approaching from the right side of the ego vehicle, then the ego vehicle must yield to the other vehicle.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "**\n\nAt all times, whenever the ego vehicle is at an intersection or at a junction, if another vehicle is approaching from the right side of the ego vehicle, then the ego vehicle must yield to the other vehicle.",
+        "similarity_score": 0.8485047817230225,
+        "verification_passed": false,
+        "verification_reasoning": "**\n\n1. **Formula Structure:**  \n   The formula is:  \n   `G((at_intersection(ego) | at_junction(ego)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))`  \n   This is a nested implication under a global operator.\n\n2. **Global Operator (`G`):**  \n   The `G` operator means \"always\" or \"at all times\".\n\n3. **Disjunction (`|`) in Antecedent:**\n   - `at_intersection(ego)`: The ego vehicle is at an intersection.\n   - `at_junction(ego)`: The ego vehicle is at a junction.\n   - Combined as: \"the ego vehicle is at an intersection or at a junction\".\n\n4. **Nested Implication:**  \n   - `approaching_from_right_of(other, ego)`: The other vehicle is approaching from the right side of the ego vehicle.\n   - `yield(ego, other)`: The ego vehicle yields to the other vehicle.\n   - `approaching_from_right_of(other, ego) -> yield(ego, other)`: If the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle.\n\n5. **Overall Structure:**  \n   - Whenever the ego vehicle is at an intersection or at a junction, if another vehicle is approaching from the right, the ego must yield to that vehicle.\n   - This condition must hold at all times (\"always\"/\"globally\").\n\n---\n\n**"
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.840014934539795,
+      "token_usage": {
+        "prompt_tokens": 6487,
+        "completion_tokens": 582,
+        "total_tokens": 7069
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_other\",\n            \"name\": \"other\",\n            \"type\": \"vehicle\"\n        },\n        {\n            \"id\": \"obj_intersection\",\n            \"name\": \"intersection\",\n            \"type\": \"location\"\n        },\n        {\n            \"id\": \"obj_junction\",\n            \"name\": \"junction\",\n            \"type\": \"location\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_intersection\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"ego_at_intersection\",\n            \"description\": \"Ego vehicle is at an intersection\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_junction\",\n            \"predicate\": \"at_location\",\n            \"variable\": \"ego_at_junction\",\n            \"description\": \"Ego vehicle is at a junction\"\n        },\n        {\n            \"id\": \"ap_3\",\n            \"object\": \"obj_other\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"approaching_from_right_of\",\n            \"variable\": \"other_approaching_right\",\n            \"description\": \"Other vehicle is approaching from the right side of ego\"\n        },\n        {\n            \"id\": \"ap_4\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_other\",\n            \"predicate\": \"yield\",\n            \"variable\": \"ego_yields_to_other\",\n            \"description\": \"Ego vehicle yields to other vehicle\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"universal_contextual_implication\",\n            \"antecedent\": \"(ego_at_intersection | ego_at_junction)\",\n            \"consequent\": \"forall other: (other_approaching_right -> ego_yields_to_other)\",\n            \"description\": \"Whenever the ego vehicle is at an intersection or junction, it must yield to every other vehicle approaching from the right side of ego.\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Contextual (Whenever at intersection or junction)\",\n    \"lexicon\": {\n        \"ego_at_intersection\": \"Ego vehicle is at an intersection\",\n        \"ego_at_junction\": \"Ego vehicle is at a junction\",\n        \"other_approaching_right\": \"Other vehicle is approaching from the right side of ego\",\n        \"ego_yields_to_other\": \"Ego vehicle yields to other vehicle\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": "obj_intersection",
+            "predicate": "at_location",
+            "variable": "ego_at_intersection",
+            "description": "Ego vehicle is at an intersection"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": "obj_junction",
+            "predicate": "at_location",
+            "variable": "ego_at_junction",
+            "description": "Ego vehicle is at a junction"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "approaching_from_right_of",
+            "variable": "other_approaching_right",
+            "description": "Other vehicle is approaching from the right side of ego"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "yield",
+            "variable": "ego_yields_to_other",
+            "description": "Ego vehicle yields to other vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "universal_contextual_implication",
+            "antecedent": "(ego_at_intersection | ego_at_junction)",
+            "consequent": "forall other: (other_approaching_right -> ego_yields_to_other)",
+            "description": "Whenever the ego vehicle is at an intersection or junction, it must yield to every other vehicle approaching from the right side of ego."
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Contextual (Whenever at intersection or junction)",
+        "lexicon": {
+          "ego_at_intersection": "Ego vehicle is at an intersection",
+          "ego_at_junction": "Ego vehicle is at a junction",
+          "other_approaching_right": "Other vehicle is approaching from the right side of ego",
+          "ego_yields_to_other": "Ego vehicle yields to other vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 5.879334926605225,
+      "token_usage": {
+        "prompt_tokens": 6815,
+        "completion_tokens": 601,
+        "total_tokens": 7416
+      },
+      "agent_response": "Reasoning Process:\n1. **Object Mapping**:  \n   - Parse the \"objects\" list for ID-to-name mapping:\n     - `obj_ego` → \"ego\"\n     - `obj_other` → \"other\"\n     - `obj_intersection` → \"intersection\"\n     - `obj_junction` → \"junction\"\n\n2. **Atomic Proposition Construction**:  \n   - ap_1:  \n     - predicate: \"at_location\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"intersection\" (`obj_intersection`)\n     - → **at_location(ego, intersection)**\n   - ap_2:  \n     - predicate: \"at_location\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"junction\" (`obj_junction`)\n     - → **at_location(ego, junction)**\n   - ap_3:  \n     - predicate: \"approaching_from_right_of\"\n     - object: \"other\" (`obj_other`)\n     - related_object: \"ego\" (`obj_ego`)\n     - → **approaching_from_right_of(other, ego)**\n   - ap_4:  \n     - predicate: \"yield\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"other\" (`obj_other`)\n     - → **yield(ego, other)**\n\n3. **Temporal Relation Decomposition**:  \n   - Universal contextual implication:  \n     - Antecedent: `(ego_at_intersection | ego_at_junction)`  \n     - Consequent: `forall other: (other_approaching_right -> ego_yields_to_other)`  \n   - Using atomic predicates:  \n     - Antecedent: `(at_location(ego, intersection) | at_location(ego, junction))`\n     - Consequent: For every \"other\", if \"other\" is approaching from right of ego, then ego yields to other:\n       - Since only one \"other\" is specified, quantification will be represented over \"other\".\n       - → `(approaching_from_right_of(other, ego) -> yield(ego, other))`\n\n4. **Global Property Application**:  \n   - Contextual: \"Whenever at intersection or junction\"\n   - Use `G` (Globally), but apply implication only when the context (antecedent) holds.\n\n5. **Formula Assembly**:  \n   - Combine antecedent and consequent with implication, using MTL syntax and predicate(object) format.\n   - Final structure:  \n     **G((at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))**\n\nFinal MTL Formula:\nG((at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G((at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))",
+        "synthesis_reasoning": "1. **Object Mapping**:  \n   - Parse the \"objects\" list for ID-to-name mapping:\n     - `obj_ego` → \"ego\"\n     - `obj_other` → \"other\"\n     - `obj_intersection` → \"intersection\"\n     - `obj_junction` → \"junction\"\n\n2. **Atomic Proposition Construction**:  \n   - ap_1:  \n     - predicate: \"at_location\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"intersection\" (`obj_intersection`)\n     - → **at_location(ego, intersection)**\n   - ap_2:  \n     - predicate: \"at_location\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"junction\" (`obj_junction`)\n     - → **at_location(ego, junction)**\n   - ap_3:  \n     - predicate: \"approaching_from_right_of\"\n     - object: \"other\" (`obj_other`)\n     - related_object: \"ego\" (`obj_ego`)\n     - → **approaching_from_right_of(other, ego)**\n   - ap_4:  \n     - predicate: \"yield\"\n     - object: \"ego\" (`obj_ego`)\n     - related_object: \"other\" (`obj_other`)\n     - → **yield(ego, other)**\n\n3. **Temporal Relation Decomposition**:  \n   - Universal contextual implication:  \n     - Antecedent: `(ego_at_intersection | ego_at_junction)`  \n     - Consequent: `forall other: (other_approaching_right -> ego_yields_to_other)`  \n   - Using atomic predicates:  \n     - Antecedent: `(at_location(ego, intersection) | at_location(ego, junction))`\n     - Consequent: For every \"other\", if \"other\" is approaching from right of ego, then ego yields to other:\n       - Since only one \"other\" is specified, quantification will be represented over \"other\".\n       - → `(approaching_from_right_of(other, ego) -> yield(ego, other))`\n\n4. **Global Property Application**:  \n   - Contextual: \"Whenever at intersection or junction\"\n   - Use `G` (Globally), but apply implication only when the context (antecedent) holds.\n\n5. **Formula Assembly**:  \n   - Combine antecedent and consequent with implication, using MTL syntax and predicate(object) format.\n   - Final structure:  \n     **G((at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other)))**",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 6.393573045730591,
+      "token_usage": {
+        "prompt_tokens": 1485,
+        "completion_tokens": 312,
+        "total_tokens": 1797
+      },
+      "agent_response": "Reasoning Process:\n- The outermost operator is `G`, meaning \"always\" or \"at all times\".\n- The main implication is:  \n  `(at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other))`\n- Breaking down the inner implications:\n    - `at_location(ego, intersection) | at_location(ego, junction)`: This means \"ego vehicle is at an intersection or at a junction\".\n    - `approaching_from_right_of(other, ego)`: The \"other vehicle is approaching from the right side of the ego vehicle\".\n    - `yield(ego, other)`: \"Ego vehicle yields to the other vehicle\".\n- The nested implication `(approaching_from_right_of(other, ego) -> yield(ego, other))` means \"if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle\".\n- The full structure is:  \n  \"Whenever the ego vehicle is at an intersection or at a junction, if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle\".\n- The `G` operator requires this rule to hold at all times.\n\nNatural Language Translation:\nAt all times, whenever the ego vehicle is at an intersection or at a junction, if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "At all times, whenever the ego vehicle is at an intersection or at a junction, if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle.",
+        "similarity_score": 0.8505114316940308,
+        "verification_passed": true,
+        "verification_reasoning": "- The outermost operator is `G`, meaning \"always\" or \"at all times\".\n- The main implication is:  \n  `(at_location(ego, intersection) | at_location(ego, junction)) -> (approaching_from_right_of(other, ego) -> yield(ego, other))`\n- Breaking down the inner implications:\n    - `at_location(ego, intersection) | at_location(ego, junction)`: This means \"ego vehicle is at an intersection or at a junction\".\n    - `approaching_from_right_of(other, ego)`: The \"other vehicle is approaching from the right side of the ego vehicle\".\n    - `yield(ego, other)`: \"Ego vehicle yields to the other vehicle\".\n- The nested implication `(approaching_from_right_of(other, ego) -> yield(ego, other))` means \"if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle\".\n- The full structure is:  \n  \"Whenever the ego vehicle is at an intersection or at a junction, if the other vehicle is approaching from the right side of the ego vehicle, then the ego vehicle yields to the other vehicle\".\n- The `G` operator requires this rule to hold at all times."
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": false
+  },
+  "timestamp": "2025-10-28 23:10:33"
+}

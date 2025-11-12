@@ -1,0 +1,136 @@
+{
+  "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+  "input_sentence": "ego vehicle shall not overtake the vehicle in front until vehichle behind the ego is overtaking the ego vehicle.",
+  "final_mtl_formula": "G(~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego))",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.914)",
+  "total_processing_time": 31.213502883911133,
+  "total_token_usage": {
+    "prompt_tokens": 5356,
+    "completion_tokens": 786,
+    "total_tokens": 6142
+  },
+  "refinement_iterations": 0,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 13.647807836532593,
+      "token_usage": {
+        "prompt_tokens": 1907,
+        "completion_tokens": 359,
+        "total_tokens": 2266
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\"id\": \"obj_ego\", \"name\": \"ego\", \"type\": \"vehicle\"},\n        {\"id\": \"obj_vehicle_front\", \"name\": \"vehicle_front\", \"type\": \"vehicle\"},\n        {\"id\": \"obj_vehicle_behind\", \"name\": \"vehicle_behind\", \"type\": \"vehicle\"}\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": \"obj_vehicle_front\",\n            \"predicate\": \"overtake\",\n            \"variable\": \"ego_overtakes_front\",\n            \"description\": \"Ego vehicle overtakes the vehicle in front\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_vehicle_behind\",\n            \"related_object\": \"obj_ego\",\n            \"predicate\": \"overtake\",\n            \"variable\": \"behind_overtakes_ego\",\n            \"description\": \"Vehicle behind overtakes ego vehicle\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"until\",\n            \"antecedent\": \"~ego_overtakes_front\",\n            \"consequent\": \"behind_overtakes_ego\",\n            \"description\": \"Ego shall not overtake vehicle in front until vehicle behind overtakes ego\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_overtakes_front\": \"Ego vehicle overtakes the vehicle in front\",\n        \"behind_overtakes_ego\": \"Vehicle behind overtakes ego vehicle\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": "obj_vehicle_front",
+            "predicate": "overtake",
+            "variable": "ego_overtakes_front",
+            "description": "Ego vehicle overtakes the vehicle in front"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_vehicle_behind",
+            "related_object": "obj_ego",
+            "predicate": "overtake",
+            "variable": "behind_overtakes_ego",
+            "description": "Vehicle behind overtakes ego vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "until",
+            "antecedent": "~ego_overtakes_front",
+            "consequent": "behind_overtakes_ego",
+            "description": "Ego shall not overtake vehicle in front until vehicle behind overtakes ego"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_overtakes_front": "Ego vehicle overtakes the vehicle in front",
+          "behind_overtakes_ego": "Vehicle behind overtakes ego vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 10.198471069335938,
+      "token_usage": {
+        "prompt_tokens": 1988,
+        "completion_tokens": 258,
+        "total_tokens": 2246
+      },
+      "agent_response": "Reasoning Process:\n1. Extract object mapping from \"objects\" list:\n   - obj_ego → ego\n   - obj_vehicle_front → vehicle_front\n   - obj_vehicle_behind → vehicle_behind\n\n2. Construct predicate(object) forms for atomic propositions:\n   - ap_1: overtake(ego, vehicle_front) [from: predicate=\"overtake\", object=\"obj_ego\", related_object=\"obj_vehicle_front\"]\n   - ap_2: overtake(vehicle_behind, ego) [from: predicate=\"overtake\", object=\"obj_vehicle_behind\", related_object=\"obj_ego\"]\n\n3. Apply temporal relation \"until\":\n   - Antecedent: ~overtake(ego, vehicle_front)\n   - Consequent: overtake(vehicle_behind, ego)\n   - Construct: ~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego)\n\n4. Apply global property \"Always\":\n   - Wrap entire formula with G operator: G(~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego))\n\nFinal MTL Formula:\nG(~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G(~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego))",
+        "synthesis_reasoning": "1. Extract object mapping from \"objects\" list:\n   - obj_ego → ego\n   - obj_vehicle_front → vehicle_front\n   - obj_vehicle_behind → vehicle_behind\n\n2. Construct predicate(object) forms for atomic propositions:\n   - ap_1: overtake(ego, vehicle_front) [from: predicate=\"overtake\", object=\"obj_ego\", related_object=\"obj_vehicle_front\"]\n   - ap_2: overtake(vehicle_behind, ego) [from: predicate=\"overtake\", object=\"obj_vehicle_behind\", related_object=\"obj_ego\"]\n\n3. Apply temporal relation \"until\":\n   - Antecedent: ~overtake(ego, vehicle_front)\n   - Consequent: overtake(vehicle_behind, ego)\n   - Construct: ~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego)\n\n4. Apply global property \"Always\":\n   - Wrap entire formula with G operator: G(~overtake(ego, vehicle_front) U overtake(vehicle_behind, ego))",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 7.367096900939941,
+      "token_usage": {
+        "prompt_tokens": 1461,
+        "completion_tokens": 169,
+        "total_tokens": 1630
+      },
+      "agent_response": "Reasoning Process:\n- The formula uses the globally operator `G` which means \"always\" or \"continuously\"\n- The until operator `U` has no time bounds specified, meaning it applies over the entire timeline\n- The predicate `overtake(ego, vehicle_front)` represents \"ego overtakes the vehicle in front\"\n- The predicate `overtake(vehicle_behind, ego)` represents \"the vehicle behind overtakes ego\"\n- The negation operator `~` applied to `overtake(ego, vehicle_front)` means \"ego does NOT overtake the vehicle in front\"\n- The structure `G(φ U ψ)` means \"always, φ holds until ψ occurs\"\n\nNatural Language Translation:\nAlways, the ego vehicle does not overtake the vehicle in front until the vehicle behind overtakes the ego vehicle.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "Always, the ego vehicle does not overtake the vehicle in front until the vehicle behind overtakes the ego vehicle.",
+        "similarity_score": 0.9142529964447021,
+        "verification_passed": true,
+        "verification_reasoning": "- The formula uses the globally operator `G` which means \"always\" or \"continuously\"\n- The until operator `U` has no time bounds specified, meaning it applies over the entire timeline\n- The predicate `overtake(ego, vehicle_front)` represents \"ego overtakes the vehicle in front\"\n- The predicate `overtake(vehicle_behind, ego)` represents \"the vehicle behind overtakes ego\"\n- The negation operator `~` applied to `overtake(ego, vehicle_front)` means \"ego does NOT overtake the vehicle in front\"\n- The structure `G(φ U ψ)` means \"always, φ holds until ψ occurs\""
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "deepseek-chat",
+        "temperature": 0.7,
+        "api_key_env": "DEEPSEEK_API_KEY",
+        "base_url_env": "DEEPSEEK_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": false
+  },
+  "timestamp": "2025-10-22 23:45:44"
+}

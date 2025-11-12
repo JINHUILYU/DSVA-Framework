@@ -1,0 +1,186 @@
+{
+  "framework": "DSVA with Dynamic Examples",
+  "input_sentence": "if ego vehicle is turning left and there is no relevent traffic light for the ego and other vehicle is going to turn right or going straight and other vehicle is onto the oncoming lane of ego then in this case ego shall yield to other vehicle.",
+  "final_mtl_formula": "G( (turning_left(ego) & ~relevant_for(traffic_light,ego) & (turning_right(other) | going_straight(other)) & on_oncoming_lane_of(other,ego)) -> yield(ego,other))",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.956)",
+  "total_processing_time": 14.630507946014404,
+  "total_token_usage": {
+    "prompt_tokens": 8340,
+    "completion_tokens": 1402,
+    "total_tokens": 9742
+  },
+  "refinement_iterations": 0,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 6.514863967895508,
+      "token_usage": {
+        "prompt_tokens": 3846,
+        "completion_tokens": 682,
+        "total_tokens": 4528
+      },
+      "agent_response": "```json\n{\n  \"objects\": [\n    {\"id\": \"obj_ego\", \"name\": \"ego\", \"type\": \"vehicle\"},\n    {\"id\": \"obj_other\", \"name\": \"other\", \"type\": \"vehicle\"},\n    {\"id\": \"obj_traffic_light\", \"name\": \"traffic_light\", \"type\": \"traffic_control\"}\n  ],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"object\": \"obj_ego\",\n      \"predicate\": \"turning_left\",\n      \"variable\": \"ego_turning_left\",\n      \"description\": \"Ego vehicle is turning left\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"object\": \"obj_traffic_light\",\n      \"related_object\": \"obj_ego\",\n      \"predicate\": \"relevant_for\",\n      \"variable\": \"relevant_traffic_light_for_ego\",\n      \"description\": \"There is a relevant traffic light for ego\"\n    },\n    {\n      \"id\": \"ap_3\",\n      \"object\": \"obj_other\",\n      \"predicate\": \"turning_right\",\n      \"variable\": \"other_turning_right\",\n      \"description\": \"Other vehicle is turning right\"\n    },\n    {\n      \"id\": \"ap_4\",\n      \"object\": \"obj_other\",\n      \"predicate\": \"going_straight\",\n      \"variable\": \"other_going_straight\",\n      \"description\": \"Other vehicle is going straight\"\n    },\n    {\n      \"id\": \"ap_5\",\n      \"object\": \"obj_other\",\n      \"related_object\": \"obj_ego\",\n      \"predicate\": \"on_oncoming_lane_of\",\n      \"variable\": \"other_on_oncoming_lane_of_ego\",\n      \"description\": \"Other vehicle is on the oncoming lane of ego\"\n    },\n    {\n      \"id\": \"ap_6\",\n      \"object\": \"obj_ego\",\n      \"related_object\": \"obj_other\",\n      \"predicate\": \"yield\",\n      \"variable\": \"ego_yields_to_other\",\n      \"description\": \"Ego yields to other vehicle\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"conditional\",\n      \"antecedent\": \"ap_1 & ~ap_2 & (ap_3 | ap_4) & ap_5\",\n      \"consequent\": \"ap_6\",\n      \"description\": \"If ego is turning left, there is no relevant traffic light for ego, and other is turning right or going straight and on the oncoming lane of ego, then ego must yield to other\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"ego_turning_left\": \"Ego vehicle is turning left\",\n    \"relevant_traffic_light_for_ego\": \"There is a relevant traffic light for ego\",\n    \"other_turning_right\": \"Other vehicle is turning right\",\n    \"other_going_straight\": \"Other vehicle is going straight\",\n    \"other_on_oncoming_lane_of_ego\": \"Other vehicle is on the oncoming lane of ego\",\n    \"ego_yields_to_other\": \"Ego yields to other vehicle\"\n  }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "predicate": "turning_left",
+            "variable": "ego_turning_left",
+            "description": "Ego vehicle is turning left"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_traffic_light",
+            "related_object": "obj_ego",
+            "predicate": "relevant_for",
+            "variable": "relevant_traffic_light_for_ego",
+            "description": "There is a relevant traffic light for ego"
+          },
+          {
+            "id": "ap_3",
+            "object": "obj_other",
+            "predicate": "turning_right",
+            "variable": "other_turning_right",
+            "description": "Other vehicle is turning right"
+          },
+          {
+            "id": "ap_4",
+            "object": "obj_other",
+            "predicate": "going_straight",
+            "variable": "other_going_straight",
+            "description": "Other vehicle is going straight"
+          },
+          {
+            "id": "ap_5",
+            "object": "obj_other",
+            "related_object": "obj_ego",
+            "predicate": "on_oncoming_lane_of",
+            "variable": "other_on_oncoming_lane_of_ego",
+            "description": "Other vehicle is on the oncoming lane of ego"
+          },
+          {
+            "id": "ap_6",
+            "object": "obj_ego",
+            "related_object": "obj_other",
+            "predicate": "yield",
+            "variable": "ego_yields_to_other",
+            "description": "Ego yields to other vehicle"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "conditional",
+            "antecedent": "ap_1 & ~ap_2 & (ap_3 | ap_4) & ap_5",
+            "consequent": "ap_6",
+            "description": "If ego is turning left, there is no relevant traffic light for ego, and other is turning right or going straight and on the oncoming lane of ego, then ego must yield to other"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_turning_left": "Ego vehicle is turning left",
+          "relevant_traffic_light_for_ego": "There is a relevant traffic light for ego",
+          "other_turning_right": "Other vehicle is turning right",
+          "other_going_straight": "Other vehicle is going straight",
+          "other_on_oncoming_lane_of_ego": "Other vehicle is on the oncoming lane of ego",
+          "ego_yields_to_other": "Ego yields to other vehicle"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 5.246659278869629,
+      "token_usage": {
+        "prompt_tokens": 2629,
+        "completion_tokens": 471,
+        "total_tokens": 3100
+      },
+      "agent_response": "Reasoning Process:\n1. **Object Mapping**:  \n   - \"obj_ego\" → \"ego\"  \n   - \"obj_other\" → \"other\"  \n   - \"obj_traffic_light\" → \"traffic_light\"  \n\n2. **Atomic Proposition Extraction and Predicate Construction**:  \n   - ap_1: predicate = \"turning_left\", object = \"ego\" → **turning_left(ego)**\n   - ap_2: predicate = \"relevant_for\", object = \"traffic_light\", related_object = \"ego\" → **relevant_for(traffic_light,ego)**\n   - ap_3: predicate = \"turning_right\", object = \"other\" → **turning_right(other)**\n   - ap_4: predicate = \"going_straight\", object = \"other\" → **going_straight(other)**\n   - ap_5: predicate = \"on_oncoming_lane_of\", object = \"other\", related_object = \"ego\" → **on_oncoming_lane_of(other,ego)**\n   - ap_6: predicate = \"yield\", object = \"ego\", related_object = \"other\" → **yield(ego,other)**\n\n3. **Antecedent Construction**:  \n   Parse antecedent from temporal_relations:  \n   - ap_1 & ~ap_2 & (ap_3 | ap_4) & ap_5  \n   Substitute with predicate(object) forms:  \n   - turning_left(ego) & ~relevant_for(traffic_light,ego) & (turning_right(other) | going_straight(other)) & on_oncoming_lane_of(other,ego)\n\n4. **Consequent Construction**:  \n   - ap_6 → yield(ego,other)\n\n5. **Temporal Operator Application**:  \n   - \"global_property\": \"Always\" → Use **G(...)** (Globally)\n   - Final implication:  \n     G( [Antecedent] -> [Consequent] )\n\nFinal MTL Formula:\nG( (turning_left(ego) & ~relevant_for(traffic_light,ego) & (turning_right(other) | going_straight(other)) & on_oncoming_lane_of(other,ego)) -> yield(ego,other) )",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G( (turning_left(ego) & ~relevant_for(traffic_light,ego) & (turning_right(other) | going_straight(other)) & on_oncoming_lane_of(other,ego)) -> yield(ego,other))",
+        "synthesis_reasoning": "1. **Object Mapping**:  \n   - \"obj_ego\" → \"ego\"  \n   - \"obj_other\" → \"other\"  \n   - \"obj_traffic_light\" → \"traffic_light\"  \n\n2. **Atomic Proposition Extraction and Predicate Construction**:  \n   - ap_1: predicate = \"turning_left\", object = \"ego\" → **turning_left(ego)**\n   - ap_2: predicate = \"relevant_for\", object = \"traffic_light\", related_object = \"ego\" → **relevant_for(traffic_light,ego)**\n   - ap_3: predicate = \"turning_right\", object = \"other\" → **turning_right(other)**\n   - ap_4: predicate = \"going_straight\", object = \"other\" → **going_straight(other)**\n   - ap_5: predicate = \"on_oncoming_lane_of\", object = \"other\", related_object = \"ego\" → **on_oncoming_lane_of(other,ego)**\n   - ap_6: predicate = \"yield\", object = \"ego\", related_object = \"other\" → **yield(ego,other)**\n\n3. **Antecedent Construction**:  \n   Parse antecedent from temporal_relations:  \n   - ap_1 & ~ap_2 & (ap_3 | ap_4) & ap_5  \n   Substitute with predicate(object) forms:  \n   - turning_left(ego) & ~relevant_for(traffic_light,ego) & (turning_right(other) | going_straight(other)) & on_oncoming_lane_of(other,ego)\n\n4. **Consequent Construction**:  \n   - ap_6 → yield(ego,other)\n\n5. **Temporal Operator Application**:  \n   - \"global_property\": \"Always\" → Use **G(...)** (Globally)\n   - Final implication:  \n     G( [Antecedent] -> [Consequent] )",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 2.868767023086548,
+      "token_usage": {
+        "prompt_tokens": 1865,
+        "completion_tokens": 249,
+        "total_tokens": 2114
+      },
+      "agent_response": "Reasoning Process:\n- The formula is under the global operator `G`, meaning \"always\" or \"at all times\".\n- The implication structure is: if certain conditions (`A`) are met, then a specific action (`B`) must occur.\n- Antecedent `(A)` conditions:\n  - `turning_left(ego)`: ego vehicle is turning left.\n  - `~relevant_for(traffic_light,ego)`: there is no relevant traffic light for ego vehicle (the traffic light is not relevant to ego).\n  - `(turning_right(other) | going_straight(other))`: other vehicle is either turning right or going straight.\n  - `on_oncoming_lane_of(other,ego)`: other vehicle is on the oncoming lane relative to ego vehicle.\n- Consequent `(B)` action:\n  - `yield(ego,other)`: ego yields to other vehicle.\n\nNatural Language Translation:\nAlways, if the ego vehicle is turning left, and there is no relevant traffic light for the ego vehicle, and the other vehicle is either turning right or going straight, and the other vehicle is on the oncoming lane of the ego vehicle, then the ego vehicle must yield to the other vehicle.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "Always, if the ego vehicle is turning left, and there is no relevant traffic light for the ego vehicle, and the other vehicle is either turning right or going straight, and the other vehicle is on the oncoming lane of the ego vehicle, then the ego vehicle must yield to the other vehicle.",
+        "similarity_score": 0.9562200307846069,
+        "verification_passed": true,
+        "verification_reasoning": "- The formula is under the global operator `G`, meaning \"always\" or \"at all times\".\n- The implication structure is: if certain conditions (`A`) are met, then a specific action (`B`) must occur.\n- Antecedent `(A)` conditions:\n  - `turning_left(ego)`: ego vehicle is turning left.\n  - `~relevant_for(traffic_light,ego)`: there is no relevant traffic light for ego vehicle (the traffic light is not relevant to ego).\n  - `(turning_right(other) | going_straight(other))`: other vehicle is either turning right or going straight.\n  - `on_oncoming_lane_of(other,ego)`: other vehicle is on the oncoming lane relative to ego vehicle.\n- Consequent `(B)` action:\n  - `yield(ego,other)`: ego yields to other vehicle."
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": true,
+    "example_retrieval": {
+      "enabled": true,
+      "top_k": 3,
+      "similarity_threshold": 0.3,
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "sources": [
+        {
+          "path": "data/examples/dsv_examples.json",
+          "type": "json",
+          "stages": [
+            "deconstruct",
+            "synthesize",
+            "verify"
+          ]
+        }
+      ]
+    }
+  },
+  "timestamp": "2025-10-20 22:35:23"
+}

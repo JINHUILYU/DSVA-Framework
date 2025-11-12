@@ -1,0 +1,303 @@
+{
+  "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+  "input_sentence": "Making U-turns and reversing is prohibited by ego vehicle.",
+  "final_mtl_formula": "G(prohibits_making_u_turn(ego) & prohibits_reversing(ego))",
+  "success": true,
+  "termination_reason": "Verification passed (similarity: 0.919)",
+  "total_processing_time": 77.54706811904907,
+  "total_token_usage": {
+    "prompt_tokens": 23669,
+    "completion_tokens": 3965,
+    "total_tokens": 27634
+  },
+  "refinement_iterations": 2,
+  "stage_results": [
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.3850321769714355,
+      "token_usage": {
+        "prompt_tokens": 1863,
+        "completion_tokens": 291,
+        "total_tokens": 2154
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"making_u_turn\",\n            \"variable\": \"ego_u_turn\",\n            \"description\": \"Ego vehicle is making a U-turn\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"reversing\",\n            \"variable\": \"ego_reverse\",\n            \"description\": \"Ego vehicle is reversing\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"global_prohibition\",\n            \"formula\": \"G(~ego_u_turn & ~ego_reverse)\",\n            \"antecedent\": null,\n            \"consequent\": null,\n            \"description\": \"Always, ego vehicle is prohibited from making U-turns and reversing\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_u_turn\": \"Ego vehicle is making a U-turn\",\n        \"ego_reverse\": \"Ego vehicle is reversing\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "making_u_turn",
+            "variable": "ego_u_turn",
+            "description": "Ego vehicle is making a U-turn"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "reversing",
+            "variable": "ego_reverse",
+            "description": "Ego vehicle is reversing"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "global_prohibition",
+            "formula": "G(~ego_u_turn & ~ego_reverse)",
+            "antecedent": null,
+            "consequent": null,
+            "description": "Always, ego vehicle is prohibited from making U-turns and reversing"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_u_turn": "Ego vehicle is making a U-turn",
+          "ego_reverse": "Ego vehicle is reversing"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 2.381521701812744,
+      "token_usage": {
+        "prompt_tokens": 1906,
+        "completion_tokens": 197,
+        "total_tokens": 2103
+      },
+      "agent_response": "Reasoning Process:\nStep 1: Parse the \"objects\" list to build ID→name mapping.\n- \"obj_ego\" → \"ego\"\n\nStep 2: For each atomic proposition:\n- ap_1: predicate = \"making_u_turn\", object = \"obj_ego\", related_object = null → making_u_turn(ego)\n- ap_2: predicate = \"reversing\", object = \"obj_ego\", related_object = null → reversing(ego)\n\nStep 3: Combine predicates using logical operators.\n- The temporal relation is a global prohibition, meaning \"always not making a U-turn\" and \"always not reversing\".\n- In predicate format: ~making_u_turn(ego) & ~reversing(ego)\n\nStep 4: Apply the global property.\n- Wrap the conjunction in the \"G\" operator for \"always\".\n\nFinal MTL Formula:\nG(~making_u_turn(ego) & ~reversing(ego))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G(~making_u_turn(ego) & ~reversing(ego))",
+        "synthesis_reasoning": "Step 1: Parse the \"objects\" list to build ID→name mapping.\n- \"obj_ego\" → \"ego\"\n\nStep 2: For each atomic proposition:\n- ap_1: predicate = \"making_u_turn\", object = \"obj_ego\", related_object = null → making_u_turn(ego)\n- ap_2: predicate = \"reversing\", object = \"obj_ego\", related_object = null → reversing(ego)\n\nStep 3: Combine predicates using logical operators.\n- The temporal relation is a global prohibition, meaning \"always not making a U-turn\" and \"always not reversing\".\n- In predicate format: ~making_u_turn(ego) & ~reversing(ego)\n\nStep 4: Apply the global property.\n- Wrap the conjunction in the \"G\" operator for \"always\".",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 4.173210144042969,
+      "token_usage": {
+        "prompt_tokens": 1430,
+        "completion_tokens": 226,
+        "total_tokens": 1656
+      },
+      "agent_response": "Reasoning Process:\n- The formula is: `G(~making_u_turn(ego) & ~reversing(ego))`\n- `G` is the \"always\" or \"globally\" operator, meaning the enclosed condition must hold at all times.\n- Inside the `G`, we have a conjunction (`&`): `~making_u_turn(ego)` and `~reversing(ego)`.\n- `~` is logical negation (\"not\").\n- `making_u_turn(ego)` represents \"ego vehicle is making a U-turn\".\n- `reversing(ego)` represents \"ego vehicle is reversing\".\n- So, `~making_u_turn(ego)` means \"ego vehicle is not making a U-turn\".\n- `~reversing(ego)` means \"ego vehicle is not reversing\".\n- The conjunction means both conditions must hold simultaneously.\n- Applying the `G`, both \"not making a U-turn\" and \"not reversing\" must always be true for the ego vehicle.\n\nNatural Language Translation:\nThe ego vehicle must never make a U-turn or reverse at any time.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "The ego vehicle must never make a U-turn or reverse at any time.",
+        "similarity_score": 0.817762017250061,
+        "verification_passed": false,
+        "verification_reasoning": "- The formula is: `G(~making_u_turn(ego) & ~reversing(ego))`\n- `G` is the \"always\" or \"globally\" operator, meaning the enclosed condition must hold at all times.\n- Inside the `G`, we have a conjunction (`&`): `~making_u_turn(ego)` and `~reversing(ego)`.\n- `~` is logical negation (\"not\").\n- `making_u_turn(ego)` represents \"ego vehicle is making a U-turn\".\n- `reversing(ego)` represents \"ego vehicle is reversing\".\n- So, `~making_u_turn(ego)` means \"ego vehicle is not making a U-turn\".\n- `~reversing(ego)` means \"ego vehicle is not reversing\".\n- The conjunction means both conditions must hold simultaneously.\n- Applying the `G`, both \"not making a U-turn\" and \"not reversing\" must always be true for the ego vehicle."
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 10.176690816879272,
+      "token_usage": {
+        "prompt_tokens": 3111,
+        "completion_tokens": 313,
+        "total_tokens": 3424
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"prohibits\",\n            \"variable\": \"ego_prohibits_u_turn\",\n            \"description\": \"Ego vehicle prohibits making U-turns\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"prohibits\",\n            \"variable\": \"ego_prohibits_reversing\",\n            \"description\": \"Ego vehicle prohibits reversing\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"global_constraint\",\n            \"formula\": \"G(prohibits(ego, making_u_turn) & prohibits(ego, reversing))\",\n            \"antecedent\": null,\n            \"consequent\": null,\n            \"description\": \"Always, ego vehicle prohibits making U-turns and reversing\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_prohibits_u_turn\": \"Ego vehicle prohibits making U-turns\",\n        \"ego_prohibits_reversing\": \"Ego vehicle prohibits reversing\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "prohibits",
+            "variable": "ego_prohibits_u_turn",
+            "description": "Ego vehicle prohibits making U-turns"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "prohibits",
+            "variable": "ego_prohibits_reversing",
+            "description": "Ego vehicle prohibits reversing"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "global_constraint",
+            "formula": "G(prohibits(ego, making_u_turn) & prohibits(ego, reversing))",
+            "antecedent": null,
+            "consequent": null,
+            "description": "Always, ego vehicle prohibits making U-turns and reversing"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_prohibits_u_turn": "Ego vehicle prohibits making U-turns",
+          "ego_prohibits_reversing": "Ego vehicle prohibits reversing"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 10.22845196723938,
+      "token_usage": {
+        "prompt_tokens": 3177,
+        "completion_tokens": 447,
+        "total_tokens": 3624
+      },
+      "agent_response": "Reasoning Process:\n1. **Parse the \"objects\" list:**  \n   - There is one object:  \n     - ID: `obj_ego`, Name: `ego`, Type: `vehicle`  \n   - Mapping: `obj_ego` → `ego`\n\n2. **Extract atomic propositions:**  \n   - **ap_1:**  \n     - Predicate: `prohibits`  \n     - Object: `obj_ego` → `ego`  \n     - No `related_object` (null)  \n     - Meaning: \"Ego vehicle prohibits making U-turns\"  \n     - In required format: `prohibits(ego)`  \n   - **ap_2:**  \n     - Predicate: `prohibits`  \n     - Object: `obj_ego` → `ego`  \n     - No `related_object` (null)  \n     - Meaning: \"Ego vehicle prohibits reversing\"  \n     - In required format: `prohibits(ego)`\n\n3. **Combine atomic propositions:**  \n   - Both atomic propositions have the same predicate and object, resulting in `prohibits(ego)` for both.  \n   - The semantic sketch indicates two distinct meanings, but the current sketch only allows for `prohibits(ego)`—the specific action being prohibited (making U-turns or reversing) is not disambiguated in predicate/object form.  \n   - Since the sketch uses two distinct atomic propositions but both are rendered as `prohibits(ego)`, they are identical at the formula level.\n\n4. **Temporal operator:**  \n   - Global property is \"Always\": use the `G` (globally) operator.\n\n5. **Synthesize the formula:**  \n   - Both atomic propositions: `prohibits(ego)` & `prohibits(ego)`  \n   - Combined with AND: `prohibits(ego) & prohibits(ego)`  \n   - Apply the global operator: `G(prohibits(ego) & prohibits(ego))`  \n   - This reduces to `G(prohibits(ego))` due to redundancy.\n\nFinal MTL Formula:\nG(prohibits(ego))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G(prohibits(ego))",
+        "synthesis_reasoning": "1. **Parse the \"objects\" list:**  \n   - There is one object:  \n     - ID: `obj_ego`, Name: `ego`, Type: `vehicle`  \n   - Mapping: `obj_ego` → `ego`\n\n2. **Extract atomic propositions:**  \n   - **ap_1:**  \n     - Predicate: `prohibits`  \n     - Object: `obj_ego` → `ego`  \n     - No `related_object` (null)  \n     - Meaning: \"Ego vehicle prohibits making U-turns\"  \n     - In required format: `prohibits(ego)`  \n   - **ap_2:**  \n     - Predicate: `prohibits`  \n     - Object: `obj_ego` → `ego`  \n     - No `related_object` (null)  \n     - Meaning: \"Ego vehicle prohibits reversing\"  \n     - In required format: `prohibits(ego)`\n\n3. **Combine atomic propositions:**  \n   - Both atomic propositions have the same predicate and object, resulting in `prohibits(ego)` for both.  \n   - The semantic sketch indicates two distinct meanings, but the current sketch only allows for `prohibits(ego)`—the specific action being prohibited (making U-turns or reversing) is not disambiguated in predicate/object form.  \n   - Since the sketch uses two distinct atomic propositions but both are rendered as `prohibits(ego)`, they are identical at the formula level.\n\n4. **Temporal operator:**  \n   - Global property is \"Always\": use the `G` (globally) operator.\n\n5. **Synthesize the formula:**  \n   - Both atomic propositions: `prohibits(ego)` & `prohibits(ego)`  \n   - Combined with AND: `prohibits(ego) & prohibits(ego)`  \n   - Apply the global operator: `G(prohibits(ego) & prohibits(ego))`  \n   - This reduces to `G(prohibits(ego))` due to redundancy.",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 3.79349422454834,
+      "token_usage": {
+        "prompt_tokens": 1429,
+        "completion_tokens": 227,
+        "total_tokens": 1656
+      },
+      "agent_response": "Reasoning Process:\n- The given MTL formula is **G(prohibits(ego))**.\n- The operator `G` denotes \"always\" or \"globally,\" meaning the enclosed condition must hold at all times.\n- The atomic proposition is **prohibits(ego)**. According to the predicate rules, this describes an action or restriction by the ego vehicle.\n- The verb \"prohibits\" is generic, but per the variable vocabulary, \"ego_prohibits_u_turn\" means \"ego vehicle prohibits making U-turns\" and \"ego_prohibits_reversing\" means \"ego vehicle prohibits reversing.\" However, here it is simply **prohibits(ego)**, so the translation should be \"ego vehicle prohibits\" in a generic sense, unless domain context is given.\n- Since no further context or specific prohibited action is provided, the translation should reflect that the ego vehicle is always prohibiting (some action), with the action undefined or generic.\n\nNatural Language Translation:\nThe ego vehicle is always in a prohibiting state, or the ego vehicle prohibits (an action) at all times.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "The ego vehicle is always in a prohibiting state, or the ego vehicle prohibits (an action) at all times.",
+        "similarity_score": 0.6664020419120789,
+        "verification_passed": false,
+        "verification_reasoning": "- The given MTL formula is **G(prohibits(ego))**.\n- The operator `G` denotes \"always\" or \"globally,\" meaning the enclosed condition must hold at all times.\n- The atomic proposition is **prohibits(ego)**. According to the predicate rules, this describes an action or restriction by the ego vehicle.\n- The verb \"prohibits\" is generic, but per the variable vocabulary, \"ego_prohibits_u_turn\" means \"ego vehicle prohibits making U-turns\" and \"ego_prohibits_reversing\" means \"ego vehicle prohibits reversing.\" However, here it is simply **prohibits(ego)**, so the translation should be \"ego vehicle prohibits\" in a generic sense, unless domain context is given.\n- Since no further context or specific prohibited action is provided, the translation should reflect that the ego vehicle is always prohibiting (some action), with the action undefined or generic."
+      }
+    },
+    {
+      "stage": "deconstruct",
+      "success": true,
+      "processing_time": 4.516534090042114,
+      "token_usage": {
+        "prompt_tokens": 4131,
+        "completion_tokens": 319,
+        "total_tokens": 4450
+      },
+      "agent_response": "```json\n{\n    \"objects\": [\n        {\n            \"id\": \"obj_ego\",\n            \"name\": \"ego\",\n            \"type\": \"vehicle\"\n        }\n    ],\n    \"atomic_propositions\": [\n        {\n            \"id\": \"ap_1\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"prohibits_making_u_turn\",\n            \"variable\": \"ego_prohibits_u_turn\",\n            \"description\": \"Ego vehicle prohibits making U-turns\"\n        },\n        {\n            \"id\": \"ap_2\",\n            \"object\": \"obj_ego\",\n            \"related_object\": null,\n            \"predicate\": \"prohibits_reversing\",\n            \"variable\": \"ego_prohibits_reversing\",\n            \"description\": \"Ego vehicle prohibits reversing\"\n        }\n    ],\n    \"temporal_relations\": [\n        {\n            \"type\": \"global_constraint\",\n            \"formula\": \"G(ego_prohibits_u_turn & ego_prohibits_reversing)\",\n            \"antecedent\": null,\n            \"consequent\": null,\n            \"description\": \"Always, ego vehicle prohibits both making U-turns and reversing\"\n        }\n    ],\n    \"metric_constraints\": [],\n    \"global_property\": \"Always\",\n    \"lexicon\": {\n        \"ego_prohibits_u_turn\": \"Ego vehicle prohibits making U-turns\",\n        \"ego_prohibits_reversing\": \"Ego vehicle prohibits reversing\"\n    }\n}\n```",
+      "error_message": null,
+      "semantic_sketch": {
+        "atomic_propositions": [
+          {
+            "id": "ap_1",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "prohibits_making_u_turn",
+            "variable": "ego_prohibits_u_turn",
+            "description": "Ego vehicle prohibits making U-turns"
+          },
+          {
+            "id": "ap_2",
+            "object": "obj_ego",
+            "related_object": null,
+            "predicate": "prohibits_reversing",
+            "variable": "ego_prohibits_reversing",
+            "description": "Ego vehicle prohibits reversing"
+          }
+        ],
+        "temporal_relations": [
+          {
+            "type": "global_constraint",
+            "formula": "G(ego_prohibits_u_turn & ego_prohibits_reversing)",
+            "antecedent": null,
+            "consequent": null,
+            "description": "Always, ego vehicle prohibits both making U-turns and reversing"
+          }
+        ],
+        "metric_constraints": [],
+        "global_property": "Always",
+        "lexicon": {
+          "ego_prohibits_u_turn": "Ego vehicle prohibits making U-turns",
+          "ego_prohibits_reversing": "Ego vehicle prohibits reversing"
+        },
+        "extraction_success": true
+      }
+    },
+    {
+      "stage": "synthesize",
+      "success": true,
+      "processing_time": 5.070060968399048,
+      "token_usage": {
+        "prompt_tokens": 4203,
+        "completion_tokens": 302,
+        "total_tokens": 4505
+      },
+      "agent_response": "Reasoning Process:\n1. **Extract Object Mapping**:  \n   - The \"objects\" list contains a single object:  \n     - `id`: \"obj_ego\"  \n     - `name`: \"ego\"  \n   - Map: \"obj_ego\" → \"ego\"\n\n2. **Extract Atomic Propositions**:  \n   - ap_1:  \n     - `predicate`: \"prohibits_making_u_turn\"  \n     - `object`: \"obj_ego\" (maps to \"ego\")  \n     - No `related_object`  \n     - Construct: prohibits_making_u_turn(ego)\n   - ap_2:  \n     - `predicate`: \"prohibits_reversing\"  \n     - `object`: \"obj_ego\" (maps to \"ego\")  \n     - No `related_object`  \n     - Construct: prohibits_reversing(ego)\n\n3. **Temporal Relation**:  \n   - \"type\": \"global_constraint\"  \n   - The formula template is: \"G(ego_prohibits_u_turn & ego_prohibits_reversing)\"  \n   - Substitute the correct predicate(object) forms from above.\n\n4. **Final Construction**:  \n   - Combine both atomic propositions in a conjunction (&) within the global (G) operator, ensuring only predicate(object) format is used.\n\nFinal MTL Formula:\nG(prohibits_making_u_turn(ego) & prohibits_reversing(ego))",
+      "error_message": null,
+      "synthesis_result": {
+        "mtl_formula": "G(prohibits_making_u_turn(ego) & prohibits_reversing(ego))",
+        "synthesis_reasoning": "1. **Extract Object Mapping**:  \n   - The \"objects\" list contains a single object:  \n     - `id`: \"obj_ego\"  \n     - `name`: \"ego\"  \n   - Map: \"obj_ego\" → \"ego\"\n\n2. **Extract Atomic Propositions**:  \n   - ap_1:  \n     - `predicate`: \"prohibits_making_u_turn\"  \n     - `object`: \"obj_ego\" (maps to \"ego\")  \n     - No `related_object`  \n     - Construct: prohibits_making_u_turn(ego)\n   - ap_2:  \n     - `predicate`: \"prohibits_reversing\"  \n     - `object`: \"obj_ego\" (maps to \"ego\")  \n     - No `related_object`  \n     - Construct: prohibits_reversing(ego)\n\n3. **Temporal Relation**:  \n   - \"type\": \"global_constraint\"  \n   - The formula template is: \"G(ego_prohibits_u_turn & ego_prohibits_reversing)\"  \n   - Substitute the correct predicate(object) forms from above.\n\n4. **Final Construction**:  \n   - Combine both atomic propositions in a conjunction (&) within the global (G) operator, ensuring only predicate(object) format is used.",
+        "synthesis_success": true
+      }
+    },
+    {
+      "stage": "verify",
+      "success": true,
+      "processing_time": 2.8510818481445312,
+      "token_usage": {
+        "prompt_tokens": 1441,
+        "completion_tokens": 164,
+        "total_tokens": 1605
+      },
+      "agent_response": "Reasoning Process:\nThe formula is: G(prohibits_making_u_turn(ego) & prohibits_reversing(ego))\n\n- The outermost operator is `G`, which means \"always\" or \"at all times\".\n- The inner expression uses `&` (and), connecting two predicates:\n    - prohibits_making_u_turn(ego): This expresses that the ego vehicle prohibits making U-turns.\n    - prohibits_reversing(ego): This expresses that the ego vehicle prohibits reversing.\n\n- The formula as a whole requires that both \"the ego vehicle prohibits making U-turns\" and \"the ego vehicle prohibits reversing\" are always true, at every point in time.\n\nNatural Language Translation:\nAt all times, the ego vehicle prohibits making U-turns, and the ego vehicle prohibits reversing.",
+      "error_message": null,
+      "verification_result": {
+        "back_translation": "At all times, the ego vehicle prohibits making U-turns, and the ego vehicle prohibits reversing.",
+        "similarity_score": 0.9191787838935852,
+        "verification_passed": true,
+        "verification_reasoning": "The formula is: G(prohibits_making_u_turn(ego) & prohibits_reversing(ego))\n\n- The outermost operator is `G`, which means \"always\" or \"at all times\".\n- The inner expression uses `&` (and), connecting two predicates:\n    - prohibits_making_u_turn(ego): This expresses that the ego vehicle prohibits making U-turns.\n    - prohibits_reversing(ego): This expresses that the ego vehicle prohibits reversing.\n\n- The formula as a whole requires that both \"the ego vehicle prohibits making U-turns\" and \"the ego vehicle prohibits reversing\" are always true, at every point in time."
+      }
+    }
+  ],
+  "config": {
+    "similarity_threshold": 0.85,
+    "max_refinement_iterations": 3,
+    "agents": {
+      "analyst": {
+        "name": "Analyst_Agent",
+        "role": "Semantic Analyst",
+        "description": "Responsible for deconstructing natural language into structured semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Semantic Deconstruction and Component Extraction"
+      },
+      "synthesizer": {
+        "name": "Synthesizer_Agent",
+        "role": "Formula Synthesizer",
+        "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Syntactic Synthesis under Constraints"
+      },
+      "verifier": {
+        "name": "Verifier_Agent",
+        "role": "Verifier",
+        "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+        "model": "gpt-4",
+        "temperature": 0.7,
+        "api_key_env": "OPENAI_API_KEY",
+        "base_url_env": "OPENAI_API_URL",
+        "specialization": "Iterative Verification and Correction"
+      }
+    },
+    "dynamic_enhancement": false
+  },
+  "timestamp": "2025-10-28 23:01:12"
+}

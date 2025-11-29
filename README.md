@@ -103,7 +103,7 @@ result = dsva.process(
 
 # Display results
 print(f"Success: {result.success}")
-print(f"LTL Formula: {result.final_mtl_formula}")  # Note: field name unchanged for compatibility
+print(f"LTL Formula: {result.final_ltl_formula}")  # Note: field name unchanged for compatibility
 print(f"Refinement Iterations: {result.refinement_iterations}")
 print(f"Similarity Score: {result.stage_results[-1].stage_output.similarity_score:.3f}")
 
@@ -127,7 +127,7 @@ result = dsva_ablation.process(
 
 # Display results
 print(f"Success: {result.success}")
-print(f"LTL Formula: {result.final_mtl_formula}")  # Note: field name unchanged for compatibility
+print(f"LTL Formula: {result.final_ltl_formula}")  # Note: field name unchanged for compatibility
 ```
 
 ### 4. Run Demo Scripts
@@ -153,14 +153,14 @@ The baseline version without dynamic example retrieval, designed for ablation st
 **Key Classes:**
 - `DSVFrameworkAblation`: Main framework class
 - `SemanticSpecificationSketch`: Structured semantic components
-- `SynthesisResult`: MTL formula synthesis output
+- `SynthesisResult`: LTL formula synthesis output
 - `VerificationResult`: Back-translation verification output
 - `RefinementFeedback`: Feedback from failed iterations
 
 **Key Methods:**
 - `_stage_1_deconstruct()`: Natural language → Semantic sketch
-- `_stage_2_synthesize()`: Semantic sketch → MTL formula
-- `_stage_3_verify()`: MTL formula → Back-translation + similarity
+- `_stage_2_synthesize()`: Semantic sketch → LTL formula
+- `_stage_3_verify()`: LTL formula → Back-translation + similarity
 - `_analyze_verification_failure()`: **Error Analyst Function** - Intelligent failure diagnosis and feedback generation
 - `process()`: Complete DSVA pipeline with intelligent refinement
 
@@ -283,7 +283,7 @@ Both framework versions include a comprehensive LTL knowledge base that standard
 | "in the next step" | `X(φ)` | Immediate next |
 | "in the next three steps" | `X(X(X(φ)))` | Multi-step next |
 
-### Key Differences: MTL vs LTL
+### Key Differences: LTL vs LTL
 
 **LTL (Linear Temporal Logic):**
 - ✅ Focuses on event ordering and occurrence
@@ -291,7 +291,7 @@ Both framework versions include a comprehensive LTL knowledge base that standard
 - ✅ Simpler syntax with atomic propositions (a, b, c)
 - ✅ Suitable for qualitative temporal properties
 
-**MTL (Metric Temporal Logic):**
+**LTL (Metric Temporal Logic):**
 - ⏱️ Includes explicit time intervals [a,b]
 - ⏱️ Can express real-time constraints
 - ⏱️ More complex with object-predicate structures
@@ -303,7 +303,7 @@ Both framework versions include a comprehensive LTL knowledge base that standard
 
 ## � Error Analyst Function
 
-The `_analyze_verification_failure()` function serves as an intelligent error analyst that diagnoses why MTL formula verification failed and provides targeted feedback for improvement.
+The `_analyze_verification_failure()` function serves as an intelligent error analyst that diagnoses why LTL formula verification failed and provides targeted feedback for improvement.
 
 ### How It Works
 
@@ -387,7 +387,7 @@ from dsva import EnhancedDSVFramework
 dsva = EnhancedDSVFramework()
 result = dsva.process("Whenever a holds, b holds as well.")
 
-print(f"LTL Formula: {result.final_mtl_formula}")
+print(f"LTL Formula: {result.final_ltl_formula}")
 # Output: G(a -> b)
 ```
 
@@ -437,12 +437,12 @@ result_ablation = ablation.process(sentence)
 
 print("Enhanced:")
 print(f"  Success: {result_enhanced.success}")
-print(f"  Formula: {result_enhanced.final_mtl_formula}")  # Expected: G(!(a & b))
+print(f"  Formula: {result_enhanced.final_ltl_formula}")  # Expected: G(!(a & b))
 print(f"  Tokens: {result_enhanced.total_token_usage.total_tokens}")
 
 print("Ablation:")
 print(f"  Success: {result_ablation.success}")
-print(f"  Formula: {result_ablation.final_mtl_formula}")
+print(f"  Formula: {result_ablation.final_ltl_formula}")
 print(f"  Tokens: {result_ablation.total_token_usage.total_tokens}")
 ```
 
@@ -456,7 +456,7 @@ Results are saved as JSON files with comprehensive metadata:
 {
   "framework": "DSVA with Dynamic Examples (LTL)",
   "input_sentence": "Whenever a holds, b holds as well.",
-  "final_mtl_formula": "G(a -> b)",
+  "final_ltl_formula": "G(a -> b)",
   "success": true,
   "termination_reason": "Verification passed (similarity: 0.931)",
   "total_processing_time": 12.34,
@@ -478,7 +478,7 @@ Results are saved as JSON files with comprehensive metadata:
       "stage": "synthesize",
       "success": true,
       "synthesis_result": {
-        "mtl_formula": "G(A -> F_[0,5](B))",
+        "ltl_formula": "G(A -> F_[0,5](B))",
         "synthesis_reasoning": "..."
       }
     },
@@ -670,8 +670,8 @@ class SemanticSpecificationSketch:
 
 @dataclass
 class SynthesisResult:
-    """MTL formula synthesis output"""
-    mtl_formula: str
+    """LTL formula synthesis output"""
+    ltl_formula: str
     synthesis_reasoning: str
 
 @dataclass
@@ -686,7 +686,7 @@ class VerificationResult:
 class RefinementFeedback:
     """Feedback from failed verification iterations"""
     iteration: int
-    mtl_formula: str
+    ltl_formula: str
     back_translation: str
     similarity_score: float
     semantic_sketch_json: str
@@ -738,7 +738,7 @@ If you use this framework in your research, please cite:
 
 ```bibtex
 @software{dsv_framework,
-  title={DSVA Framework: Deconstruct-Synthesize-Verify-Analyze for NL to MTL Translation},
+  title={DSVA Framework: Deconstruct-Synthesize-Verify-Analyze for NL to LTL Translation},
   author={Your Name},
   year={2025},
   url={https://github.com/your-repo/dsv-framework}
@@ -772,7 +772,7 @@ from dsva import EnhancedDSVFramework
 dsva = EnhancedDSVFramework()
 result = dsva.process('Whenever a holds, b holds as well.')
 print(f'Success: {result.success}')
-print(f'LTL Formula: {result.final_mtl_formula}')
+print(f'LTL Formula: {result.final_ltl_formula}')
 # Expected output: G(a -> b)
 "
 ```

@@ -107,7 +107,7 @@ class EnhancedDSVFramework:
     增强版DSV框架，集成动态示例检索系统
     """
 
-    def __init__(self, config_path: str = "config/dsv_config.json"):
+    def __init__(self, config_path: str = "config/dsva_config.json"):
         """初始化增强版DSV框架"""
         self.config = self._load_config(config_path)
         self.clients = self._initialize_clients()

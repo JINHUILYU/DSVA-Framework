@@ -177,7 +177,7 @@ class DSVFrameworkAblation:
     基础DSV框架，不包含动态增强模块，用于消融实验
     """
 
-    def __init__(self, config_path: str = "config/dsv_config.json"):
+    def __init__(self, config_path: str = "config/dsva_config.json"):
         """初始化DSV框架"""
         self.config = self._load_config(config_path)
         self.clients = self._initialize_clients()

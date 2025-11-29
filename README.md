@@ -32,7 +32,7 @@ DSVA-Framework/
 ├── ablation.py                   # Baseline version for ablation studies (no examples)
 ├── retrieval.py                  # Example retrieval system using sentence transformers
 ├── config/
-│   └── dsv_config.json          # Framework configuration (models, thresholds, etc.)
+│   └── dsva_config.json          # Framework configuration (models, thresholds, etc.)
 ├── data/
 │   ├── input/
 │   │   └── dataset.xlsx         # Input natural language specifications
@@ -93,7 +93,7 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 from dsva import EnhancedDSVFramework
 
 # Initialize framework
-dsva = EnhancedDSVFramework(config_path="config/dsv_config.json")
+dsva = EnhancedDSVFramework(config_path="config/dsva_config.json")
 
 # Process a natural language specification
 result = dsva.process(
@@ -117,7 +117,7 @@ dsva.save_result(result, "data/output/dsva/gpt-4/my_result.json")
 from ablation import DSVFrameworkAblation
 
 # Initialize baseline framework (without dynamic examples)
-dsva_ablation = DSVFrameworkAblation(config_path="config/dsv_config.json")
+dsva_ablation = DSVFrameworkAblation(config_path="config/dsva_config.json")
 
 # Process specification
 result = dsva_ablation.process(
@@ -189,7 +189,7 @@ Manages semantic similarity-based example retrieval for the enhanced version.
 
 ## 🔧 Configuration
 
-### Main Configuration File: [`config/dsv_config.json`](config/dsv_config.json)
+### Main Configuration File: [`config/dsva_config.json`](config/dsva_config.json)
 
 ```json
 {
@@ -243,7 +243,7 @@ The framework has been tested with multiple state-of-the-art language models:
 - **Google**: `gemini-2.5-flash` et al.
 - **Custom**: Any OpenAI-compatible API endpoint
 
-To use different models, update the `model` field in `config/dsv_config.json` for each agent.
+To use different models, update the `model` field in `config/dsva_config.json` for each agent.
 
 ---
 
@@ -578,7 +578,7 @@ Verification failed: similarity 0.65 below threshold 0.85
 **Solutions**:
 - Check if input sentence is grammatically correct
 - Ensure temporal constraints are clearly expressed
-- Try adjusting `similarity_threshold` in `config/dsv_config.json`
+- Try adjusting `similarity_threshold` in `config/dsva_config.json`
 - Enable refinement: `result = dsva.process(sentence, enable_refinement=True)`
 
 #### 3. **Example Retrieval Errors**
@@ -587,7 +587,7 @@ Verification failed: similarity 0.65 below threshold 0.85
 FileNotFoundError: data/examples/dsv_examples.json
 ```
 
-**Solution**: Verify example file path in `config/dsv_config.json`:
+**Solution**: Verify example file path in `config/dsva_config.json`:
 
 ```json
 {
@@ -612,7 +612,7 @@ FileNotFoundError: data/examples/dsv_examples.json
 
 ```python
 class EnhancedDSVFramework:
-    def __init__(self, config_path: str = "config/dsv_config.json")
+    def __init__(self, config_path: str = "config/dsva_config.json")
     def process(self, sentence: str, enable_refinement: bool = True) -> DSVResult
     def toggle_examples(self, enabled: bool) -> None
     def save_result(self, result: DSVResult, filepath: str) -> None
@@ -622,7 +622,7 @@ class EnhancedDSVFramework:
 
 ```python
 class DSVFrameworkAblation:
-    def __init__(self, config_path: str = "config/dsv_config.json")
+    def __init__(self, config_path: str = "config/dsva_config.json")
     def process(self, sentence: str, enable_refinement: bool = True) -> DSVResult
     def save_result(self, result: DSVResult, filepath: str) -> None
 ```
@@ -725,7 +725,7 @@ If you use this framework in your research, please cite:
 - [ ] Install Python 3.8+
 - [ ] Run `pip install -r requirements.txt`
 - [ ] **Create `.env` file with API credentials**
-- [ ] Verify `config/dsv_config.json` exists
+- [ ] Verify `config/dsva_config.json` exists
 - [ ] Test with: `python dsv_framework_complete.py`
 
 ### Essential Commands
@@ -751,7 +751,7 @@ print(f'Formula: {result.final_mtl_formula}')
 
 **Must Have:**
 - ✅ `.env` (API credentials) - **YOU MUST CREATE THIS**
-- ✅ `config/dsv_config.json` (configuration)
+- ✅ `config/dsva_config.json` (configuration)
 - ✅ `requirements.txt` (dependencies)
 
 **Framework Files:**

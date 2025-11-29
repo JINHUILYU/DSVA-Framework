@@ -25,75 +25,76 @@ from ablation import (
 from retrieval import ExampleRetriever
 
 logger = logging.getLogger(__name__)
-# MTL Knowledge Base - Standardized syntax and operators
-MTL_KNOWLEDGE_BASE = """
-**<Metric Temporal Logic Knowledge Base>**
+# LTL Knowledge Base - Standardized syntax and operators
+LTL_KNOWLEDGE_BASE = """
+**<Linear Temporal Logic Knowledge Base>**
 
-Use only the following operators and symbols (consistent with dataset):
+Use only the following operators and symbols (consistent with LTL standard):
 
-**Future-time operators**:
-- `X` — next (discrete next step)
-- `F_[a,b](φ)` — eventually (φ occurs within interval [a,b])
-- `G_[a,b](φ)` — globally (φ holds throughout [a,b])
-- `φ U_[a,b] ψ` — until (φ holds until ψ occurs within [a,b])
-
-**Past-time operators**:
-- `P_[a,b](φ)` — previously (φ held at some point in the past within interval [a,b])
-- `O(φ)` — once in the past (φ occurred at least once in the past, unbounded)
+**Temporal operators**:
+- `X(φ)` — next (φ holds in the next step)
+- `F(φ)` — eventually/finally (φ holds at some point in the future)
+- `G(φ)` — globally/always (φ holds at all future points)
+- `φ U ψ` — until (φ holds until ψ becomes true)
+- `φ R ψ` — release (ψ holds until and including when φ first becomes true, or forever if φ never becomes true)
 
 **Logical connectives**:
-- `&` (and), `|` (or), `~` (not), `->` (implication), `<->` (equivalence)
+- `&` (and), `|` (or), `!` or `~` (not), `->` (implication), `<->` (equivalence)
 
-**Location-based predicates** (domain-specific): e.g., `in_front_of(ego,other)`, `at_intersection(ego)`, etc.
-The formula should only contain **atomic propositions** and the above operators. Atomic propositions must be represented as compact propositional symbols (no raw natural language).
+**Atomic propositions**:
+- Simple propositional variables: `a`, `b`, `c`, `p`, `q`, etc.
+- The formula should only contain **atomic propositions** and the above operators.
+- Use lowercase letters for atomic propositions to maintain consistency.
 
-**Time units & defaults**:
-* Convert all time units to **seconds** (1 min = 60 s, 1 hr = 3600 s, 1 ms = 0.001 s).
-* If the sentence explicitly mentions discrete steps/ticks, treat time as discrete and use `X`.
-* If a numeric bound is given without units, assume **seconds** by default.
+**Important notes**:
+* LTL does not include explicit time bounds or metric constraints.
+* Focus on the ordering and occurrence of events, not their timing.
+* "In the next step" uses `X`, "eventually" uses `F`, "always" uses `G`.
+* For "until" patterns, use the `U` operator.
 
 ---
 
-**I. Temporal Operator Mapping (Natural Language → MTL)**
+**I. Temporal Operator Mapping (Natural Language → LTL)**:
 
-1. **Explicit time bounds**:
-   * "within T seconds" → `F_[0,T](φ)`
-   * "between a and b seconds" → `F_[a,b](φ)`
-   * "after exactly T seconds" → `F_[T,T](φ)`
-   * "after at least T seconds" → `F_[T,∞)(φ)`
-   * "for T seconds" → `G_[0,T](φ)`
-   * "until within T seconds" → `φ U_[0,T] ψ`
-   * "must occur within T after A" → `A -> F_[0,T](B)`
-   * "every N seconds" → `G(F_[0,N](φ))`
+1. **Basic temporal patterns**:
+   * "in the next step" → `X(φ)`
+   * "eventually" / "at some point" / "will happen" → `F(φ)`
+   * "always" / "at all times" / "never" (as `G(!φ)`) → `G(φ)`
+   * "φ until ψ" / "φ holds until ψ" → `φ U ψ`
+   * "infinitely often" / "repeatedly" → `G(F(φ))`
+   * "from some point on" → `F(G(φ))`
 
-2. **Past-time mappings**:
-   * "previously within T seconds" → `P_[0,T](φ)`
-   * "sometime in the past" / "once before" → `O(φ)`
-   * "always in the past T seconds" (continuous past constraint) → can be represented as `~P_[0,T](~φ)`
+2. **Common patterns**:
+   * "if a then eventually b" → `G(a -> F(b))`
+   * "a is always followed by b" → `G(a -> X(b))`
+   * "whenever a holds, b holds as well" → `G(a -> b)`
+   * "a and b never occur at the same time" → `G(!(a & b))`
+   * "before a happens, b must have happened" → `(!a) U b`
+   * "a happens, then b never happens again" → `G(a -> G(!b))`
 
-3. **Temporal adverbs**:
-   * "immediately" / "in the next step" → `X(φ)`
-   * "always" / "continuously" → `G(φ)`
-   * "eventually" / "at some point" → `F(φ)`
+3. **Nested temporal operators**:
+   * "in the next two steps" → `X(X(φ))`
+   * "eventually always" → `F(G(φ))`
+   * "always eventually" → `G(F(φ))`
 
 ---
 
 **II. Analysis Requirements (applied each time)**:
 
-1. **Sentence Decomposition**: Break into clauses, identify conditions, events, numeric bounds, and units.
-2. **Keyword & Quantitative Identification**: Detect temporal expressions (`within`, `for`, `after`, `before`, `previously`) and normalize numeric bounds to seconds.
-3. **Atomic Proposition Extraction**: Map natural-language phrases into concise propositional symbols (e.g., `signal_on`, `brake`, `at_intersection`).
-4. **MTL Construction & Verification**:
-   * Use `F_[a,b]`, `G_[a,b]`, `U_[a,b]`, `X`, `P_[a,b]`, `O` appropriately.
-   * Ensure bounds are valid (a ≤ b, non-negative).
-   * Verify formula reflects the temporal semantics faithfully.
+1. **Sentence Decomposition**: Break into clauses, identify conditions, events, and temporal relationships.
+2. **Keyword Identification**: Detect temporal expressions (`always`, `eventually`, `next`, `until`, `never`, `infinitely often`).
+3. **Atomic Proposition Extraction**: Map natural-language phrases into simple propositional variables (e.g., `a`, `b`, `request`, `grant`).
+4. **LTL Construction & Verification**:
+   * Use `X`, `F`, `G`, `U`, `R` appropriately.
+   * Ensure proper nesting and operator precedence.
+   * Verify formula reflects the temporal ordering faithfully.
 
 ---
 
 **III. Simplification Rules**:
-- Avoid redundant nesting (e.g., simplify `F(F_[0,5](φ))` → `F_[0,5](φ)`).
-- Use the tightest interval consistent with the natural-language requirement.
-- Prefer canonical readable forms (e.g., `G(A -> F_[0,5](B))`).
+- Avoid redundant nesting (e.g., simplify `F(F(φ))` → `F(φ)`, `G(G(φ))` → `G(φ)`).
+- Use standard operator precedence: `!` > `&` > `|` > `->` > `<->`.
+- Prefer canonical readable forms (e.g., `G(a -> F(b))`).
 
 ---
 """
@@ -103,11 +104,11 @@ logging.basicConfig(level=logging.INFO)
 
 class EnhancedDSVFramework:
     """
-    Enhanced DSV Framework with Dynamic Example Retrieval
-    增强版DSV框架，集成动态示例检索系统
+    Enhanced DSV Framework with Dynamic Example Retrieval for LTL
+    增强版DSV框架（LTL版本），集成动态示例检索系统
     """
 
-    def __init__(self, config_path: str = "config/dsv_config.json"):
+    def __init__(self, config_path: str = "config/dsva_config.json"):
         """初始化增强版DSV框架"""
         self.config = self._load_config(config_path)
         self.clients = self._initialize_clients()
@@ -134,8 +135,9 @@ class EnhancedDSVFramework:
             self.example_retriever = None
 
         self.total_token_usage = TokenUsage()
-        self.similarity_threshold = self.config.get("similarity_threshold", 0.85)
-        self.max_refinement_iterations = self.config.get("max_refinement_iterations", 3)
+        processing_params = self.config.get("processing_parameters", {})
+        self.similarity_threshold = processing_params.get("similarity_threshold", 0.85)
+        self.max_refinement_iterations = processing_params.get("max_refinement_iterations", 3)
 
         logger.info("Enhanced DSV Framework initialized")
         logger.info(f"Similarity threshold: {self.similarity_threshold}")
@@ -202,18 +204,18 @@ class EnhancedDSVFramework:
     def _analyze_verification_failure(
         self,
         original_sentence: str,
-        mtl_formula: str,
+        ltl_formula: str,
         back_translation: str,
         similarity_score: float,
         semantic_sketch_json: str
     ) -> str:
         """Analyze why verification failed and provide specific feedback"""
         analysis_prompt = f"""
-You are an expert analyst tasked with identifying why an MTL formula verification failed.
+You are an expert analyst tasked with identifying why an LTL formula verification failed.
 
 Original Sentence: "{original_sentence}"
 
-Generated MTL Formula: {mtl_formula}
+Generated LTL Formula: {ltl_formula}
 
 Back-translation: "{back_translation}"
 
@@ -233,7 +235,7 @@ Provide a concise analysis focusing on actionable corrections.
 """
 
         messages = [
-            {"role": "system", "content": "You are an expert in temporal logic and semantic analysis. Provide precise, actionable feedback for improving MTL formula generation."},
+            {"role": "system", "content": "You are an expert in temporal logic and semantic analysis. Provide precise, actionable feedback for improving LTL formula generation."},
             {"role": "user", "content": analysis_prompt}
         ]
 
@@ -255,7 +257,7 @@ Provide a concise analysis focusing on actionable corrections.
         for feedback in refinement_history:
             history_text += f"Attempt {feedback.iteration}:\n"
             history_text += f"- Semantic Sketch:\n```json\n{feedback.semantic_sketch_json}\n```\n"
-            history_text += f"- Generated MTL Formula: {feedback.mtl_formula}\n"
+            history_text += f"- Generated LTL Formula: {feedback.ltl_formula}\n"
             history_text += f"- Back-translation: \"{feedback.back_translation}\"\n"
             history_text += f"- Similarity Score: {feedback.similarity_score:.3f}\n"
             history_text += f"- Issue Analysis:\n{feedback.issue_analysis}\n"
@@ -297,35 +299,29 @@ Provide a concise analysis focusing on actionable corrections.
         # Format refinement history if available
         history_context = self._format_refinement_history(refinement_history)
 
-        # Enhanced analyst prompt with MTL knowledge base, examples and refinement feedback
+        # Enhanced analyst prompt with LTL knowledge base, examples and refinement feedback
         analyst_prompt = f"""
-You are a professional semantic analysis agent tasked with decomposing natural language sentences into core semantic components required to construct MTL formulas.
+You are a professional semantic analysis agent tasked with decomposing natural language sentences into core semantic components required to construct LTL formulas.
 
-{MTL_KNOWLEDGE_BASE}
+{LTL_KNOWLEDGE_BASE}
 
-**Object and Predicate Extraction Guidelines**:
+**Atomic Proposition Extraction Guidelines**:
 
-1. **Object Naming Conventions**:
-   - Use lowercase, concise names: "ego", "other", "sign_306"
-   - For sensors/devices: Use CamelCase without spaces: "SensorA", "AlarmB", "StatusLight"
-   - Avoid full descriptions in names (use "ego" not "Ego vehicle")
+1. **Proposition Naming Conventions**:
+   - Use lowercase single letters for simple cases: "a", "b", "c", "p", "q"
+   - Use descriptive names for clarity when needed: "request", "grant", "ready", "error"
+   - Keep names concise and meaningful
+   - Avoid spaces or special characters (use underscore for multi-word: "is_ready")
 
-2. **Predicate Naming Conventions**:
-   - Use snake_case: "in_front_of", "sudden_braking", "at_intersection", "detects_fault"
-   - For relational predicates (2 objects): include preposition
-     Examples: in_front_of, in_right_of, yield
-   - For unary predicates (1 object): use verb/state
-     Examples: sudden_braking, at_intersection, detects_fault, sounds
+2. **Temporal Pattern Identification**:
+   - Identify temporal keywords: "always", "eventually", "next", "until", "infinitely often"
+   - Note sequencing requirements: "before", "after", "followed by"
+   - Detect recurrence patterns: "repeatedly", "every time", "infinitely often"
 
-3. **Related Objects** (CRITICAL for relational predicates):
-   - MUST specify "related_object" field for predicates involving 2 entities
-   - Example: "in_front_of" requires subject (ego) and object (other)
-   - Example: "yield" requires who yields (ego) and to whom (other)
-
-4. **Complete Object List**:
-   - Extract ALL entities mentioned in the sentence
-   - Each object needs: id, name, type
-   - Types: "vehicle", "sensor", "actuator", "indicator", "traffic_sign", etc.
+3. **Logical Structure**:
+   - Identify conditions and their consequences
+   - Note conjunctions (and), disjunctions (or), negations (not)
+   - Recognize implications and equivalences
 
 {examples_text}
 
@@ -335,31 +331,22 @@ Sentence: "{sentence}"
 
 Provide a JSON-formatted semantic specification sketch containing the following fields:
 
-1. **objects**:
-   A list of ALL identified physical or logical entities, each with:
-   - id: unique identifier (e.g., "obj_ego", "obj_other", "obj_sensor_a")
-   - name: concise object name (e.g., "ego", "other", "SensorA")
-   - type: category (e.g., "vehicle", "sensor", "actuator", "indicator", "traffic_sign")
-
-2. **atomic_propositions**:
+1. **atomic_propositions**:
    List of atomic propositions, each containing:
    - id: unique identifier (e.g., "ap_1", "ap_2")
-   - object: reference to object ID from objects list
-   - related_object: (REQUIRED for relational predicates) reference to second object ID
-   - predicate: the action or property in snake_case (e.g., "in_front_of", "sudden_braking")
-   - variable: short variable name for reference
-   - description: human-readable description
+   - variable: short variable name (e.g., "a", "b", "request", "grant")
+   - description: human-readable description of what the proposition represents
 
-3. **temporal_relations**:
-   List of temporal relations describing time relationships between atomic propositions
+2. **temporal_relations**:
+   List of temporal relations describing LTL patterns, each containing:
+   - type: temporal pattern type (e.g., "always", "eventually", "next", "until", "response", "precedence")
+   - formula: suggested LTL pattern (e.g., "G(a -> b)", "F(a)", "a U b")
+   - description: natural language explanation
 
-4. **metric_constraints**:
-   List of metric constraints, including time window, duration, etc.
+3. **global_property**:
+   Overall scope (e.g., "Always", "Eventually", "Implication", "Until")
 
-5. **global_property**:
-   Global property (e.g., "Always", "Eventually")
-
-6. **lexicon**:
+4. **lexicon**:
    A lexicon mapping variable names to natural language descriptions
 
 Ensure the output adheres to valid JSON format.
@@ -367,28 +354,30 @@ Ensure the output adheres to valid JSON format.
 Example output format:
 ```json
 {{
-    "objects": [
-        {{"id": "obj_ego", "name": "ego", "type": "vehicle"}},
-        {{"id": "obj_other", "name": "other", "type": "vehicle"}}
-    ],
     "atomic_propositions": [
         {{
             "id": "ap_1",
-            "object": "obj_ego",
-            "related_object": "obj_other",
-            "predicate": "in_front_of",
-            "variable": "ego_in_front",
-            "description": "Ego vehicle is in front of other vehicle"
+            "variable": "a",
+            "description": "Proposition a holds"
+        }},
+        {{
+            "id": "ap_2",
+            "variable": "b",
+            "description": "Proposition b holds"
         }}
     ],
     "temporal_relations": [
-        {{"type": "relation_type", "antecedent": "antecedent", "consequent": "consequent", "description": "description"}}
-    ],
-    "metric_constraints": [
-        {{"applies_to": "applies_to", "type": "constraint_type", "value": "constraint_value", "description": "description"}}
+        {{
+            "type": "global_implication",
+            "formula": "G(a -> b)",
+            "description": "Whenever a holds, b must hold"
+        }}
     ],
     "global_property": "Always",
-    "lexicon": {{"variable_name": "natural language description"}}
+    "lexicon": {{
+        "a": "Proposition a",
+        "b": "Proposition b"
+    }}
 }}
 ```
 
@@ -487,51 +476,44 @@ Please refer to the processing approach in the above example, but analyze it bas
         # Format refinement history if available
         history_context = self._format_refinement_history(refinement_history)
 
-        # Enhanced synthesizer prompt with MTL knowledge base, examples and refinement feedback
+        # Enhanced synthesizer prompt with LTL knowledge base, examples and refinement feedback
         synthesizer_prompt = f"""
-You are a professional MTL formula synthesizer agent tasked with generating syntactically correct MTL formulas based on structured semantic specification sketches.
+You are a professional LTL formula synthesizer agent tasked with generating syntactically correct LTL formulas based on structured semantic specification sketches.
 
-{MTL_KNOWLEDGE_BASE}
+{LTL_KNOWLEDGE_BASE}
 
 **CRITICAL RULES - MUST FOLLOW**:
 
-1. **MANDATORY**: Use predicate(object) format for ALL atomic propositions. NEVER use simple variables.
-   ❌ WRONG: ego_in_front, sudden_brake, alarm_active
-   ✅ CORRECT: in_front_of(ego,other), sudden_braking(ego), sounds(AlarmB)
+1. **Use Simple Atomic Propositions**:
+   - Use lowercase letters for simple cases: a, b, c, p, q
+   - Use descriptive names when needed: request, grant, ready, error
+   - Keep propositions simple and concise
+   - NO complex object-predicate structures needed for LTL
 
-2. **For Relational Predicates** (involving 2 objects, with "related_object" field in sketch):
-   - Format: predicate(subject, object)
-   - Examples: 
-     * in_front_of(ego,other)
-     * yield(ego,other)
-     * in_right_of(other,ego)
-   - Order matters: predicate(主体, 客体)
+2. **Extract Variables from Semantic Sketch**:
+   - Find the "variable" field in each atomic proposition
+   - Use these variables directly in your LTL formula
+   - Example: if variable is "a", use "a" in the formula
 
-3. **For Unary Predicates** (single object, no "related_object" field):
-   - Format: predicate(object)
-   - Examples:
-     * sudden_braking(ego)
-     * at_intersection(ego)
-     * detects_fault(SensorA)
-     * sounds(AlarmB)
+3. **Temporal Operator Usage**:
+   - G: for "always" / "at all times"
+   - F: for "eventually" / "at some point"
+   - X: for "in the next step"
+   - U: for "until" patterns
+   - R: for "release" / "weak until" patterns
 
-4. **Object Name Extraction**:
-   - Extract object names from "objects" list in the semantic sketch
-   - Use the "name" field directly (e.g., "ego", "other", "SensorA", "AlarmB")
-   - For each atomic proposition:
-     a) Find the "object" field (object ID) → map to object "name"
-     b) If "related_object" exists → also map its ID to object "name"
-     c) Build: predicate(object_name) or predicate(object1_name, object2_name)
+4. **Operator Nesting**:
+   - G(F(a)): "a holds infinitely often"
+   - F(G(a)): "from some point on, a holds forever"
+   - X(X(a)): "a holds two steps from now"
+   - G(a -> F(b)): "every a is eventually followed by b"
 
 5. **Step-by-Step Construction Process**:
-   Step 1: Parse the "objects" list to build ID→name mapping
-   Step 2: For each atomic proposition:
-           - Extract predicate name
-           - Map object ID to object name
-           - If related_object exists, map it to related object name
-           - Construct: predicate(name) or predicate(name1, name2)
-   Step 3: Combine predicates using temporal and logical operators
-   Step 4: Apply global property (G, F, etc.)
+   Step 1: Extract variable names from atomic_propositions list
+   Step 2: Identify temporal relations and their patterns
+   Step 3: Combine variables using suggested patterns
+   Step 4: Apply logical operators (&, |, !, ->) as needed
+   Step 5: Wrap in global property (G, F) if specified
 
 {examples_text}
 
@@ -542,30 +524,30 @@ You are a professional MTL formula synthesizer agent tasked with generating synt
 ```
 
 **Your Task**:
-Synthesize a syntactically correct MTL formula based on this semantic specification sketch.
-REMEMBER: Every atomic proposition MUST use predicate(object) format!
+Synthesize a syntactically correct LTL formula based on this semantic specification sketch.
+REMEMBER: Use simple atomic propositions (lowercase letters like a, b, c or descriptive names)!
 
-MTL Syntax Rules:
-- G: Globally (always)
-- F: Finally (ultimately)  
-- X: Next (subsequent)
-- U: Until (until)
-- Time Interval: [a,b] denotes a time window
-- Logical Operations: & (and), | (or), ~ (not), -> (implication)
+LTL Syntax Rules:
+- G: Globally (always at all future points)
+- F: Finally (eventually at some future point)  
+- X: Next (in the immediate next step)
+- U: Until (φ holds until ψ becomes true)
+- R: Release (ψ holds until φ, or forever)
+- Logical Operations: & (and), | (or), ! or ~ (not), -> (implication), <-> (equivalence)
 
 Please provide the following two sections:
 
 Reasoning Process:
-[Explain step-by-step how you extract objects and construct predicate(object) forms]
+[Explain step-by-step how you construct the LTL formula from the semantic components]
 
-Final MTL Formula:
-[Synthetic MTL formula using ONLY predicate(object) format]
+Final LTL Formula:
+[Synthetic LTL formula using standard LTL operators]
 
 Please follow the processing approach demonstrated in the above example, but synthesize the formula based on the specific content of the current semantic specification sketch.
 """
 
         messages = [
-            {"role": "system", "content": "You are a professional MTL formula synthesizer. Strictly construct MTL formulas based on the provided semantic components without adding any additional explanations or speculations. Refer to the provided examples, but synthesize independently according to the specific semantic specification sketch."},
+            {"role": "system", "content": "You are a professional LTL formula synthesizer. Strictly construct LTL formulas based on the provided semantic components without adding any additional explanations or speculations. Refer to the provided examples, but synthesize independently according to the specific semantic specification sketch."},
             {"role": "user", "content": synthesizer_prompt}
         ]
 
@@ -581,7 +563,7 @@ Please follow the processing approach demonstrated in the above example, but syn
                 token_usage=token_usage,
                 stage_output=synthesis_result,
                 agent_response=response,
-                error_message=None if synthesis_result.synthesis_success else "Failed to extract MTL formula"
+                error_message=None if synthesis_result.synthesis_success else "Failed to extract LTL formula"
             )
         except Exception as e:
             processing_time = time.time() - start_time
@@ -601,33 +583,33 @@ Please follow the processing approach demonstrated in the above example, but syn
         try:
             # Extract reasoning - handle both plain and markdown formats (** for bold)
             reasoning_match = re.search(
-                r'\*{0,2}Reasoning Process\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final MTL Formula\*{0,2}[:：]|$)', 
+                r'\*{0,2}Reasoning Process\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final LTL Formula\*{0,2}[:：]|$)', 
                 response, re.DOTALL | re.IGNORECASE
             )
             if not reasoning_match:
                 reasoning_match = re.search(
-                    r'\*{0,2}Reasoning\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：]|$)', 
+                    r'\*{0,2}Reasoning\*{0,2}[:：]\s*(.*?)(?=\*{0,2}Final LTL [Ff]ormula\*{0,2}[:：]|$)', 
                     response, re.DOTALL | re.IGNORECASE
                 )
             reasoning = reasoning_match.group(1).strip() if reasoning_match else ""
 
-            # Extract MTL formula - handle markdown bold markers (**) and various formats
+            # Extract LTL formula - handle markdown bold markers (**) and various formats
             # Try multiple patterns to handle different formats:
             # Pattern 1: Formula on same line (no newline after colon, only spaces)
             # Pattern 2: Formula on next line (with optional blank lines)
             
-            # Pattern 1: Same line format - Final MTL Formula: G(...) or Final MTL Formula: **G(...)**
+            # Pattern 1: Same line format - Final LTL Formula: G(...) or Final LTL Formula: **G(...)**
             # Use [ \t] (space or tab, NOT newline) after colon to ensure same-line matching
             formula_match = re.search(
-                r'\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：][ \t]*\*{0,2}[ \t]*([GFPXgfpx~\(][^\n]+?)(?:\*{0,2})?(?:\n|$)', 
+                r'\*{0,2}Final LTL [Ff]ormula\*{0,2}[:：][ \t]*\*{0,2}[ \t]*([GFPXgfpx~\(][^\n]+?)(?:\*{0,2})?(?:\n|$)', 
                 response, re.IGNORECASE
             )
             
-            # Pattern 2: Next line format with optional blank lines - Final MTL Formula:\n\nG(...)
+            # Pattern 2: Next line format with optional blank lines - Final LTL Formula:\n\nG(...)
             # Use DOTALL to match across multiple lines
             if not formula_match:
                 formula_match = re.search(
-                    r'\*{0,2}Final MTL [Ff]ormula\*{0,2}[:：]\*{0,2}\s*\n+\s*(.+?)(?=\n\n\n|\n\*{2}[A-Z]|\Z)', 
+                    r'\*{0,2}Final LTL [Ff]ormula\*{0,2}[:：]\*{0,2}\s*\n+\s*(.+?)(?=\n\n\n|\n\*{2}[A-Z]|\Z)', 
                     response, re.DOTALL | re.IGNORECASE
                 )
             
@@ -637,7 +619,7 @@ Please follow the processing approach demonstrated in the above example, but syn
                 if code_block:
                     formula = code_block.group(1).strip()
                 else:
-                    # Last resort: try to find a line starting with G, F, P, or X (common MTL operators)
+                    # Last resort: try to find a line starting with G, F, P, or X (common LTL operators)
                     lines = response.split('\n')
                     formula = ""
                     for line in reversed(lines):
@@ -657,26 +639,26 @@ Please follow the processing approach demonstrated in the above example, but syn
             # Further cleanup: extract only the formula part if there's extra text
             # Look for patterns like "G(...)" or "F[...](...)"
             if formula:
-                # Try to extract a pure MTL formula (starts with G, F, P, X, ~, or parenthesis)
+                # Try to extract a pure LTL formula (starts with G, F, P, X, ~, or parenthesis)
                 # Match until end of string or until we hit text that looks like explanation
-                mtl_pattern = re.search(r'([GFPXgfpx~\(].+?)(?:\s*$)', formula)
-                if mtl_pattern:
-                    formula = mtl_pattern.group(1).strip()
+                ltl_pattern = re.search(r'([GFPXgfpx~\(].+?)(?:\s*$)', formula)
+                if ltl_pattern:
+                    formula = ltl_pattern.group(1).strip()
                 # Remove any trailing punctuation that's not part of the formula
                 formula = re.sub(r'\s*\)\s*$', ')', formula)
 
             if not formula:
-                logger.error("No MTL formula found in synthesizer response")
+                logger.error("No LTL formula found in synthesizer response")
                 logger.debug(f"Response content: {response[:500]}...")
                 return SynthesisResult(
-                    mtl_formula="",
+                    ltl_formula="",
                     synthesis_reasoning=reasoning,
                     synthesis_success=False
                 )
 
-            logger.info(f"Successfully extracted MTL formula: {formula}")
+            logger.info(f"Successfully extracted LTL formula: {formula}")
             return SynthesisResult(
-                mtl_formula=formula,
+                ltl_formula=formula,
                 synthesis_reasoning=reasoning,
                 synthesis_success=True
             )
@@ -684,12 +666,12 @@ Please follow the processing approach demonstrated in the above example, but syn
             logger.error(f"Failed to extract synthesis result: {e}")
             logger.debug(f"Response content: {response[:500]}...")
             return SynthesisResult(
-                mtl_formula="",
+                ltl_formula="",
                 synthesis_reasoning="",
                 synthesis_success=False
             )
 
-    def _stage_3_verify(self, original_sentence: str, mtl_formula: str, lexicon: Optional[Dict[str, Any]] = None) -> DSVStageResult:
+    def _stage_3_verify(self, original_sentence: str, ltl_formula: str, lexicon: Optional[Dict[str, Any]] = None) -> DSVStageResult:
         """Stage 3: Verify with dynamic example enhancement"""
         start_time = time.time()
         logger.info("=== DSV Stage 3: Verify (Enhanced) ===")
@@ -707,61 +689,60 @@ Please follow the processing approach demonstrated in the above example, but syn
                 lexicon_text += f"- {var}: {desc}\n"
             lexicon_text += "\n"
 
-        # Enhanced verifier prompt with MTL knowledge base and examples
+        # Enhanced verifier prompt with LTL knowledge base and examples
         verifier_prompt = f"""
-You are a professional MTL formula verifier Agent, responsible for translating MTL formulas back into natural language for verification.
+You are a professional LTL formula verifier Agent, responsible for translating LTL formulas back into natural language for verification.
 
-{MTL_KNOWLEDGE_BASE}
+{LTL_KNOWLEDGE_BASE}
 
-**Predicate(Object) Interpretation Rules**:
+**Atomic Proposition Interpretation**:
 
-1. **Relational Predicates** (two parameters):
-   - Format: predicate(subject, object)
-   - in_front_of(ego,other) → "ego is in front of other" or "the ego vehicle is in front of the other vehicle"
-   - yield(ego,other) → "ego yields to other" or "ego vehicle yields to other vehicle"
-   - in_right_of(other,ego) → "other is on the right side of ego"
+1. **Simple Variables**:
+   - Direct interpretation: a → "proposition a holds", b → "proposition b holds"
+   - Descriptive names: request → "a request is made", grant → "access is granted"
 
-2. **Unary Predicates** (one parameter):
-   - Format: predicate(object)
-   - sudden_braking(ego) → "ego brakes suddenly" or "ego vehicle brakes suddenly"
-   - at_intersection(ego) → "ego is at an intersection" or "ego vehicle is at an intersection"
-   - detects_fault(SensorA) → "SensorA detects a fault" or "sensor A detects a fault"
-   - sounds(AlarmB) → "AlarmB sounds" or "alarm B sounds"
+2. **Context from Lexicon**:
+   - Use the provided lexicon to understand what each variable represents
+   - Translate variables into meaningful natural language based on their descriptions
 
-3. **Preserve Object Information**:
-   - Always mention the specific objects involved
-   - Use natural language equivalents: "ego vehicle", "other vehicle", "sensor A", "alarm B"
+3. **Preserve Temporal Meaning**:
+   - G: "at all times", "always", "in every state"
+   - F: "eventually", "at some future point", "will happen"
+   - X: "in the next step", "immediately after"
+   - U: "until", "holds continuously until"
+   - R: "releases", "weak until"
 
 {examples_text}
 
-{lexicon_text}MTL formula to be verified: {mtl_formula}
+{lexicon_text}LTL formula to be verified: {ltl_formula}
 
-Please translate this MTL formula into a clear natural language description.
+Please translate this LTL formula into a clear natural language description.
 
-MTL Symbol Meanings:
-- G: Always/Globally
-- F: Eventually/At some future time
-- X: Next time step
-- U: Until
-- [a,b]: Time interval from a to b
+LTL Symbol Meanings:
+- G: Always/Globally (at all future points)
+- F: Eventually/Finally (at some future point)
+- X: Next (in the immediate next step)
+- U: Until (first operand holds until second becomes true)
+- R: Release (second holds until first, or forever)
 - &: And
 - |: Or  
-- ~: Not
+- ! or ~: Not
 - ->: Implication
+- <->: Equivalence
 
 Provide two marked sections:
 
 Reasoning Process:
-[Explain how you interpret each predicate(object) and translate to natural language]
+[Explain how you interpret each atomic proposition and translate the LTL formula to natural language]
 
 Natural Language Translation:
-[Result of translating MTL formula into natural language, preserving object information]
+[Result of translating LTL formula into natural language, capturing temporal ordering]
 
-Please follow the processing method from the above example, but adapt the translation based on the specific content of the current MTL formula.
+Please follow the processing method from the above example, but adapt the translation based on the specific content of the current LTL formula.
 """
 
         messages = [
-            {"role": "system", "content": "You are a professional MTL formula translator, skilled at converting formal formulas into natural language. Ensure translations are accurate and easy to understand. Refer to the provided examples, but translate each MTL formula independently."},
+            {"role": "system", "content": "You are a professional LTL formula translator, skilled at converting formal formulas into natural language. Ensure translations are accurate and easy to understand. Refer to the provided examples, but translate each LTL formula independently."},
             {"role": "user", "content": verifier_prompt}
         ]
 
@@ -869,7 +850,7 @@ Please follow the processing method from the above example, but adapt the transl
         
         stage_results = []
         refinement_iterations = 0
-        final_mtl_formula = None
+        final_ltl_formula = None
         success = False
         termination_reason = "Unknown"
         
@@ -903,7 +884,7 @@ Please follow the processing method from the above example, but adapt the transl
 
                 # Stage 3: Verify (Enhanced)
                 lexicon = deconstruct_result.stage_output.lexicon if deconstruct_result.stage_output else {}
-                verify_result = self._stage_3_verify(sentence, synth_result.stage_output.mtl_formula, lexicon=lexicon)
+                verify_result = self._stage_3_verify(sentence, synth_result.stage_output.ltl_formula, lexicon=lexicon)
                 stage_results.append(verify_result)
                 if not verify_result.success:
                     termination_reason = "Verify stage failed"
@@ -911,7 +892,7 @@ Please follow the processing method from the above example, but adapt the transl
 
                 # Check verification result
                 if verify_result.stage_output.verification_passed:
-                    final_mtl_formula = synth_result.stage_output.mtl_formula
+                    final_ltl_formula = synth_result.stage_output.ltl_formula
                     success = True
                     termination_reason = f"Verification passed (similarity: {verify_result.stage_output.similarity_score:.3f})"
                     logger.info(f"✅ Success after {iteration + 1} iteration(s)")
@@ -922,7 +903,7 @@ Please follow the processing method from the above example, but adapt the transl
                     logger.info(f"Verification failed (similarity: {similarity:.3f}), below threshold {self.similarity_threshold}")
                     
                     if not enable_refinement or iteration >= self.max_refinement_iterations:
-                        final_mtl_formula = synth_result.stage_output.mtl_formula
+                        final_ltl_formula = synth_result.stage_output.ltl_formula
                         termination_reason = f"Reached max refinement iterations (similarity: {similarity:.3f})"
                         break
                     else:
@@ -930,7 +911,7 @@ Please follow the processing method from the above example, but adapt the transl
                         logger.info(f"Analyzing failure to improve next iteration...")
                         issue_analysis = self._analyze_verification_failure(
                             original_sentence=sentence,
-                            mtl_formula=synth_result.stage_output.mtl_formula,
+                            ltl_formula=synth_result.stage_output.ltl_formula,
                             back_translation=verify_result.stage_output.back_translation,
                             similarity_score=similarity,
                             semantic_sketch_json=deconstruct_result.stage_output.raw_json
@@ -939,7 +920,7 @@ Please follow the processing method from the above example, but adapt the transl
                         # Store feedback for next iteration
                         feedback = RefinementFeedback(
                             iteration=iteration + 1,
-                            mtl_formula=synth_result.stage_output.mtl_formula,
+                            ltl_formula=synth_result.stage_output.ltl_formula,
                             back_translation=verify_result.stage_output.back_translation,
                             similarity_score=similarity,
                             semantic_sketch_json=deconstruct_result.stage_output.raw_json,
@@ -953,7 +934,7 @@ Please follow the processing method from the above example, but adapt the transl
             total_processing_time = time.time() - start_time
             return DSVProcessResult(
                 input_sentence=sentence,
-                final_mtl_formula=final_mtl_formula,
+                final_ltl_formula=final_ltl_formula,
                 total_processing_time=total_processing_time,
                 total_token_usage=self.total_token_usage,
                 stage_results=stage_results,
@@ -966,7 +947,7 @@ Please follow the processing method from the above example, but adapt the transl
             logger.error(f"Enhanced DSV processing failed: {e}")
             return DSVProcessResult(
                 input_sentence=sentence,
-                final_mtl_formula=None,
+                final_ltl_formula=None,
                 total_processing_time=total_processing_time,
                 total_token_usage=self.total_token_usage,
                 stage_results=stage_results,
@@ -980,9 +961,9 @@ Please follow the processing method from the above example, but adapt the transl
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         
         save_data = {
-            "framework": "DSVA with Dynamic Examples",
+            "framework": "DSVA with Dynamic Examples (LTL)",
             "input_sentence": result.input_sentence,
-            "final_mtl_formula": result.final_mtl_formula,
+            "final_ltl_formula": result.final_ltl_formula,
             "success": result.success,
             "termination_reason": result.termination_reason,
             "total_processing_time": result.total_processing_time,
@@ -1021,7 +1002,7 @@ Please follow the processing method from the above example, but adapt the transl
                     }
                 elif isinstance(stage_result.stage_output, SynthesisResult):
                     stage_data["synthesis_result"] = {
-                        "mtl_formula": stage_result.stage_output.mtl_formula,
+                        "ltl_formula": stage_result.stage_output.ltl_formula,
                         "synthesis_reasoning": stage_result.stage_output.synthesis_reasoning,
                         "synthesis_success": stage_result.stage_output.synthesis_success
                     }
@@ -1077,7 +1058,7 @@ def main() -> None:
             
             # Display results
             print(f"✅ Success: {result.success}")
-            print(f"🎯 Final MTL formula: {result.final_mtl_formula}")
+            print(f"🎯 Final LTL formula: {result.final_ltl_formula}")
             print(f"🔄 Refinement iterations: {result.refinement_iterations}")
             print(f"📝 Termination reason: {result.termination_reason}")
             print(f"⏱️  Total processing time: {result.total_processing_time:.2f}s")

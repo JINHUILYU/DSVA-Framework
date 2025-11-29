@@ -1,14 +1,14 @@
 {
     "framework_name": "DSV (Deconstruct, Synthesize, and Verify)",
-    "version": "1.0.0",
-    "description": "A white-box, structure-driven natural language to MTL conversion framework",
+    "version": "2.0.0",
+    "description": "A white-box, structure-driven natural language to LTL conversion framework",
     
     "agents": {
         "analyst": {
             "name": "Analyst_Agent",
             "role": "Semantic Analyst",
             "description": "Responsible for deconstructing natural language into structured semantic components",
-            "model": "deepseek-reasoner",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -17,8 +17,8 @@
         "synthesizer": {
             "name": "Synthesizer_Agent", 
             "role": "Formula Synthesizer",
-            "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
-            "model": "deepseek-reasoner",
+            "description": "Responsible for synthesizing syntactically correct LTL formulas from semantic components",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -27,8 +27,8 @@
         "verifier": {
             "name": "Verifier_Agent",
             "role": "Verifier",
-            "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
-            "model": "deepseek-reasoner",
+            "description": "Responsible for verifying the semantic correctness of LTL formulas through back-translation",
+            "model": "deepseek-chat",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -37,7 +37,7 @@
     },
     
     "processing_parameters": {
-        "similarity_threshold": 0.85,
+        "similarity_threshold": 0.70,
         "max_refinement_iterations": 3,
         "enable_refinement_loop": true,
         "similarity_model": "sentence-transformers/all-MiniLM-L6-v2"
@@ -50,34 +50,29 @@
         "model": "sentence-transformers/all-MiniLM-L6-v2",
         "sources": [
             {
-                "path": "data/examples/dsv_examples.json",
+                "path": "data/examples/ltl_examples.json",
                 "type": "json",
                 "stages": ["deconstruct", "synthesize", "verify"]
             }
         ]
     },
     
-    "mtl_syntax": {
+    "ltl_syntax": {
         "temporal_operators": {
-            "G": "Globally (Always)",
-            "F": "Finally (Eventually)", 
-            "X": "Next",
-            "U": "Until",
-            "P": "Past",
-            "O": "Once"
-        },
-        "metric_operators": {
-            "G_[a,b]": "Globally within time interval [a,b]",
-            "F_[a,b]": "Finally within time interval [a,b]",
-            "U_[a,b]": "Until within time interval [a,b]"
+            "G": "Globally/Always (holds at all future points)",
+            "F": "Finally/Eventually (holds at some future point)", 
+            "X": "Next (holds in the immediate next step)",
+            "U": "Until (first operand holds until second becomes true)",
+            "R": "Release (second holds until first, or forever)"
         },
         "logical_operators": {
-            "∧": "AND",
-            "∨": "OR", 
-            "¬": "NOT",
-            "→": "IMPLIES",
-            "↔": "EQUIVALENCE"
-        }
+            "∧ / &": "AND",
+            "∨ / |": "OR", 
+            "¬ / ! / ~": "NOT",
+            "→ / ->": "IMPLIES",
+            "↔ / <->": "EQUIVALENCE"
+        },
+        "notes": "LTL focuses on ordering of events, not timing metrics. No explicit time bounds."
     },
     
     "semantic_components": {

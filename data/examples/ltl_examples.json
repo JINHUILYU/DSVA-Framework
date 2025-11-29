@@ -1,0 +1,286 @@
+{
+  "framework": "DSV Example Database for LTL",
+  "description": "Comprehensive LTL examples covering diverse temporal patterns based on nl2spec dataset",
+  "version": "1.0",
+  "examples": {
+    "deconstruct": [
+      {
+        "id": "dec_001",
+        "input_text": "It is never the case that a and b hold at the same time.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"global_prohibition\",\n      \"formula\": \"!(a & b)\",\n      \"description\": \"a and b never hold simultaneously\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Two atomic propositions with global prohibition of simultaneous occurrence. No timing constraints, pure LTL pattern."
+      },
+      {
+        "id": "dec_002",
+        "input_text": "Whenever a is enabled, b is enabled three steps later.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a is enabled\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b is enabled\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"conditional_next\",\n      \"antecedent\": \"a\",\n      \"consequent\": \"b\",\n      \"steps\": 3,\n      \"description\": \"When a holds, b must hold exactly 3 steps later\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a enabled\",\n    \"b\": \"Proposition b enabled\"\n  }\n}",
+        "reasoning": "Temporal implication with discrete step count. Requires nested X operators."
+      },
+      {
+        "id": "dec_003",
+        "input_text": "If b holds at some point, a has to hold somewhere beforehand.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"precedence\",\n      \"antecedent\": \"a\",\n      \"consequent\": \"b\",\n      \"description\": \"a must occur before b\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Precedence pattern: a must have occurred before b. Uses until operator for past constraint."
+      },
+      {
+        "id": "dec_004",
+        "input_text": "Whenever a holds, b holds as well.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"synchronous_implication\",\n      \"antecedent\": \"a\",\n      \"consequent\": \"b\",\n      \"description\": \"Whenever a holds, b must hold in the same state\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Synchronous implication pattern. Simple global conditional."
+      },
+      {
+        "id": "dec_005",
+        "input_text": "a holds always and whenever b holds, c does not hold.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    },\n    {\n      \"id\": \"ap_3\",\n      \"variable\": \"c\",\n      \"description\": \"Proposition c holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"conjunction\",\n      \"components\": [\"G(a)\", \"G(b -> !c)\"],\n      \"description\": \"a always holds AND b implies not c\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\",\n    \"c\": \"Proposition c\"\n  }\n}",
+        "reasoning": "Conjunction of two global properties: invariant a and conditional prohibition."
+      },
+      {
+        "id": "dec_006",
+        "input_text": "If a holds infinitely often, then b holds infinitely often as well.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"infinite_recurrence_implication\",\n      \"antecedent\": \"G(F(a))\",\n      \"consequent\": \"G(F(b))\",\n      \"description\": \"If a recurs infinitely, b must also recur infinitely\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Implication\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Infinite recurrence pattern with implication. GF pattern for both propositions."
+      },
+      {
+        "id": "dec_007",
+        "input_text": "Once a happened, b will not happen again.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Event a occurs\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Event b occurs\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"after_prohibition\",\n      \"trigger\": \"a\",\n      \"prohibited\": \"b\",\n      \"description\": \"After a occurs, b is prohibited forever\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Event a\",\n    \"b\": \"Event b\"\n  }\n}",
+        "reasoning": "Trigger-based permanent prohibition. After a, b is globally prohibited."
+      },
+      {
+        "id": "dec_008",
+        "input_text": "Whenever a holds and b holds in the next step, then c holds one step after b.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    },\n    {\n      \"id\": \"ap_3\",\n      \"variable\": \"c\",\n      \"description\": \"Proposition c holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"multi_step_implication\",\n      \"pattern\": \"a & X(b) -> X(X(c))\",\n      \"description\": \"If a holds now and b holds next, then c holds in 2 steps\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\",\n    \"c\": \"Proposition c\"\n  }\n}",
+        "reasoning": "Multi-step implication with nested next operators."
+      },
+      {
+        "id": "dec_009",
+        "input_text": "Every a is eventually followed by a b.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Event a occurs\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Event b occurs\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"response\",\n      \"trigger\": \"a\",\n      \"response\": \"b\",\n      \"description\": \"Each occurrence of a must eventually be followed by b\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Event a\",\n    \"b\": \"Event b\"\n  }\n}",
+        "reasoning": "Response pattern: every a triggers eventual b. Classic LTL pattern."
+      },
+      {
+        "id": "dec_010",
+        "input_text": "Whenever a holds, b must hold in the next two steps.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"bounded_response\",\n      \"antecedent\": \"a\",\n      \"consequent\": \"b\",\n      \"steps\": 2,\n      \"description\": \"When a holds, b must hold within the next 2 steps\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Bounded response with specific step count. Disjunction of next operators."
+      },
+      {
+        "id": "dec_011",
+        "input_text": "a holds until b holds or always a holds.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"weak_until\",\n      \"held\": \"a\",\n      \"release\": \"b\",\n      \"description\": \"a holds continuously until b, or a holds forever if b never occurs\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Weak until pattern (release operator). a persists until b or forever."
+      },
+      {
+        "id": "dec_012",
+        "input_text": "a and b never occur at the same time but one of them holds in every time step.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"mutex_coverage\",\n      \"components\": [\"!(a & b)\", \"(a | b)\"],\n      \"description\": \"a and b are mutually exclusive but one always holds\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Mutual exclusion with coverage requirement. Conjunction of two global properties."
+      },
+      {
+        "id": "dec_013",
+        "input_text": "If a holds b will eventually hold.",
+        "stage": "deconstruct",
+        "output": "{\n  \"objects\": [],\n  \"atomic_propositions\": [\n    {\n      \"id\": \"ap_1\",\n      \"variable\": \"a\",\n      \"description\": \"Proposition a holds\"\n    },\n    {\n      \"id\": \"ap_2\",\n      \"variable\": \"b\",\n      \"description\": \"Proposition b holds\"\n    }\n  ],\n  \"temporal_relations\": [\n    {\n      \"type\": \"eventual_response\",\n      \"antecedent\": \"a\",\n      \"consequent\": \"b\",\n      \"description\": \"Whenever a holds, b must eventually hold\"\n    }\n  ],\n  \"metric_constraints\": [],\n  \"global_property\": \"Always\",\n  \"lexicon\": {\n    \"a\": \"Proposition a\",\n    \"b\": \"Proposition b\"\n  }\n}",
+        "reasoning": "Simple response pattern. Global implication with eventual consequence."
+      }
+    ],
+    "synthesize": [
+      {
+        "id": "syn_001",
+        "input_text": "It is never the case that a and b hold at the same time.",
+        "stage": "synthesize",
+        "output": "G(!(a & b))",
+        "reasoning": "Global operator G applies to negation of conjunction. Standard mutual exclusion pattern."
+      },
+      {
+        "id": "syn_002",
+        "input_text": "Whenever a is enabled, b is enabled three steps later.",
+        "stage": "synthesize",
+        "output": "G(a -> X(X(X(b))))",
+        "reasoning": "Three nested X operators for three steps. Global implication from a to future b."
+      },
+      {
+        "id": "syn_003",
+        "input_text": "If b holds at some point, a has to hold somewhere beforehand.",
+        "stage": "synthesize",
+        "output": "(!b) U a",
+        "reasoning": "Until operator captures precedence: not-b holds until a becomes true, ensuring a precedes b."
+      },
+      {
+        "id": "syn_004",
+        "input_text": "Whenever a holds, b holds as well.",
+        "stage": "synthesize",
+        "output": "G(a -> b)",
+        "reasoning": "Global implication for synchronous requirement. Simple response in same state."
+      },
+      {
+        "id": "syn_005",
+        "input_text": "a holds always and whenever b holds, c does not hold.",
+        "stage": "synthesize",
+        "output": "G(a) & G(b -> !c)",
+        "reasoning": "Conjunction of two global formulas: persistent a and conditional prohibition."
+      },
+      {
+        "id": "syn_006",
+        "input_text": "If a holds infinitely often, then b holds infinitely often as well.",
+        "stage": "synthesize",
+        "output": "G(F(a)) -> G(F(b))",
+        "reasoning": "Implication between two infinite recurrence patterns (GF). Fairness-style constraint."
+      },
+      {
+        "id": "syn_007",
+        "input_text": "Once a happened, b will not happen again.",
+        "stage": "synthesize",
+        "output": "G(a -> G(!b))",
+        "reasoning": "After a occurs, b is globally prohibited. Nested global for permanent effect."
+      },
+      {
+        "id": "syn_008",
+        "input_text": "Whenever a holds and b holds in the next step, then c holds one step after b.",
+        "stage": "synthesize",
+        "output": "G((a & X(b)) -> X(X(c)))",
+        "reasoning": "Conjunction in antecedent with current and next state. Two next operators for consequence."
+      },
+      {
+        "id": "syn_009",
+        "input_text": "Every a is eventually followed by a b.",
+        "stage": "synthesize",
+        "output": "G(a -> F(b))",
+        "reasoning": "Classic response pattern. Global implication with eventually operator."
+      },
+      {
+        "id": "syn_010",
+        "input_text": "Whenever a holds, b must hold in the next two steps.",
+        "stage": "synthesize",
+        "output": "G(a -> (X(b) | X(X(b))))",
+        "reasoning": "Disjunction of next operators for bounded response. b must occur in step 1 or 2."
+      },
+      {
+        "id": "syn_011",
+        "input_text": "a holds until b holds or always a holds.",
+        "stage": "synthesize",
+        "output": "a R b",
+        "reasoning": "Release operator (R) for weak until. a persists until b or forever."
+      },
+      {
+        "id": "syn_012",
+        "input_text": "a and b never occur at the same time but one of them holds in every time step.",
+        "stage": "synthesize",
+        "output": "G(!(a & b)) & G(a | b)",
+        "reasoning": "Conjunction of mutex and coverage. Both constraints globally enforced."
+      },
+      {
+        "id": "syn_013",
+        "input_text": "If a holds b will eventually hold.",
+        "stage": "synthesize",
+        "output": "G(a -> F(b))",
+        "reasoning": "Standard response pattern with global scope and eventual consequence."
+      }
+    ],
+    "verify": [
+      {
+        "id": "ver_001",
+        "input_text": "It is never the case that a and b hold at the same time.",
+        "stage": "verify",
+        "output": "It is always the case that a and b do not hold simultaneously.",
+        "reasoning": "G translates to 'always', negation of conjunction to 'not simultaneously'."
+      },
+      {
+        "id": "ver_002",
+        "input_text": "Whenever a is enabled, b is enabled three steps later.",
+        "stage": "verify",
+        "output": "Whenever a holds, b holds exactly three steps in the future.",
+        "reasoning": "Three nested X operators translate to 'three steps later'. G(a -> ...) as 'whenever'."
+      },
+      {
+        "id": "ver_003",
+        "input_text": "If b holds at some point, a has to hold somewhere beforehand.",
+        "stage": "verify",
+        "output": "Not b holds until a becomes true, ensuring a occurs before any b.",
+        "reasoning": "Until operator captures precedence requirement in temporal ordering."
+      },
+      {
+        "id": "ver_004",
+        "input_text": "Whenever a holds, b holds as well.",
+        "stage": "verify",
+        "output": "At all times, if a holds then b holds in the same state.",
+        "reasoning": "Global implication without next operator means synchronous holding."
+      },
+      {
+        "id": "ver_005",
+        "input_text": "a holds always and whenever b holds, c does not hold.",
+        "stage": "verify",
+        "output": "a holds at all times, and at all times when b holds, c does not hold.",
+        "reasoning": "Conjunction of two global properties expressed as compound sentence."
+      },
+      {
+        "id": "ver_006",
+        "input_text": "If a holds infinitely often, then b holds infinitely often as well.",
+        "stage": "verify",
+        "output": "If a recurs infinitely often, then b must also recur infinitely often.",
+        "reasoning": "GF pattern translates to 'infinitely often' or 'repeatedly'. Implication preserved."
+      },
+      {
+        "id": "ver_007",
+        "input_text": "Once a happened, b will not happen again.",
+        "stage": "verify",
+        "output": "At all times, if a holds, then from that point onward b never holds.",
+        "reasoning": "Nested global creates permanent prohibition after trigger event."
+      },
+      {
+        "id": "ver_008",
+        "input_text": "Whenever a holds and b holds in the next step, then c holds one step after b.",
+        "stage": "verify",
+        "output": "At all times, if a holds currently and b holds in the next step, then c holds two steps from now.",
+        "reasoning": "Multi-step implication with explicit step counting from current state."
+      },
+      {
+        "id": "ver_009",
+        "input_text": "Every a is eventually followed by a b.",
+        "stage": "verify",
+        "output": "At all times, whenever a holds, b eventually holds at some future point.",
+        "reasoning": "G(a -> F(b)) is the standard response pattern translation."
+      },
+      {
+        "id": "ver_010",
+        "input_text": "Whenever a holds, b must hold in the next two steps.",
+        "stage": "verify",
+        "output": "At all times, when a holds, b must hold either in the next step or in two steps.",
+        "reasoning": "Disjunction translates to 'either...or' for alternative timing."
+      },
+      {
+        "id": "ver_011",
+        "input_text": "a holds until b holds or always a holds.",
+        "stage": "verify",
+        "output": "a holds continuously until b occurs, or a holds forever if b never occurs.",
+        "reasoning": "Release operator (weak until) allows perpetual holding of first operand."
+      },
+      {
+        "id": "ver_012",
+        "input_text": "a and b never occur at the same time but one of them holds in every time step.",
+        "stage": "verify",
+        "output": "At all times, a and b do not hold simultaneously, and at all times, either a or b holds.",
+        "reasoning": "Two conjoined global properties: mutual exclusion and coverage."
+      },
+      {
+        "id": "ver_013",
+        "input_text": "If a holds b will eventually hold.",
+        "stage": "verify",
+        "output": "At all times, whenever a holds, b will eventually hold at some future point.",
+        "reasoning": "Standard LTL response pattern with clear temporal ordering."
+      }
+    ]
+  }
+}

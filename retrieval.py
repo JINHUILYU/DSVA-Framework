@@ -36,7 +36,7 @@ class RetrievalResult:
 class ExampleRetriever:
     """示例检索器"""
     
-    def __init__(self, config_path: str = "config/dsv_config.json"):
+    def __init__(self, config_path: str = "config/dsva_config.json"):
         """初始化示例检索器"""
         self.config = self._load_config(config_path)
         self.sentence_model = None

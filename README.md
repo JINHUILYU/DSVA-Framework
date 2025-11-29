@@ -1,13 +1,13 @@
 # DSVA Framework: Deconstruct-Synthesize-Verify-Analyze
 
-A sophisticated framework for translating natural language specifications into Metric Temporal Logic (MTL) formulas using a four-stage pipeline with intelligent refinement feedback and error analysis.
+A sophisticated framework for translating natural language specifications into **Linear Temporal Logic (LTL)** formulas using a four-stage pipeline with intelligent refinement feedback and error analysis.
 
 ## 🌟 Overview
 
-The DSVA Framework employs a **Deconstruct → Synthesize → Verify → Analyze** approach to convert natural language requirements into formal MTL formulas:
+The DSVA Framework employs a **Deconstruct → Synthesize → Verify → Analyze** approach to convert natural language requirements into formal LTL formulas:
 
-1. **Deconstruct**: Semantic analysis agent breaks down natural language into structured components
-2. **Synthesize**: MTL formula synthesizer generates formal logic from semantic sketches  
+1. **Deconstruct**: Semantic analysis agent breaks down natural language into simple atomic propositions and temporal patterns
+2. **Synthesize**: LTL formula synthesizer generates formal logic using standard temporal operators
 3. **Verify**: Back-translation verifier validates formula correctness through semantic similarity
 4. **Analyze**: Error analyst function diagnoses verification failures and provides targeted feedback for refinement
 
@@ -15,10 +15,10 @@ The DSVA Framework employs a **Deconstruct → Synthesize → Verify → Analyze
 
 ✅ **Intelligent Refinement Loop**: Learns from verification failures with detailed feedback analysis  
 ✅ **Error Analyst Function**: Advanced failure diagnosis that identifies semantic gaps and provides actionable correction suggestions  
-✅ **MTL Knowledge Base Integration**: Standardized temporal logic operators and mappings  
-✅ **Dynamic Example Retrieval**: Semantic similarity-based few-shot learning for improved accuracy  
+✅ **LTL Knowledge Base Integration**: Standardized temporal logic operators (G, F, X, U, R) and common patterns  
+✅ **Dynamic Example Retrieval**: Semantic similarity-based few-shot learning using nl2spec dataset  
 ✅ **Multi-Agent Architecture**: Specialized agents for each DSVA stage  
-✅ **Multi-LLM Support**: Tested with GPT-4, GPT-4o, DeepSeek-v3, and Gemini 2.5 Flash  
+✅ **Multi-LLM Support**: Tested with GPT-4, GPT-4o, DeepSeek-v3, DeepSeek-r1, and Gemini 2.5 Flash  
 ✅ **Comprehensive Tracking**: Token usage, processing time, and refinement history  
 ✅ **Ablation Study Support**: Built-in baseline version for performance comparison  
 
@@ -32,12 +32,12 @@ DSVA-Framework/
 ├── ablation.py                   # Baseline version for ablation studies (no examples)
 ├── retrieval.py                  # Example retrieval system using sentence transformers
 ├── config/
-│   └── dsv_config.json          # Framework configuration (models, thresholds, etc.)
+│   └── dsva_config.json          # Framework configuration (models, thresholds, etc.)
 ├── data/
 │   ├── input/
-│   │   └── dataset.xlsx         # Input natural language specifications
+│   │   └── nl2spec.csv          # Input natural language specifications (nl2spec dataset)
 │   ├── examples/
-│   │   └── dsv_examples.json    # Example dataset for dynamic retrieval
+│   │   └── ltl_examples.json    # LTL example dataset for dynamic retrieval
 │   └── output/
 │       ├── dsva/                # Enhanced DSVA framework outputs
 │       │   ├── gpt-4/           # Results using GPT-4
@@ -93,17 +93,17 @@ OPENAI_BASE_URL=https://api.openai.com/v1
 from dsva import EnhancedDSVFramework
 
 # Initialize framework
-dsva = EnhancedDSVFramework(config_path="config/dsv_config.json")
+dsva = EnhancedDSVFramework(config_path="config/dsva_config.json")
 
 # Process a natural language specification
 result = dsva.process(
-    sentence="At intersections, the ego vehicle must yield to vehicles coming from the right side.",
+    sentence="Whenever a is enabled, b is enabled three steps later.",
     enable_refinement=True
 )
 
 # Display results
 print(f"Success: {result.success}")
-print(f"MTL Formula: {result.final_mtl_formula}")
+print(f"LTL Formula: {result.final_mtl_formula}")  # Note: field name unchanged for compatibility
 print(f"Refinement Iterations: {result.refinement_iterations}")
 print(f"Similarity Score: {result.stage_results[-1].stage_output.similarity_score:.3f}")
 
@@ -117,17 +117,17 @@ dsva.save_result(result, "data/output/dsva/gpt-4/my_result.json")
 from ablation import DSVFrameworkAblation
 
 # Initialize baseline framework (without dynamic examples)
-dsva_ablation = DSVFrameworkAblation(config_path="config/dsv_config.json")
+dsva_ablation = DSVFrameworkAblation(config_path="config/dsva_config.json")
 
 # Process specification
 result = dsva_ablation.process(
-    sentence="At intersections, the ego vehicle must yield to vehicles coming from the right side.",
+    sentence="Every a is eventually followed by a b.",
     enable_refinement=True
 )
 
 # Display results
 print(f"Success: {result.success}")
-print(f"MTL Formula: {result.final_mtl_formula}")
+print(f"LTL Formula: {result.final_mtl_formula}")  # Note: field name unchanged for compatibility
 ```
 
 ### 4. Run Demo Scripts
@@ -189,7 +189,7 @@ Manages semantic similarity-based example retrieval for the enhanced version.
 
 ## 🔧 Configuration
 
-### Main Configuration File: [`config/dsv_config.json`](config/dsv_config.json)
+### Main Configuration File: [`config/dsva_config.json`](config/dsva_config.json)
 
 ```json
 {
@@ -218,7 +218,14 @@ Manages semantic similarity-based example retrieval for the enhanced version.
   "example_retrieval": {
     "enabled": true,
     "top_k": 3,
-    "examples_path": "data/examples/dsv_examples.json"
+    "similarity_threshold": 0.3,
+    "sources": [
+      {
+        "path": "data/examples/ltl_examples.json",
+        "type": "json",
+        "stages": ["deconstruct", "synthesize", "verify"]
+      }
+    ]
   }
 }
 ```
@@ -243,40 +250,54 @@ The framework has been tested with multiple state-of-the-art language models:
 - **Google**: `gemini-2.5-flash` et al.
 - **Custom**: Any OpenAI-compatible API endpoint
 
-To use different models, update the `model` field in `config/dsv_config.json` for each agent.
+To use different models, update the `model` field in `config/dsva_config.json` for each agent.
 
 ---
 
-## 📊 MTL Knowledge Base
+## 📊 LTL Knowledge Base
 
-Both framework versions include a comprehensive MTL knowledge base that standardizes:
+Both framework versions include a comprehensive LTL knowledge base that standardizes:
 
 ### Temporal Operators
 
-**Future-time:**
-- `F_[a,b](φ)` — Eventually (φ occurs within [a,b])
-- `G_[a,b](φ)` — Globally (φ holds throughout [a,b])
-- `φ U_[a,b] ψ` — Until (φ holds until ψ within [a,b])
-- `X` — Next (discrete next step)
-
-**Past-time:**
-- `P_[a,b](φ)` — Previously (φ held within past [a,b])
-- `O(φ)` — Once (φ occurred at least once in the past)
+- `G(φ)` — Globally/Always (φ holds at all future points)
+- `F(φ)` — Finally/Eventually (φ holds at some future point)
+- `X(φ)` — Next (φ holds in the immediate next step)
+- `φ U ψ` — Until (φ holds until ψ becomes true)
+- `φ R ψ` — Release (ψ holds until φ, or forever)
 
 ### Logical Connectives
 
-- `&` (and), `|` (or), `~` (not), `->` (implication), `<->` (equivalence)
+- `&` / `∧` (and), `|` / `∨` (or), `!` / `~` / `¬` (not), `->` / `→` (implication), `<->` / `↔` (equivalence)
 
-### Common Mappings
+### Common LTL Patterns
 
-| Natural Language | MTL Formula |
-|------------------|-------------|
-| "within T seconds" | `F_[0,T](φ)` |
-| "for T seconds" | `G_[0,T](φ)` |
-| "after at least T seconds" | `F_[T,∞)(φ)` |
-| "always" | `G(φ)` |
-| "eventually" | `F(φ)` |
-| "immediately" | `X(φ)` |
+| Natural Language | LTL Formula | Description |
+|------------------|-------------|-------------|
+| "a and b never occur at the same time" | `G(!(a & b))` | Mutual exclusion |
+| "whenever a holds, b holds as well" | `G(a -> b)` | Synchronous implication |
+| "every a is eventually followed by b" | `G(a -> F(b))` | Response pattern |
+| "a happens, then b never happens again" | `G(a -> G(!b))` | Permanent prohibition |
+| "a holds infinitely often" | `G(F(a))` | Infinite recurrence |
+| "from some point on, a holds forever" | `F(G(a))` | Eventual stability |
+| "in the next step" | `X(φ)` | Immediate next |
+| "in the next three steps" | `X(X(X(φ)))` | Multi-step next |
+
+### Key Differences: MTL vs LTL
+
+**LTL (Linear Temporal Logic):**
+- ✅ Focuses on event ordering and occurrence
+- ✅ No explicit time bounds or metrics
+- ✅ Simpler syntax with atomic propositions (a, b, c)
+- ✅ Suitable for qualitative temporal properties
+
+**MTL (Metric Temporal Logic):**
+- ⏱️ Includes explicit time intervals [a,b]
+- ⏱️ Can express real-time constraints
+- ⏱️ More complex with object-predicate structures
+- ⏱️ Suitable for real-time systems
+
+**Note:** This framework uses **LTL** for its simplicity and focus on event sequencing.
 
 ---
 
@@ -321,18 +342,19 @@ Original implementation had a critical flaw:
 
 ```
 Iteration 1: 
-  Input: "Within 5 seconds after A, B must occur"
-  → Deconstruct → Synthesize → Verify (similarity: 0.45) ❌
-  → Analyze: "Time constraint [5,5] should be [0,5]"
+  Input: "Whenever a holds, b must hold eventually"
+  → Deconstruct → Synthesize → Verify (similarity: 0.52) ❌
+  → Analyze: "Missing F operator - 'eventually' not captured"
 
 Iteration 2:
   Input: Original + [Analysis from Iteration 1]
-  → Deconstruct → Synthesize → Verify (similarity: 0.78) ❌
-  → Analyze: "Missing 'must' implication operator"
+  → Deconstruct → Synthesize → Verify (similarity: 0.81) ❌
+  → Analyze: "Missing global operator G for 'whenever'"
 
 Iteration 3:
   Input: Original + [Analysis from Iterations 1 & 2]
-  → Deconstruct → Synthesize → Verify (similarity: 0.92) ✅
+  → Deconstruct → Synthesize → Verify (similarity: 0.94) ✅
+  → Final Formula: G(a -> F(b))
 ```
 
 ### Key Improvements
@@ -363,16 +385,16 @@ Iteration 3:
 from dsva import EnhancedDSVFramework
 
 dsva = EnhancedDSVFramework()
-result = dsva.process("At intersections, ego must yield to vehicles from the right.")
+result = dsva.process("Whenever a holds, b holds as well.")
 
-print(f"MTL Formula: {result.final_mtl_formula}")
-# Output: G(at_intersection(ego) -> yield(ego, other))
+print(f"LTL Formula: {result.final_mtl_formula}")
+# Output: G(a -> b)
 ```
 
 ### Example 2: Accessing Stage Details
 
 ```python
-result = dsva.process("If signal received, respond within 10 seconds.")
+result = dsva.process("Every a is eventually followed by a b.")
 
 for stage_result in result.stage_results:
     print(f"\nStage: {stage_result.stage.value}")
@@ -403,7 +425,7 @@ for i, stage in enumerate(verify_stages, 1):
 from dsva import EnhancedDSVFramework
 from ablation import DSVFrameworkAblation
 
-sentence = "At intersections, ego must yield to vehicles from the right."
+sentence = "It is never the case that a and b hold at the same time."
 
 # Enhanced version (with examples)
 enhanced = EnhancedDSVFramework()
@@ -415,10 +437,12 @@ result_ablation = ablation.process(sentence)
 
 print("Enhanced:")
 print(f"  Success: {result_enhanced.success}")
+print(f"  Formula: {result_enhanced.final_mtl_formula}")  # Expected: G(!(a & b))
 print(f"  Tokens: {result_enhanced.total_token_usage.total_tokens}")
 
 print("Ablation:")
 print(f"  Success: {result_ablation.success}")
+print(f"  Formula: {result_ablation.final_mtl_formula}")
 print(f"  Tokens: {result_ablation.total_token_usage.total_tokens}")
 ```
 
@@ -430,11 +454,11 @@ Results are saved as JSON files with comprehensive metadata:
 
 ```json
 {
-  "framework": "Enhanced DSV with Dynamic Examples",
-  "input_sentence": "Within 5 seconds...",
-  "final_mtl_formula": "G(A -> F_[0,5](B))",
+  "framework": "DSVA with Dynamic Examples (LTL)",
+  "input_sentence": "Whenever a holds, b holds as well.",
+  "final_mtl_formula": "G(a -> b)",
   "success": true,
-  "termination_reason": "Verification passed (similarity: 0.923)",
+  "termination_reason": "Verification passed (similarity: 0.931)",
   "total_processing_time": 12.34,
   "total_token_usage": {
     "prompt_tokens": 1234,
@@ -494,11 +518,11 @@ from dsva import EnhancedDSVFramework
 from ablation import DSVFrameworkAblation
 import json
 
-# Test dataset
+# Test dataset (from nl2spec)
 test_cases = [
-    "At intersections, ego must yield to vehicles from the right.",
-    "The system must respond within 10 to 20 seconds.",
-    "If traffic is moving slowly, do not enter the intersection."
+    "It is never the case that a and b hold at the same time.",
+    "Whenever a is enabled, b is enabled three steps later.",
+    "Every a is eventually followed by a b."
 ]
 
 # Run enhanced version
@@ -578,21 +602,26 @@ Verification failed: similarity 0.65 below threshold 0.85
 **Solutions**:
 - Check if input sentence is grammatically correct
 - Ensure temporal constraints are clearly expressed
-- Try adjusting `similarity_threshold` in `config/dsv_config.json`
+- Try adjusting `similarity_threshold` in `config/dsva_config.json`
 - Enable refinement: `result = dsva.process(sentence, enable_refinement=True)`
 
 #### 3. **Example Retrieval Errors**
 
 ```text
-FileNotFoundError: data/examples/dsv_examples.json
+FileNotFoundError: data/examples/ltl_examples.json
 ```
 
-**Solution**: Verify example file path in `config/dsv_config.json`:
+**Solution**: Verify example file path in `config/dsva_config.json`:
 
 ```json
 {
   "example_retrieval": {
-    "examples_path": "data/examples/dsv_examples.json"
+    "sources": [
+      {
+        "path": "data/examples/ltl_examples.json",
+        "type": "json"
+      }
+    ]
   }
 }
 ```
@@ -612,7 +641,7 @@ FileNotFoundError: data/examples/dsv_examples.json
 
 ```python
 class EnhancedDSVFramework:
-    def __init__(self, config_path: str = "config/dsv_config.json")
+    def __init__(self, config_path: str = "config/dsva_config.json")
     def process(self, sentence: str, enable_refinement: bool = True) -> DSVResult
     def toggle_examples(self, enabled: bool) -> None
     def save_result(self, result: DSVResult, filepath: str) -> None
@@ -622,7 +651,7 @@ class EnhancedDSVFramework:
 
 ```python
 class DSVFrameworkAblation:
-    def __init__(self, config_path: str = "config/dsv_config.json")
+    def __init__(self, config_path: str = "config/dsva_config.json")
     def process(self, sentence: str, enable_refinement: bool = True) -> DSVResult
     def save_result(self, result: DSVResult, filepath: str) -> None
 ```
@@ -725,7 +754,7 @@ If you use this framework in your research, please cite:
 - [ ] Install Python 3.8+
 - [ ] Run `pip install -r requirements.txt`
 - [ ] **Create `.env` file with API credentials**
-- [ ] Verify `config/dsv_config.json` exists
+- [ ] Verify `config/dsva_config.json` exists
 - [ ] Test with: `python dsv_framework_complete.py`
 
 ### Essential Commands
@@ -741,9 +770,10 @@ python ablation.py
 python -c "
 from dsva import EnhancedDSVFramework
 dsva = EnhancedDSVFramework()
-result = dsva.process('Your sentence here')
+result = dsva.process('Whenever a holds, b holds as well.')
 print(f'Success: {result.success}')
-print(f'Formula: {result.final_mtl_formula}')
+print(f'LTL Formula: {result.final_mtl_formula}')
+# Expected output: G(a -> b)
 "
 ```
 
@@ -751,7 +781,7 @@ print(f'Formula: {result.final_mtl_formula}')
 
 **Must Have:**
 - ✅ `.env` (API credentials) - **YOU MUST CREATE THIS**
-- ✅ `config/dsv_config.json` (configuration)
+- ✅ `config/dsva_config.json` (configuration)
 - ✅ `requirements.txt` (dependencies)
 
 **Framework Files:**
@@ -760,7 +790,8 @@ print(f'Formula: {result.final_mtl_formula}')
 - ✅ `retrieval.py` (example retrieval system)
 
 **Data Files:**
-- ✅ `data/examples/dsv_examples.json` (example dataset)
+- ✅ `data/examples/ltl_examples.json` (LTL example dataset based on nl2spec)
+- ✅ `nl2spec.csv` (NL2LTL benchmark dataset)
 - 📁 `data/output/dsva/` (enhanced version outputs)
 - 📁 `data/output/ablation/` (ablation version outputs)
 

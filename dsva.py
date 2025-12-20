@@ -16,8 +16,8 @@ load_dotenv()
 
 # Import base DSVA components
 from ablation import (
-    DSVStage, TokenUsage, SemanticSpecificationSketch,
-    SynthesisResult, VerificationResult, DSVStageResult, DSVProcessResult,
+    DSVAStage, TokenUsage, SemanticSpecificationSketch,
+    SynthesisResult, VerificationResult, DSVAStageResult, DSVAProcessResult,
     RefinementFeedback
 )
 
@@ -102,14 +102,14 @@ Use only the following operators and symbols (consistent with LTL standard):
 logging.basicConfig(level=logging.INFO)
 
 
-class EnhancedDSVFramework:
+class EnhancedDSVAFramework:
     """
-    Enhanced DSV Framework with Dynamic Example Retrieval for LTL
-    增强版DSV框架（LTL版本），集成动态示例检索系统
+    Enhanced DSVA Framework with Dynamic Example Retrieval for LTL
+    增强版DSVA框架（LTL版本），集成动态示例检索系统
     """
 
     def __init__(self, config_path: str = "config/dsva_config.json"):
-        """初始化增强版DSV框架"""
+        """初始化增强版DSVA框架"""
         self.config = self._load_config(config_path)
         self.clients = self._initialize_clients()
 
@@ -139,7 +139,7 @@ class EnhancedDSVFramework:
         self.similarity_threshold = processing_params.get("similarity_threshold", 0.85)
         self.max_refinement_iterations = processing_params.get("max_refinement_iterations", 3)
 
-        logger.info("Enhanced DSV Framework initialized")
+        logger.info("Enhanced DSVA Framework initialized")
         logger.info(f"Similarity threshold: {self.similarity_threshold}")
         logger.info(f"Max refinement iterations: {self.max_refinement_iterations}")
         logger.info(f"Example enhancement enabled: {self.examples_enabled}")
@@ -286,10 +286,10 @@ Provide a concise analysis focusing on actionable corrections.
             logger.error(f"Example retrieval failed for stage {stage}: {e}")
             return ""
 
-    def _stage_1_deconstruct(self, sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+    def _stage_1_deconstruct(self, sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVAStageResult:
         """Stage 1: Deconstruct with dynamic example enhancement and refinement feedback"""
         start_time = time.time()
-        logger.info("=== DSV Stage 1: Deconstruct (Enhanced) ===")
+        logger.info("=== DSVA Stage 1: Deconstruct (Enhanced) ===")
 
         refinement_history = refinement_history or []
         
@@ -394,8 +394,8 @@ Please refer to the processing approach in the above example, but analyze it bas
             semantic_sketch = self._extract_semantic_sketch(response)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.DECONSTRUCT,
+            return DSVAStageResult(
+                stage=DSVAStage.DECONSTRUCT,
                 success=semantic_sketch.extraction_success,
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -406,8 +406,8 @@ Please refer to the processing approach in the above example, but analyze it bas
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Deconstruct stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.DECONSTRUCT,
+            return DSVAStageResult(
+                stage=DSVAStage.DECONSTRUCT,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -463,10 +463,10 @@ Please refer to the processing approach in the above example, but analyze it bas
             logger.error(f"Failed to extract semantic sketch: {e}")
             return SemanticSpecificationSketch(extraction_success=False)
 
-    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, original_sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, original_sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVAStageResult:
         """Stage 2: Synthesize with dynamic example enhancement and refinement feedback"""
         start_time = time.time()
-        logger.info("=== DSV Stage 2: Synthesize (Enhanced) ===")
+        logger.info("=== DSVA Stage 2: Synthesize (Enhanced) ===")
 
         refinement_history = refinement_history or []
         
@@ -556,8 +556,8 @@ Please follow the processing approach demonstrated in the above example, but syn
             synthesis_result = self._extract_synthesis_result(response)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.SYNTHESIZE,
+            return DSVAStageResult(
+                stage=DSVAStage.SYNTHESIZE,
                 success=synthesis_result.synthesis_success,
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -568,8 +568,8 @@ Please follow the processing approach demonstrated in the above example, but syn
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Synthesis stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.SYNTHESIZE,
+            return DSVAStageResult(
+                stage=DSVAStage.SYNTHESIZE,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -671,10 +671,10 @@ Please follow the processing approach demonstrated in the above example, but syn
                 synthesis_success=False
             )
 
-    def _stage_3_verify(self, original_sentence: str, ltl_formula: str, lexicon: Optional[Dict[str, Any]] = None) -> DSVStageResult:
+    def _stage_3_verify(self, original_sentence: str, ltl_formula: str, lexicon: Optional[Dict[str, Any]] = None) -> DSVAStageResult:
         """Stage 3: Verify with dynamic example enhancement"""
         start_time = time.time()
-        logger.info("=== DSV Stage 3: Verify (Enhanced) ===")
+        logger.info("=== DSVA Stage 3: Verify (Enhanced) ===")
 
         lexicon = lexicon or {}
         
@@ -751,8 +751,8 @@ Please follow the processing method from the above example, but adapt the transl
             verification_result = self._extract_verification_result(response, original_sentence)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.VERIFY,
+            return DSVAStageResult(
+                stage=DSVAStage.VERIFY,
                 success=True,  # Always successful if we get a response
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -763,8 +763,8 @@ Please follow the processing method from the above example, but adapt the transl
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Verification stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.VERIFY,
+            return DSVAStageResult(
+                stage=DSVAStage.VERIFY,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -840,10 +840,10 @@ Please follow the processing method from the above example, but adapt the transl
             logger.error(f"Semantic similarity calculation failed: {e}")
             return 0.0
 
-    def process(self, sentence: str, enable_refinement: bool = True) -> DSVProcessResult:
-        """Process a sentence through the complete enhanced DSV pipeline with refinement feedback"""
+    def process(self, sentence: str, enable_refinement: bool = True) -> DSVAProcessResult:
+        """Process a sentence through the complete enhanced DSVA pipeline with refinement feedback"""
         start_time = time.time()
-        logger.info(f"Starting Enhanced DSV processing with Refinement Feedback: {sentence}")
+        logger.info(f"Starting Enhanced DSVA processing with Refinement Feedback: {sentence}")
 
         # Reset token usage tracking
         self.total_token_usage = TokenUsage()
@@ -859,7 +859,7 @@ Please follow the processing method from the above example, but adapt the transl
 
         try:
             for iteration in range(self.max_refinement_iterations + 1):
-                logger.info(f"=== Enhanced DSV Processing Iteration {iteration + 1} ===")
+                logger.info(f"=== Enhanced DSVA Processing Iteration {iteration + 1} ===")
                 
                 if refinement_history:
                     logger.info(f"Using feedback from {len(refinement_history)} previous attempt(s)")
@@ -932,7 +932,7 @@ Please follow the processing method from the above example, but adapt the transl
                         continue
 
             total_processing_time = time.time() - start_time
-            return DSVProcessResult(
+            return DSVAProcessResult(
                 input_sentence=sentence,
                 final_ltl_formula=final_ltl_formula,
                 total_processing_time=total_processing_time,
@@ -944,8 +944,8 @@ Please follow the processing method from the above example, but adapt the transl
             )
         except Exception as e:
             total_processing_time = time.time() - start_time
-            logger.error(f"Enhanced DSV processing failed: {e}")
-            return DSVProcessResult(
+            logger.error(f"Enhanced DSVA processing failed: {e}")
+            return DSVAProcessResult(
                 input_sentence=sentence,
                 final_ltl_formula=None,
                 total_processing_time=total_processing_time,
@@ -956,8 +956,8 @@ Please follow the processing method from the above example, but adapt the transl
                 termination_reason=str(e)
             )
 
-    def save_result(self, result: DSVProcessResult, output_file: str) -> None:
-        """Save enhanced DSV processing result to a JSON file"""
+    def save_result(self, result: DSVAProcessResult, output_file: str) -> None:
+        """Save enhanced DSVA processing result to a JSON file"""
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         
         save_data = {
@@ -1019,7 +1019,7 @@ Please follow the processing method from the above example, but adapt the transl
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(save_data, f, ensure_ascii=False, indent=2)
         
-        logger.info(f"Enhanced DSV result saved to: {output_file}")
+        logger.info(f"Enhanced DSVA result saved to: {output_file}")
 
     def toggle_examples(self, enabled: bool) -> None:
         """Toggle example enhancement on/off"""
@@ -1028,12 +1028,12 @@ Please follow the processing method from the above example, but adapt the transl
 
 
 def main() -> None:
-    """Run demo of Enhanced DSV Framework"""
-    print("=== Enhanced DSV Framework Demo ===\n")
+    """Run demo of Enhanced DSVA Framework"""
+    print("=== Enhanced DSVA Framework Demo ===\n")
     print("This version includes dynamic example enhancement for improved performance.\n")
     
-    # Create enhanced DSV framework
-    enhanced_dsv = EnhancedDSVFramework()
+    # Create enhanced DSVA framework
+    enhanced_dsva = EnhancedDSVAFramework()
     # Read dataset
     dataset = []
     with open("data/input/dataset.xlsx", "rb") as f:
@@ -1054,7 +1054,7 @@ def main() -> None:
         print("-" * 60)
 
         try:
-            result = enhanced_dsv.process(sentence, enable_refinement=True)
+            result = enhanced_dsva.process(sentence, enable_refinement=True)
             
             # Display results
             print(f"✅ Success: {result.success}")
@@ -1063,7 +1063,7 @@ def main() -> None:
             print(f"📝 Termination reason: {result.termination_reason}")
             print(f"⏱️  Total processing time: {result.total_processing_time:.2f}s")
             print(f"🔢 Total tokens: {result.total_token_usage.total_tokens}")
-            print(f"🚀 Dynamic enhancement: {'Enabled' if enhanced_dsv.examples_enabled else 'Disabled'}")
+            print(f"🚀 Dynamic enhancement: {'Enabled' if enhanced_dsva.examples_enabled else 'Disabled'}")
             
             # Display stage summary
             print(f"\n📊 Stage Results Summary:")
@@ -1073,10 +1073,10 @@ def main() -> None:
             
             # Save results
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            output_dir = Path("data/output/dsva/gemini-2.5-flash")
+            output_dir = Path("data/output/dsva/deepseek-v3")
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"result_{i}_{timestamp}.json"
-            enhanced_dsv.save_result(result, str(output_file))
+            enhanced_dsva.save_result(result, str(output_file))
             
         except Exception as e:
             print(f"❌ Processing failed: {e}")
@@ -1093,16 +1093,16 @@ def main() -> None:
     
     # # Test with examples enabled
     # print("🚀 Enhanced Version (with examples):")
-    # enhanced_dsv.toggle_examples(True)
-    # result_enhanced = enhanced_dsv.process(test_sentence, enable_refinement=False)
+    # enhanced_dsva.toggle_examples(True)
+    # result_enhanced = enhanced_dsva.process(test_sentence, enable_refinement=False)
     # print(f"  Success: {result_enhanced.success}")
     # print(f"  Processing time: {result_enhanced.total_processing_time:.2f}s")
     # print(f"  Tokens used: {result_enhanced.total_token_usage.total_tokens}")
     
     # # Test with examples disabled (ablation)
     # print("\n🚫 Ablation Version (without examples):")
-    # enhanced_dsv.toggle_examples(False)
-    # result_ablation = enhanced_dsv.process(test_sentence, enable_refinement=False)
+    # enhanced_dsva.toggle_examples(False)
+    # result_ablation = enhanced_dsva.process(test_sentence, enable_refinement=False)
     # print(f"  Success: {result_ablation.success}")
     # print(f"  Processing time: {result_ablation.total_processing_time:.2f}s")
     # print(f"  Tokens used: {result_ablation.total_token_usage.total_tokens}")

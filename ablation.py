@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-class DSVStage(Enum):
-    """DSV pipeline stages enumeration."""
+class DSVAStage(Enum):
+    """DSVA pipeline stages enumeration."""
     DECONSTRUCT = "deconstruct"
     SYNTHESIZE = "synthesize"
     VERIFY = "verify"
@@ -74,9 +74,9 @@ class RefinementFeedback:
 
 
 @dataclass
-class DSVStageResult:
-    """Result for a single DSV stage."""
-    stage: DSVStage
+class DSVAStageResult:
+    """Result for a single DSVA stage."""
+    stage: DSVAStage
     success: bool
     processing_time: float
     token_usage: TokenUsage
@@ -86,13 +86,13 @@ class DSVStageResult:
 
 
 @dataclass
-class DSVProcessResult:
-    """Complete DSV pipeline processing result."""
+class DSVAProcessResult:
+    """Complete DSVA pipeline processing result."""
     input_sentence: str
     final_ltl_formula: Optional[str]
     total_processing_time: float
     total_token_usage: TokenUsage
-    stage_results: List[DSVStageResult]
+    stage_results: List[DSVAStageResult]
     refinement_iterations: int
     success: bool
     termination_reason: str
@@ -172,14 +172,14 @@ Use only the following operators and symbols (consistent with LTL standard):
 """
 
 
-class DSVFrameworkAblation:
+class DSVAFrameworkAblation:
     """
-    DSV Framework - Ablation Study Version for LTL
-    基础DSV框架（LTL版本），不包含动态增强模块，用于消融实验
+    DSVA Framework - Ablation Study Version for LTL
+    基础DSVA框架（LTL版本），不包含动态增强模块，用于消融实验
     """
 
     def __init__(self, config_path: str = "config/dsva_config.json"):
-        """初始化DSV框架"""
+        """初始化DSVA框架"""
         self.config = self._load_config(config_path)
         self.clients = self._initialize_clients()
 
@@ -199,7 +199,7 @@ class DSVFrameworkAblation:
         self.similarity_threshold = processing_params.get("similarity_threshold", 0.85)
         self.max_refinement_iterations = processing_params.get("max_refinement_iterations", 3)
 
-        logger.info("DSV Framework (Ablation Version) initialized")
+        logger.info("DSVA Framework (Ablation Version) initialized")
         logger.info(f"Similarity threshold: {self.similarity_threshold}")
         logger.info(f"Max refinement iterations: {self.max_refinement_iterations}")
 
@@ -333,10 +333,10 @@ Provide a concise analysis focusing on actionable corrections.
         
         return history_text
 
-    def _stage_1_deconstruct(self, sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+    def _stage_1_deconstruct(self, sentence: str, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVAStageResult:
         """Stage 1: Deconstruct natural language into semantic components with refinement feedback"""
         start_time = time.time()
-        logger.info("=== DSV Stage 1: Deconstruct ===")
+        logger.info("=== DSVA Stage 1: Deconstruct ===")
         
         refinement_history = refinement_history or []
         
@@ -448,8 +448,8 @@ Please refer to the processing approach in the above example, but analyze it bas
             semantic_sketch = self._extract_semantic_sketch(response)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.DECONSTRUCT,
+            return DSVAStageResult(
+                stage=DSVAStage.DECONSTRUCT,
                 success=semantic_sketch.extraction_success,
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -460,8 +460,8 @@ Please refer to the processing approach in the above example, but analyze it bas
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Deconstruct stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.DECONSTRUCT,
+            return DSVAStageResult(
+                stage=DSVAStage.DECONSTRUCT,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -517,10 +517,10 @@ Please refer to the processing approach in the above example, but analyze it bas
             logger.error(f"Failed to extract semantic sketch: {e}")
             return SemanticSpecificationSketch(extraction_success=False)
 
-    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVStageResult:
+    def _stage_2_synthesize(self, sketch: SemanticSpecificationSketch, refinement_history: Optional[List[RefinementFeedback]] = None) -> DSVAStageResult:
         """Stage 2: Synthesize LTL formula from semantic sketch with refinement feedback"""
         start_time = time.time()
-        logger.info("=== DSV Stage 2: Synthesize ===")
+        logger.info("=== DSVA Stage 2: Synthesize ===")
         
         refinement_history = refinement_history or []
         
@@ -611,8 +611,8 @@ Please follow the processing approach demonstrated in the above example, but syn
             synthesis_result = self._extract_synthesis_result(response)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.SYNTHESIZE,
+            return DSVAStageResult(
+                stage=DSVAStage.SYNTHESIZE,
                 success=synthesis_result.synthesis_success,
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -623,8 +623,8 @@ Please follow the processing approach demonstrated in the above example, but syn
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Synthesis stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.SYNTHESIZE,
+            return DSVAStageResult(
+                stage=DSVAStage.SYNTHESIZE,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -678,10 +678,10 @@ Please follow the processing approach demonstrated in the above example, but syn
                 synthesis_success=False
             )
 
-    def _stage_3_verify(self, original_sentence: str, ltl_formula: str, lexicon: Optional[Dict[str, str]] = None) -> DSVStageResult:
+    def _stage_3_verify(self, original_sentence: str, ltl_formula: str, lexicon: Optional[Dict[str, str]] = None) -> DSVAStageResult:
         """Stage 3: Verify LTL formula by back-translation"""
         start_time = time.time()
-        logger.info("=== DSV Stage 3: Verify ===")
+        logger.info("=== DSVA Stage 3: Verify ===")
 
         lexicon = lexicon or {}
         
@@ -753,8 +753,8 @@ Please follow the processing method from the above example, but adapt the transl
             verification_result = self._extract_verification_result(response, original_sentence)
             processing_time = time.time() - start_time
             
-            return DSVStageResult(
-                stage=DSVStage.VERIFY,
+            return DSVAStageResult(
+                stage=DSVAStage.VERIFY,
                 success=True,  # Always successful if we get a response
                 processing_time=processing_time,
                 token_usage=token_usage,
@@ -765,8 +765,8 @@ Please follow the processing method from the above example, but adapt the transl
         except Exception as e:
             processing_time = time.time() - start_time
             logger.error(f"Verification stage failed: {e}")
-            return DSVStageResult(
-                stage=DSVStage.VERIFY,
+            return DSVAStageResult(
+                stage=DSVAStage.VERIFY,
                 success=False,
                 processing_time=processing_time,
                 token_usage=TokenUsage(),
@@ -842,10 +842,10 @@ Please follow the processing method from the above example, but adapt the transl
             logger.error(f"Semantic similarity calculation failed: {e}")
             return 0.0
 
-    def process(self, sentence: str, enable_refinement: bool = True) -> DSVProcessResult:
-        """Process a sentence through the complete DSV pipeline with refinement feedback"""
+    def process(self, sentence: str, enable_refinement: bool = True) -> DSVAProcessResult:
+        """Process a sentence through the complete DSVA pipeline with refinement feedback"""
         start_time = time.time()
-        logger.info(f"Starting DSV processing (Ablation Version with Refinement Feedback): {sentence}")
+        logger.info(f"Starting DSVA processing (Ablation Version with Refinement Feedback): {sentence}")
 
         # Reset token usage tracking
         self.total_token_usage = TokenUsage()
@@ -861,7 +861,7 @@ Please follow the processing method from the above example, but adapt the transl
 
         try:
             for iteration in range(self.max_refinement_iterations + 1):
-                logger.info(f"=== DSV Processing Iteration {iteration + 1} ===")
+                logger.info(f"=== DSVA Processing Iteration {iteration + 1} ===")
                 
                 if refinement_history:
                     logger.info(f"Using feedback from {len(refinement_history)} previous attempt(s)")
@@ -933,7 +933,7 @@ Please follow the processing method from the above example, but adapt the transl
                         continue
 
             total_processing_time = time.time() - start_time
-            return DSVProcessResult(
+            return DSVAProcessResult(
                 input_sentence=sentence,
                 final_ltl_formula=final_ltl_formula,
                 total_processing_time=total_processing_time,
@@ -945,8 +945,8 @@ Please follow the processing method from the above example, but adapt the transl
             )
         except Exception as e:
             total_processing_time = time.time() - start_time
-            logger.error(f"DSV processing failed: {e}")
-            return DSVProcessResult(
+            logger.error(f"DSVA processing failed: {e}")
+            return DSVAProcessResult(
                 input_sentence=sentence,
                 final_ltl_formula=None,
                 total_processing_time=total_processing_time,
@@ -957,12 +957,12 @@ Please follow the processing method from the above example, but adapt the transl
                 termination_reason=str(e)
             )
 
-    def save_result(self, result: DSVProcessResult, output_file: str) -> None:
-        """Save DSV processing result to a JSON file"""
+    def save_result(self, result: DSVAProcessResult, output_file: str) -> None:
+        """Save DSVA processing result to a JSON file"""
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
         
         save_data = {
-            "framework": "DSV (Deconstruct, Synthesize, and Verify) - Ablation Version",
+            "framework": "DSVA (Deconstruct, Synthesize, and Verify) - Ablation Version",
             "input_sentence": result.input_sentence,
             "final_ltl_formula": result.final_ltl_formula,
             "success": result.success,
@@ -1027,7 +1027,7 @@ def main() -> None:
     print("=== DSVA Framework Demo - Ablation Version ===\n")
     print("This version does NOT include dynamic example enhancement for ablation studies.\n")
     
-    dsv = DSVFrameworkAblation()
+    dsva = DSVAFrameworkAblation()
     
     dataset = []
     with open("data/input/dataset.xlsx", "rb") as f:
@@ -1048,7 +1048,7 @@ def main() -> None:
         print("-" * 60)
 
         try:
-            result = dsv.process(sentence, enable_refinement=True)
+            result = dsva.process(sentence, enable_refinement=True)
             
             # Display results
             print(f"✅ Success: {result.success}")
@@ -1061,10 +1061,10 @@ def main() -> None:
             
             # Save results
             timestamp = time.strftime("%Y%m%d_%H%M%S")
-            output_dir = Path("data/output/ablation/gpt-4")
+            output_dir = Path("data/output/ablation/deepseek-v3")
             output_dir.mkdir(parents=True, exist_ok=True)
             output_file = output_dir / f"result_{i}_{timestamp}.json"
-            dsv.save_result(result, str(output_file))
+            dsva.save_result(result, str(output_file))
             
         except Exception as e:
             print(f"❌ Processing failed: {e}")

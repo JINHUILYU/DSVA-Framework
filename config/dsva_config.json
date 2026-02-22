@@ -1,14 +1,14 @@
 {
     "framework_name": "DSVA (Deconstruct, Synthesize, Verify, and Analyze)",
-    "version": "2.0.0",
-    "description": "A white-box, structure-driven natural language to LTL conversion framework",
+    "version": "1.0.0",
+    "description": "A white-box, structure-driven natural language to MTL conversion framework",
     
     "agents": {
         "deconstructor": {
             "name": "Deconstructor_Agent",
             "role": "Semantic Deconstructor",
             "description": "Responsible for deconstructing natural language into structured semantic components",
-            "model": "deepseek-chat",
+            "model": "deepseek-reasoner",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -17,8 +17,8 @@
         "synthesizer": {
             "name": "Synthesizer_Agent", 
             "role": "Formula Synthesizer",
-            "description": "Responsible for synthesizing syntactically correct LTL formulas from semantic components",
-            "model": "deepseek-chat",
+            "description": "Responsible for synthesizing syntactically correct MTL formulas from semantic components",
+            "model": "deepseek-reasoner",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -27,8 +27,8 @@
         "verifier": {
             "name": "Verifier_Agent",
             "role": "Verifier",
-            "description": "Responsible for verifying the semantic correctness of LTL formulas through back-translation",
-            "model": "deepseek-chat",
+            "description": "Responsible for verifying the semantic correctness of MTL formulas through back-translation",
+            "model": "deepseek-reasoner",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
@@ -36,18 +36,18 @@
         },
         "analyzer": {
             "name": "Analyzer_Agent",
-            "role": "Result Analyzer",
-            "description": "Responsible for analyzing verification failures and providing actionable feedback",
-            "model": "deepseek-chat",
+            "role": "Result Analyst",
+            "description": "Responsible for analyzing the final MTL formula and verification results",
+            "model": "deepseek-reasoner",
             "temperature": 0.7,
             "api_key_env": "DEEPSEEK_API_KEY",
             "base_url_env": "DEEPSEEK_API_URL",
-            "specialization": "Failure Analysis and Refinement Guidance"
+            "specialization": "Comprehensive Analysis and Reporting"
         }
     },
     
     "processing_parameters": {
-        "similarity_threshold": 0.70,
+        "similarity_threshold": 0.85,
         "max_refinement_iterations": 3,
         "enable_refinement_loop": true,
         "similarity_model": "sentence-transformers/all-MiniLM-L6-v2"
@@ -60,29 +60,34 @@
         "model": "sentence-transformers/all-MiniLM-L6-v2",
         "sources": [
             {
-                "path": "data/examples/ltl_examples.json",
+                "path": "data/examples/.json",
                 "type": "json",
                 "stages": ["deconstruct", "synthesize", "verify", "analyze"]
             }
         ]
     },
     
-    "ltl_syntax": {
+    "mtl_syntax": {
         "temporal_operators": {
-            "G": "Globally/Always (holds at all future points)",
-            "F": "Finally/Eventually (holds at some future point)", 
-            "X": "Next (holds in the immediate next step)",
-            "U": "Until (first operand holds until second becomes true)",
-            "R": "Release (second holds until first, or forever)"
+            "G": "Globally (Always)",
+            "F": "Finally (Eventually)", 
+            "X": "Next",
+            "U": "Until",
+            "P": "Past",
+            "O": "Once"
+        },
+        "metric_operators": {
+            "G_[a,b]": "Globally within time interval [a,b]",
+            "F_[a,b]": "Finally within time interval [a,b]",
+            "U_[a,b]": "Until within time interval [a,b]"
         },
         "logical_operators": {
-            "∧ / &": "AND",
-            "∨ / |": "OR", 
-            "¬ / ! / ~": "NOT",
-            "→ / ->": "IMPLIES",
-            "↔ / <->": "EQUIVALENCE"
-        },
-        "notes": "LTL focuses on ordering of events, not timing metrics. No explicit time bounds."
+            "∧": "AND",
+            "∨": "OR", 
+            "¬": "NOT",
+            "→": "IMPLIES",
+            "↔": "EQUIVALENCE"
+        }
     },
     
     "semantic_components": {
